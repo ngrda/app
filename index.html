@@ -71,6 +71,7 @@ textarea{resize:vertical; min-height:64px;}
 main{flex:1; padding:16px 16px calc(96px + var(--safe-bottom)); animation:fadein .28s ease;}
 main.fullbleed{display:flex; flex-direction:column; min-height:0; overflow:hidden;}
 main.fullbleed > .dateflip{flex:0 0 auto;}
+main.fullbleed > .paint-bar{flex:0 0 auto;}
 main.fullbleed > .legend{flex:0 0 auto; margin-top:10px; max-height:64px; overflow-y:auto;}
 @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
 
@@ -165,6 +166,10 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:10px; max-height:64px; overfl
 .day-dots span{width:6px; height:6px; border-radius:50%; flex-shrink:0;}
 .day-dots span.note-dot{border-radius:1.5px; background:var(--text-muted);}
 .day-note-badge{font-size:8.5px; font-weight:600; color:var(--text-muted); background:var(--bg-sunken); border-radius:5px; padding:1px 4px; margin-top:1px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.day-cell.painted{border-color:transparent;}
+.day-cell.painted .dnum{color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.4);}
+.day-cell.painted.today{outline-color:#fff;}
+.day-cell.painted .day-dots span.note-dot{background:#fff; box-shadow:0 0 0 1px rgba(0,0,0,.3);}
 
 /* ---------- Week view ---------- */
 .week-list{display:flex; flex-direction:column; gap:10px;}
@@ -177,7 +182,8 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:10px; max-height:64px; overfl
 .week-day-row.today .wd-num, .week-day-row.today .wd-dow{color:var(--accent);}
 .week-day-body{flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; justify-content:center;}
 .week-chip-row{display:flex; flex-wrap:wrap; gap:6px;}
-.week-chip{display:inline-flex; align-items:center; gap:5px; border-radius:8px; padding:4px 9px; font-size:11.5px; font-weight:700; max-width:100%; overflow:hidden;}
+.week-chip{display:inline-flex; align-items:center; gap:5px; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:700; max-width:100%; overflow:hidden;}
+.week-chip svg{width:12px; height:12px; flex-shrink:0;}
 .week-chip span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .week-chip .wc-time{opacity:.85; font-family:var(--font-mono); font-weight:600;}
 .week-note-chip{display:inline-flex; align-items:center; gap:5px; border-radius:8px; padding:4px 9px; font-size:11.5px; font-weight:600; background:var(--bg-sunken); color:var(--text-muted);}
@@ -298,6 +304,21 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:10px; max-height:64px; overfl
 
 .legend{display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:14px;}
 .legend-item{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-muted);}
+
+/* ---------- Paint bar (Month view) ---------- */
+.paint-bar{flex:0 0 auto; margin-top:8px;}
+.paint-bar-row{display:flex; justify-content:flex-end;}
+.paint-toggle{display:flex; align-items:center; gap:5px; padding:5px 10px; border:none; background:transparent; color:var(--text-muted); font-weight:600; font-size:11.5px; border-radius:99px; opacity:.7;}
+.paint-toggle svg{width:13px; height:13px;}
+.paint-bar.active .paint-toggle{color:var(--accent); opacity:1; background:color-mix(in srgb, var(--accent) 10%, transparent);}
+.paint-strip{display:flex; flex-direction:column; gap:6px; padding:8px 2px 2px; margin-top:2px; border-top:1px solid var(--border);}
+.paint-hint{font-size:11px; color:var(--text-muted); text-align:center; padding:0 6px;}
+.paint-chip-row{display:flex; gap:6px; overflow-x:auto; padding:2px; scrollbar-width:none;}
+.paint-chip-row::-webkit-scrollbar{display:none;}
+.paint-chip{flex:0 0 auto; display:flex; align-items:center; gap:5px; border-radius:10px; padding:6px 10px; font-size:11.5px; font-weight:600; border:1.5px solid transparent; background:var(--bg-sunken); color:var(--text); white-space:nowrap;}
+.paint-chip svg{width:13px; height:13px;}
+.paint-chip.selected{border-color:currentColor; box-shadow:var(--shadow);}
+.paint-chip:active{transform:scale(.95);}
 .legend-dot{width:9px; height:9px; border-radius:3px;}
 
 ::-webkit-scrollbar{width:0; height:0;}
@@ -332,23 +353,23 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:10px; max-height:64px; overfl
   <nav class="bottomnav">
     <button class="navbtn" data-tab="day" onclick="setTab('day')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M12 13v4M10 15h4"/></svg>
-      <span>Day</span><span class="navdot"></span>
+      <span class="navlabel" data-i18n="nav_day">Day</span><span class="navdot"></span>
     </button>
     <button class="navbtn" data-tab="week" onclick="setTab('week')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4"/><path d="M7 14h.01M10.5 14h.01M14 14h.01M17.5 14h.01"/></svg>
-      <span>Week</span><span class="navdot"></span>
+      <span class="navlabel" data-i18n="nav_week">Week</span><span class="navdot"></span>
     </button>
     <button class="navbtn" data-tab="month" onclick="setTab('month')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4M7 13h2M11 13h2M15 13h2M7 17h2M11 17h2"/></svg>
-      <span>Month</span><span class="navdot"></span>
+      <span class="navlabel" data-i18n="nav_month">Month</span><span class="navdot"></span>
     </button>
     <button class="navbtn" data-tab="year" onclick="setTab('year')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      <span>Year</span><span class="navdot"></span>
+      <span class="navlabel" data-i18n="nav_year">Year</span><span class="navdot"></span>
     </button>
     <button class="navbtn navbtn-add" data-tab="add" onclick="setTab('add')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-      <span>Add</span><span class="navdot"></span>
+      <span class="navlabel" data-i18n="nav_add">Add</span><span class="navdot"></span>
     </button>
   </nav>
 
@@ -417,9 +438,136 @@ function textColorFor(hex){
   return lum > 0.62 ? '#14161F' : '#FFFFFF';
 }
 
-const WEEKDAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const WEEKDAYS_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WEEKDAYS_BY_LANG = {
+  en: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+  es: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
+};
+const WEEKDAYS_FULL_BY_LANG = {
+  en: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+  es: ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo']
+};
+const MONTHS_BY_LANG = {
+  en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+  es: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+};
+let WEEKDAYS = WEEKDAYS_BY_LANG.en;
+let WEEKDAYS_FULL = WEEKDAYS_FULL_BY_LANG.en;
+let MONTHS = MONTHS_BY_LANG.en;
+function currentLang(){ return (state.settings && state.settings.language) || 'en'; }
+function applyLanguageArrays(){
+  const lang = currentLang();
+  WEEKDAYS = WEEKDAYS_BY_LANG[lang] || WEEKDAYS_BY_LANG.en;
+  WEEKDAYS_FULL = WEEKDAYS_FULL_BY_LANG[lang] || WEEKDAYS_FULL_BY_LANG.en;
+  MONTHS = MONTHS_BY_LANG[lang] || MONTHS_BY_LANG.en;
+}
+
+/* ---------------- i18n strings ---------------- */
+const I18N = {
+  en: {
+    nav_day:'Day', nav_week:'Week', nav_month:'Month', nav_year:'Year', nav_add:'Add',
+    today:'Today', week_label:'Week',
+    nothing_scheduled:'Nothing scheduled', nothing_scheduled_sub:'Use the Add tab below to log a shift or note',
+    all_day:'All day', timeline:'Timeline', no_timed_shifts:'No timed shifts today.',
+    add_shift:'Add shift', add_note:'Add note',
+    create_first_type_title:"Create your first shift type",
+    create_first_type_sub:"Shift types (like Morning or Night) aren't built in — set them up once, then assign them to any day.",
+    manage_types:'Manage shift types', unknown_type:'Unknown shift type', note_label:'Note',
+    no_shifts:'No shifts',
+    metrics_title:'Metrics', this_week:'This Week', this_month:'This Month',
+    hours_worked:'Hours Worked', days_worked:'Days Worked', off_days:'Off Days', vacation_days:'Vacation Days',
+    hours_by_type:'Hours by shift type', no_hours_logged:'No work hours logged for this period yet.',
+    edit_shift:'Edit shift', add_shift_title:'Add shift', date_label:'Date', shift_type_label:'Shift type',
+    notes_label:'Notes', notes_placeholder:'Optional note for this shift…', save_shift:'Save shift',
+    share_swap_card:'Share swap card', remove_shift:'Remove shift',
+    mode_shift:'Shift', mode_note:'Note', jump_today:'Jump to today',
+    notes_optional:'Notes (optional)', shift_notes_placeholder2:'Anything worth remembering about this shift…',
+    editing_note_banner:'Editing an existing note', cancel:'Cancel',
+    note_placeholder:"e.g. Doctor's appointment at 3pm, remember to bring ID…",
+    save_changes:'Save changes', other_notes_day:'Other notes on this day',
+    shift_types_title:'Shift types', no_shift_types_yet:'No shift types yet', create_first_below:'Create your first one below',
+    new_shift_type:'New shift type', not_counted_work:'Not counted as work', brk_abbrev:'brk',
+    edit_shift_type:'Edit shift type', name_label:'Name', name_placeholder:'e.g. Morning shift',
+    counts_as_work:'Counts as work hours', start_time:'Start time', end_time:'End time',
+    break_duration:'Break duration (minutes)', color_label:'Color', icon_label:'Icon',
+    save_shift_type:'Save shift type', give_name_first:'Give it a name first',
+    assign_prefix:'Assign', from_label:'From', to_label:'To',
+    replace_existing:'Replace existing shifts on those days',
+    applies_hint:'Applies "{n}" to every day in the range.', apply_to_range:'Apply to range', check_date_range:'Check your date range',
+    settings_title:'Settings', appearance:'Appearance', light:'Light', dark:'Dark',
+    text_size:'Text size', color_palette:'Color palette', export_section:'Export',
+    export_ics:'Export to Apple / Google / Outlook (.ics)', data_section:'Data',
+    data_hint:'Shifts and shift types are saved locally on this device. This build is Supabase-ready — connecting an account will enable multi-device sync.',
+    connect_supabase:'Connect Supabase account (coming soon)', erase_all:'Erase all shifts', language_label:'Language',
+    toast_image_downloaded:'Image downloaded', toast_copied:'Copied to clipboard', toast_all_cleared:'All shifts cleared',
+    toast_create_type_first:'Create a shift type first', toast_pick_type:'Pick a shift type',
+    toast_shift_added:'Shift added', toast_shift_updated:'Shift updated', toast_shift_removed:'Shift removed',
+    toast_note_removed:'Note removed', toast_note_saved:'Note saved', toast_write_something:'Write something first',
+    toast_type_created:'Shift type created', toast_type_updated:'Shift type updated', toast_type_deleted:'Shift type deleted',
+    toast_applied_days:'Applied to {n} day{s}', toast_calendar_downloaded:'Calendar file downloaded',
+    paint_bar:'Paint', paint_hint:'Tap a shift, then tap days to paint them', paint_done:'Done',
+    language_picker_title:'Choose your language', language_picker_sub:'You can change this later in Settings.',
+    default_morning:'Morning', default_afternoon:'Afternoon', default_night:'Night',
+    default_morning_afternoon:'Morning & Afternoon', default_off:'Off', default_vacation:'Vacation',
+    swap_card_title:'Shift swap card', download:'Download', copy_image:'Copy image',
+    swap_request:'SHIFT SWAP REQUEST', shift_suffix:'shift', total_hours:'total hours', break_word:'break',
+    generated_with:'Generated with Rota'
+  },
+  es: {
+    nav_day:'Día', nav_week:'Semana', nav_month:'Mes', nav_year:'Año', nav_add:'Añadir',
+    today:'Hoy', week_label:'Semana',
+    nothing_scheduled:'Nada programado', nothing_scheduled_sub:'Usa la pestaña Añadir de abajo para registrar un turno o nota',
+    all_day:'Todo el día', timeline:'Cronología', no_timed_shifts:'No hay turnos con horario hoy.',
+    add_shift:'Añadir turno', add_note:'Añadir nota',
+    create_first_type_title:'Crea tu primer tipo de turno',
+    create_first_type_sub:'Los tipos de turno (como Mañana o Noche) no vienen predefinidos — configúralos una vez y asígnalos a cualquier día.',
+    manage_types:'Gestionar tipos de turno', unknown_type:'Tipo de turno desconocido', note_label:'Nota',
+    no_shifts:'Sin turnos',
+    metrics_title:'Estadísticas', this_week:'Esta semana', this_month:'Este mes',
+    hours_worked:'Horas trabajadas', days_worked:'Días trabajados', off_days:'Días libres', vacation_days:'Días de vacaciones',
+    hours_by_type:'Horas por tipo de turno', no_hours_logged:'Aún no hay horas registradas para este período.',
+    edit_shift:'Editar turno', add_shift_title:'Añadir turno', date_label:'Fecha', shift_type_label:'Tipo de turno',
+    notes_label:'Notas', notes_placeholder:'Nota opcional para este turno…', save_shift:'Guardar turno',
+    share_swap_card:'Compartir tarjeta de cambio', remove_shift:'Eliminar turno',
+    mode_shift:'Turno', mode_note:'Nota', jump_today:'Ir a hoy',
+    notes_optional:'Notas (opcional)', shift_notes_placeholder2:'Algo que valga la pena recordar sobre este turno…',
+    editing_note_banner:'Editando una nota existente', cancel:'Cancelar',
+    note_placeholder:'p. ej. Cita médica a las 15:00, recuerda llevar el DNI…',
+    save_changes:'Guardar cambios', other_notes_day:'Otras notas de este día',
+    shift_types_title:'Tipos de turno', no_shift_types_yet:'Aún no hay tipos de turno', create_first_below:'Crea el primero abajo',
+    new_shift_type:'Nuevo tipo de turno', not_counted_work:'No cuenta como trabajo', brk_abbrev:'desc',
+    edit_shift_type:'Editar tipo de turno', name_label:'Nombre', name_placeholder:'p. ej. Turno de mañana',
+    counts_as_work:'Cuenta como horas de trabajo', start_time:'Hora de inicio', end_time:'Hora de fin',
+    break_duration:'Duración del descanso (minutos)', color_label:'Color', icon_label:'Icono',
+    save_shift_type:'Guardar tipo de turno', give_name_first:'Ponle un nombre primero',
+    assign_prefix:'Asignar', from_label:'Desde', to_label:'Hasta',
+    replace_existing:'Reemplazar los turnos existentes en esos días',
+    applies_hint:'Aplica "{n}" a todos los días del rango.', apply_to_range:'Aplicar al rango', check_date_range:'Revisa el rango de fechas',
+    settings_title:'Ajustes', appearance:'Apariencia', light:'Claro', dark:'Oscuro',
+    text_size:'Tamaño de texto', color_palette:'Paleta de colores', export_section:'Exportar',
+    export_ics:'Exportar a Apple / Google / Outlook (.ics)', data_section:'Datos',
+    data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo. Esta versión está lista para Supabase — conectar una cuenta habilitará la sincronización multidispositivo.',
+    connect_supabase:'Conectar cuenta de Supabase (próximamente)', erase_all:'Borrar todos los turnos', language_label:'Idioma',
+    toast_image_downloaded:'Imagen descargada', toast_copied:'Copiado al portapapeles', toast_all_cleared:'Todos los turnos borrados',
+    toast_create_type_first:'Crea primero un tipo de turno', toast_pick_type:'Elige un tipo de turno',
+    toast_shift_added:'Turno añadido', toast_shift_updated:'Turno actualizado', toast_shift_removed:'Turno eliminado',
+    toast_note_removed:'Nota eliminada', toast_note_saved:'Nota guardada', toast_write_something:'Escribe algo primero',
+    toast_type_created:'Tipo de turno creado', toast_type_updated:'Tipo de turno actualizado', toast_type_deleted:'Tipo de turno eliminado',
+    toast_applied_days:'Aplicado a {n} día{s}', toast_calendar_downloaded:'Archivo de calendario descargado',
+    paint_bar:'Pintar', paint_hint:'Toca un turno y luego toca los días para pintarlos', paint_done:'Listo',
+    language_picker_title:'Elige tu idioma', language_picker_sub:'Puedes cambiarlo más tarde en Ajustes.',
+    default_morning:'Mañana', default_afternoon:'Tarde', default_night:'Noche',
+    default_morning_afternoon:'Mañana y Tarde', default_off:'Libre', default_vacation:'Vacaciones',
+    swap_card_title:'Tarjeta de cambio de turno', download:'Descargar', copy_image:'Copiar imagen',
+    swap_request:'SOLICITUD DE CAMBIO DE TURNO', shift_suffix:'turno', total_hours:'horas totales', break_word:'descanso',
+    generated_with:'Generado con Rota'
+  }
+};
+function tr(key, vars){
+  const lang = currentLang();
+  let str = (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
+  if(vars){ Object.keys(vars).forEach(k=>{ str = str.split('{'+k+'}').join(vars[k]); }); }
+  return str;
+}
 
 /* ---------------- Date utils ---------------- */
 function pad(n){ return String(n).padStart(2,'0'); }
@@ -464,7 +612,8 @@ const FONT_SIZES = { sm:{label:'S', zoom:92}, md:{label:'M', zoom:100}, lg:{labe
 const DEFAULT_SETTINGS = {
   theme: (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark':'light',
   palette: 'violet',
-  fontSize: 'md'
+  fontSize: 'md',
+  language: null
 };
 const DB = {
   async loadShiftTypes(){
@@ -514,6 +663,7 @@ const state = {
   yearCursor: new Date().getFullYear(),
   metricsPeriod: 'week',
   addCtx: { mode: 'shift', selectedTypeId: null, noteId: null },
+  paintMode: { active: false, typeId: null },
 };
 
 function typeById(id){ return state.shiftTypes.find(t=>t.id===id); }
@@ -528,7 +678,57 @@ async function init(){
   state.notes = notes;
   state.settings = settings;
   applyTheme();
+  if(!state.settings.language){
+    showLanguagePicker();
+  } else {
+    applyLanguageArrays();
+    applyStaticLabels();
+    renderApp();
+  }
+}
+function applyStaticLabels(){
+  document.querySelectorAll('.navbtn [data-i18n]').forEach(el=>{
+    el.textContent = tr(el.dataset.i18n);
+  });
+}
+function showLanguagePicker(){
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="overlay" style="align-items:center">
+      <div class="sheet" style="border-radius:24px; max-width:400px; text-align:center; padding:32px 24px calc(28px + var(--safe-bottom))">
+        <div class="brand-mark" style="margin:0 auto 16px; width:44px; height:44px">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14161F" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        </div>
+        <h2 style="justify-content:center; margin-bottom:6px">Choose your language / Elige tu idioma</h2>
+        <div class="text-muted" style="font-size:13px; margin-bottom:20px">You can change this later in Settings. / Puedes cambiarlo más tarde en Ajustes.</div>
+        <div class="btn-row" style="flex-direction:column; gap:10px">
+          <button class="btn btn-primary" onclick="chooseLanguage('es')">Español</button>
+          <button class="btn btn-primary" onclick="chooseLanguage('en')">English</button>
+        </div>
+      </div>
+    </div>`;
+}
+function chooseLanguage(lang){
+  state.settings.language = lang;
+  applyLanguageArrays();
+  DB.saveSettings(state.settings);
+  applyStaticLabels();
+  seedDefaultShiftTypesIfNeeded();
+  document.getElementById('modal-root').innerHTML = '';
   renderApp();
+}
+function seedDefaultShiftTypesIfNeeded(){
+  if(state.shiftTypes.length > 0) return;
+  const defaults = [
+    { name: tr('default_morning'),           start:'06:00', end:'14:00', breakMins:0,  color:'#FFA94D', icon:'sun',       isWork:true },
+    { name: tr('default_afternoon'),         start:'14:00', end:'22:00', breakMins:0,  color:'#FF6B4A', icon:'sunset',    isWork:true },
+    { name: tr('default_night'),             start:'22:00', end:'06:00', breakMins:0,  color:'#5B5FEF', icon:'moon',      isWork:true },
+    { name: tr('default_morning_afternoon'), start:'06:00', end:'22:00', breakMins:30, color:'#4D96FF', icon:'briefcase', isWork:true },
+    { name: tr('default_off'),               start:'',      end:'',      breakMins:0,  color:'#8890A6', icon:'home',      isWork:false },
+    { name: tr('default_vacation'),          start:'',      end:'',      breakMins:0,  color:'#2DD4BF', icon:'palm',      isWork:false },
+  ];
+  state.shiftTypes = defaults.map(d => ({ id: uid(), ...d }));
+  DB.saveShiftTypes(state.shiftTypes);
 }
 function applyTheme(){
   document.documentElement.classList.toggle('dark', state.settings.theme === 'dark');
@@ -584,33 +784,33 @@ function renderDayView(){
   if(entries.length === 0 && dayNotes.length === 0){
     body = `<div class="empty-state">
       ${ICONS.calBlank}
-      <div class="title">Nothing scheduled</div>
-      <div>Use the Add tab below to log a shift or note</div>
+      <div class="title">${tr('nothing_scheduled')}</div>
+      <div>${tr('nothing_scheduled_sub')}</div>
     </div>`;
   } else {
     if(allDayEntries.length || dayNotes.length){
-      body += `<div class="section-title" style="margin-top:0">All day</div>`;
+      body += `<div class="section-title" style="margin-top:0">${tr('all_day')}</div>`;
       body += '<div class="agenda-list">'
         + allDayEntries.map(e => renderAgendaItem(e, dateStr)).join('')
         + dayNotes.map(n => renderNoteAgendaItem(n, dateStr)).join('')
         + '</div>';
     }
     if(timedEntries.length){
-      body += `<div class="section-title">Timeline</div>`;
+      body += `<div class="section-title">${tr('timeline')}</div>`;
       body += renderTimeline(timedEntries, dateStr);
     } else if(allDayEntries.length || dayNotes.length){
-      body += `<div class="text-muted" style="font-size:13px; margin-top:14px">No timed shifts today.</div>`;
+      body += `<div class="text-muted" style="font-size:13px; margin-top:14px">${tr('no_timed_shifts')}</div>`;
     }
   }
   body += `<div class="quickadd-row">
-    <button class="add-shift-row" onclick="goAddShift()">${ICONS.plus} Add shift</button>
-    <button class="add-shift-row" onclick="goAddNote()">${ICONS.note} Add note</button>
+    <button class="add-shift-row" onclick="goAddShift()">${ICONS.plus} ${tr('add_shift')}</button>
+    <button class="add-shift-row" onclick="goAddNote()">${ICONS.note} ${tr('add_note')}</button>
   </div>`;
   if(state.shiftTypes.length === 0){
     body += `<div class="card" style="margin-top:16px">
-      <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">Create your first shift type</div>
-      <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">Shift types (like Morning or Night) aren't built in — set them up once, then assign them to any day.</div>
-      <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} Manage shift types</button>
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">${tr('create_first_type_title')}</div>
+      <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">${tr('create_first_type_sub')}</div>
+      <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} ${tr('manage_types')}</button>
     </div>`;
   }
 
@@ -618,7 +818,7 @@ function renderDayView(){
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftDay(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
-        <div class="today-label">${isToday?'Today':WEEKDAYS_FULL[mondayIndex(fromDateStr(dateStr))]}</div>
+        <div class="today-label">${isToday?tr('today'):WEEKDAYS_FULL[mondayIndex(fromDateStr(dateStr))]}</div>
         <h2 class="date-heading">${fmtHumanShort(dateStr)}</h2>
       </div>
       <button class="icon-btn" onclick="shiftDay(1)">${ICONS.chevR}</button>
@@ -665,7 +865,7 @@ function scrollTimelineIntoView(){
 function renderAgendaItem(entry, dateStr){
   const t = typeById(entry.typeId);
   if(!t){
-    return `<div class="agenda-item"><div class="agenda-body"><div class="agenda-name">Unknown shift type</div></div>
+    return `<div class="agenda-item"><div class="agenda-body"><div class="agenda-name">${tr('unknown_type')}</div></div>
       <div class="agenda-actions"><button onclick="deleteShiftEntry('${dateStr}','${entry.id}')">${ICONS.trash}</button></div></div>`;
   }
   return `<div class="agenda-item" style="--stripe:${t.color}">
@@ -686,7 +886,7 @@ function renderNoteAgendaItem(note, dateStr){
   return `<div class="agenda-item note-item">
     <div class="agenda-icon">${ICONS.note}</div>
     <div class="agenda-body">
-      <div class="agenda-name">Note</div>
+      <div class="agenda-name">${tr('note_label')}</div>
       <div class="agenda-notes">${escapeHtml(note.text)}</div>
     </div>
     <div class="agenda-actions">
@@ -705,7 +905,7 @@ function deleteShiftEntry(dateStr, entryId){
   if(state.shifts[dateStr].length===0) delete state.shifts[dateStr];
   DB.saveShifts(state.shifts);
   renderApp();
-  showToast('Shift removed');
+  showToast(tr('toast_shift_removed'));
 }
 function deleteNoteEntry(dateStr, noteId){
   if(!state.notes[dateStr]) return;
@@ -713,7 +913,7 @@ function deleteNoteEntry(dateStr, noteId){
   if(state.notes[dateStr].length===0) delete state.notes[dateStr];
   DB.saveNotes(state.notes);
   renderApp();
-  showToast('Note removed');
+  showToast(tr('toast_note_removed'));
 }
 function editNoteInline(dateStr, noteId){
   state.selectedDate = dateStr;
@@ -773,7 +973,7 @@ function renderWeekView(){
 
     let body;
     if(!entries.length && !dayNotes.length){
-      body = `<div class="week-empty">No shifts</div>`;
+      body = `<div class="week-empty">${tr('no_shifts')}</div>`;
     } else {
       body = `<div class="week-chip-row">${chips}${noteChips}</div>`;
     }
@@ -792,13 +992,12 @@ function renderWeekView(){
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftWeek(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
-        <div class="today-label">Week</div>
+        <div class="today-label">${tr('week_label')}</div>
         <h2 class="date-heading" style="font-size:19px">${rangeLabel}</h2>
       </div>
       <button class="icon-btn" onclick="shiftWeek(1)">${ICONS.chevR}</button>
     </div>
     <div class="week-list">${rows.join('')}</div>
-    ${legendHtml()}
   `;
 }
 function shiftWeek(n){
@@ -822,15 +1021,19 @@ function renderMonthView(){
 
   const todaystr = todayStr();
   const nRows = cells.length / 7;
+  const paintActive = state.paintMode.active;
   const gridHtml = cells.map(c=>{
     const dstr = toDateStr(c.date);
     const entries = entriesFor(dstr);
     const dayNotes = notesFor(dstr);
-    let dots = entries.slice(0,4).map(e=>{ const t=typeById(e.typeId); return t?`<span style="background:${t.color}"></span>`:''; }).join('');
-    if(dayNotes.length) dots += `<span class="note-dot"></span>`;
-    return `<button class="day-cell ${c.outside?'outside':''} ${dstr===todaystr?'today':''}" onclick="goToDay('${dstr}')">
+    const typeColors = [...new Set(entries.map(e=>{ const t=typeById(e.typeId); return t?t.color:null; }).filter(Boolean))];
+    const bgStyle = shiftBgStyle(typeColors);
+    const painted = typeColors.length > 0;
+    const noteDot = dayNotes.length ? `<div class="day-dots"><span class="note-dot"></span></div>` : '';
+    const clickHandler = (paintActive && state.paintMode.typeId) ? `paintDay('${dstr}')` : `goToDay('${dstr}')`;
+    return `<button class="day-cell ${c.outside?'outside':''} ${dstr===todaystr?'today':''} ${painted?'painted':''}" style="${bgStyle}" onclick="${clickHandler}">
       <span class="dnum">${c.date.getDate()}</span>
-      ${dots?`<div class="day-dots">${dots}</div>`:''}
+      ${noteDot}
     </button>`;
   }).join('');
 
@@ -844,8 +1047,58 @@ function renderMonthView(){
     </div>
     <div class="month-grid-head">${WEEKDAYS.map(w=>`<div>${w}</div>`).join('')}</div>
     <div class="month-grid" style="grid-template-rows:repeat(${nRows},1fr)">${gridHtml}</div>
-    ${legendHtml()}
+    ${renderPaintBar()}
   `;
+}
+function shiftBgStyle(colors){
+  if(!colors.length) return '';
+  if(colors.length === 1) return `background:${colors[0]};`;
+  const n = colors.length;
+  const stops = colors.map((c,i)=>`${c} ${(360*i/n).toFixed(2)}deg ${(360*(i+1)/n).toFixed(2)}deg`).join(', ');
+  return `background:conic-gradient(from 135deg, ${stops});`;
+}
+function renderPaintBar(){
+  const active = state.paintMode.active;
+  const chips = state.shiftTypes.map(t=>`
+    <button class="paint-chip ${state.paintMode.typeId===t.id?'selected':''}" style="color:${t.color}" onclick="selectPaintType('${t.id}')">
+      <span style="color:${t.color}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</span>${escapeHtml(t.name)}
+    </button>`).join('');
+  return `
+    <div class="paint-bar ${active?'active':''}">
+      <div class="paint-bar-row">
+        <button class="paint-toggle" onclick="togglePaintMode()">
+          ${ICONS.edit}${tr('paint_bar')}${active?` · ${tr('paint_done')}`:''}
+        </button>
+      </div>
+      ${active ? `
+        <div class="paint-strip">
+          <div class="paint-hint">${tr('paint_hint')}</div>
+          ${state.shiftTypes.length ? `<div class="paint-chip-row">${chips}</div>` : `<div class="paint-hint">${tr('no_shift_types_yet')}</div>`}
+        </div>` : ''}
+    </div>`;
+}
+function togglePaintMode(){
+  state.paintMode.active = !state.paintMode.active;
+  if(!state.paintMode.active) state.paintMode.typeId = null;
+  renderApp();
+}
+function selectPaintType(id){
+  state.paintMode.typeId = (state.paintMode.typeId === id) ? null : id;
+  renderApp();
+}
+function paintDay(dstr){
+  const typeId = state.paintMode.typeId;
+  if(!typeId) return;
+  if(!state.shifts[dstr]) state.shifts[dstr] = [];
+  const idx = state.shifts[dstr].findIndex(e=>e.typeId===typeId);
+  if(idx >= 0){
+    state.shifts[dstr].splice(idx,1);
+    if(state.shifts[dstr].length===0) delete state.shifts[dstr];
+  } else {
+    state.shifts[dstr].push({ id: uid(), typeId, notes:'' });
+  }
+  DB.saveShifts(state.shifts);
+  renderApp();
 }
 function legendHtml(){
   if(!state.shiftTypes.length) return '';
@@ -882,10 +1135,11 @@ function renderYearView(){
       if(d===null) return `<div class="year-cell outside"></div>`;
       const dstr = toDateStr(new Date(y,m,d));
       const entries = entriesFor(dstr);
-      const t = entries.length ? typeById(entries[0].typeId) : null;
+      const typeColors = [...new Set(entries.map(e=>{ const t=typeById(e.typeId); return t?t.color:null; }).filter(Boolean))];
+      const hasShift = typeColors.length > 0;
+      const style = shiftBgStyle(typeColors) + (hasShift ? `color:${textColorFor(typeColors[0])}` : '');
       const isToday = dstr === todaystr;
-      const style = t ? `background:${t.color};color:${textColorFor(t.color)}` : '';
-      return `<button class="year-cell ${t?'has-shift':''} ${isToday?'today':''}" style="${style}" onclick="goToDay('${dstr}')" title="${dstr}">${d}</button>`;
+      return `<button class="year-cell ${hasShift?'has-shift':''} ${isToday?'today':''}" style="${style}" onclick="goToDay('${dstr}')" title="${dstr}">${d}</button>`;
     }).join('');
     months += `<div class="year-month"><h3>${MONTHS[m]}</h3><div class="year-grid">${cellsHtml}</div></div>`;
   }
@@ -896,7 +1150,6 @@ function renderYearView(){
       <button class="icon-btn" onclick="shiftYear(1)">${ICONS.chevR}</button>
     </div>
     ${months}
-    ${legendHtml()}
   `;
 }
 function shiftYear(n){ state.yearCursor += n; renderApp(); }
@@ -933,7 +1186,7 @@ function renderMetrics(){
         workedToday = true;
       } else {
         offToday = true;
-        if(/vacation|holiday|pto|leave/i.test(t.name)) vacToday = true;
+        if(/vacation|holiday|pto|leave|vacacion|vacaciones/i.test(t.name)) vacToday = true;
       }
     });
     if(workedToday) daysWorked++;
@@ -952,20 +1205,20 @@ function renderMetrics(){
   }).join('');
 
   return `
-    <div class="section-title" style="margin-top:0">Metrics</div>
+    <div class="section-title" style="margin-top:0">${tr('metrics_title')}</div>
     <div class="modeToggle">
-      <button class="${period==='week'?'active':''}" onclick="setMetricsPeriod('week')">This Week</button>
-      <button class="${period==='month'?'active':''}" onclick="setMetricsPeriod('month')">This Month</button>
+      <button class="${period==='week'?'active':''}" onclick="setMetricsPeriod('week')">${tr('this_week')}</button>
+      <button class="${period==='month'?'active':''}" onclick="setMetricsPeriod('month')">${tr('this_month')}</button>
     </div>
     <div class="stat-grid">
-      <div class="stat-card"><div class="lab">Hours Worked</div><div class="big-num">${totalHours.toFixed(1)}<span style="font-size:14px;color:var(--text-muted)"> h</span></div></div>
-      <div class="stat-card"><div class="lab">Days Worked</div><div class="big-num">${daysWorked}</div></div>
-      <div class="stat-card"><div class="lab">Off Days</div><div class="big-num">${offDays}</div></div>
-      <div class="stat-card"><div class="lab">Vacation Days</div><div class="big-num">${vacationDays}</div></div>
+      <div class="stat-card"><div class="lab">${tr('hours_worked')}</div><div class="big-num">${totalHours.toFixed(1)}<span style="font-size:14px;color:var(--text-muted)"> h</span></div></div>
+      <div class="stat-card"><div class="lab">${tr('days_worked')}</div><div class="big-num">${daysWorked}</div></div>
+      <div class="stat-card"><div class="lab">${tr('off_days')}</div><div class="big-num">${offDays}</div></div>
+      <div class="stat-card"><div class="lab">${tr('vacation_days')}</div><div class="big-num">${vacationDays}</div></div>
     </div>
-    <div class="section-title">Hours by shift type</div>
+    <div class="section-title">${tr('hours_by_type')}</div>
     <div class="card">
-      ${breakdownRows || `<div class="text-muted" style="font-size:13.5px">No work hours logged for this period yet.</div>`}
+      ${breakdownRows || `<div class="text-muted" style="font-size:13.5px">${tr('no_hours_logged')}</div>`}
     </div>
   `;
 }
@@ -983,7 +1236,7 @@ let _shiftModalCtx = null; // {dateStr, entryId, selectedTypeId}
 function openShiftModal(dateStr, entryId){
   if(state.shiftTypes.length === 0){
     closeModal();
-    showToast('Create a shift type first');
+    showToast(tr('toast_create_type_first'));
     openShiftTypesManager();
     return;
   }
@@ -1003,22 +1256,22 @@ function renderShiftModal(notes){
     </button>`).join('');
   const html = `
     <div class="sheet-handle"></div>
-    <h2>${entryId?'Edit shift':'Add shift'}</h2>
+    <h2>${entryId?tr('edit_shift'):tr('add_shift_title')}</h2>
     <div class="field">
-      <label>Date</label>
+      <label>${tr('date_label')}</label>
       <div class="card flat" style="padding:11px 14px;font-weight:700">${fmtHuman(dateStr)}</div>
     </div>
     <div class="field">
-      <label>Shift type</label>
+      <label>${tr('shift_type_label')}</label>
       <div class="type-grid">${chips}</div>
     </div>
     <div class="field">
-      <label>Notes</label>
-      <textarea id="shiftNotesInput" placeholder="Optional note for this shift…">${escapeHtml(notes)}</textarea>
+      <label>${tr('notes_label')}</label>
+      <textarea id="shiftNotesInput" placeholder="${tr('notes_placeholder')}">${escapeHtml(notes)}</textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveShiftEntry()">Save shift</button>
-    ${entryId && typeById(selectedTypeId) && typeById(selectedTypeId).isWork ? `<button class="btn btn-ghost" style="margin-top:10px" onclick="openSwapCard('${dateStr}','${entryId}')">${ICONS.share}Share swap card</button>` : ''}
-    ${entryId?`<button class="btn btn-danger" style="margin-top:10px" onclick="deleteShiftEntry('${dateStr}','${entryId}'); closeModal();">${ICONS.trash}Remove shift</button>`:''}
+    <button class="btn btn-primary" onclick="saveShiftEntry()">${tr('save_shift')}</button>
+    ${entryId && typeById(selectedTypeId) && typeById(selectedTypeId).isWork ? `<button class="btn btn-ghost" style="margin-top:10px" onclick="openSwapCard('${dateStr}','${entryId}')">${ICONS.share}${tr('share_swap_card')}</button>` : ''}
+    ${entryId?`<button class="btn btn-danger" style="margin-top:10px" onclick="deleteShiftEntry('${dateStr}','${entryId}'); closeModal();">${ICONS.trash}${tr('remove_shift')}</button>`:''}
   `;
   showSheet(html);
 }
@@ -1041,7 +1294,7 @@ function saveShiftEntry(){
   DB.saveShifts(state.shifts);
   closeModal();
   renderApp();
-  showToast(entryId?'Shift updated':'Shift added');
+  showToast(entryId?tr('toast_shift_updated'):tr('toast_shift_added'));
 }
 
 /* ================= ADD VIEW (composer tab: shift or note) ================= */
@@ -1055,24 +1308,24 @@ function renderAddView(){
     <div class="composer-datebar">
       <button class="icon-btn" onclick="shiftDay(-1)">${ICONS.chevL}</button>
       <div class="dn-mid">
-        <div class="dn-dow">${isToday?'Today':WEEKDAYS_FULL[mondayIndex(fromDateStr(dateStr))]}</div>
+        <div class="dn-dow">${isToday?tr('today'):WEEKDAYS_FULL[mondayIndex(fromDateStr(dateStr))]}</div>
         <div class="dn-date">${fmtHumanShort(dateStr)}</div>
-        ${isToday?'':`<button class="today-jump" onclick="goToToday()">Jump to today</button>`}
+        ${isToday?'':`<button class="today-jump" onclick="goToToday()">${tr('jump_today')}</button>`}
       </div>
       <button class="icon-btn" onclick="shiftDay(1)">${ICONS.chevR}</button>
     </div>
     <div class="modeToggle">
-      <button class="${mode==='shift'?'active':''}" onclick="setAddMode('shift')">${ICONS.calBlank} Shift</button>
-      <button class="${mode==='note'?'active':''}" onclick="setAddMode('note')">${ICONS.note} Note</button>
+      <button class="${mode==='shift'?'active':''}" onclick="setAddMode('shift')">${ICONS.calBlank} ${tr('mode_shift')}</button>
+      <button class="${mode==='note'?'active':''}" onclick="setAddMode('note')">${ICONS.note} ${tr('mode_note')}</button>
     </div>
   `;
 
   if(mode === 'shift'){
     if(state.shiftTypes.length === 0){
       return `<div class="addview">` + datebar + `<div class="card" style="margin-top:2px">
-        <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">Create a shift type first</div>
-        <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">Shift types (like Morning or Night) aren't built in — set one up, then assign it to any day.</div>
-        <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} Manage shift types</button>
+        <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">${tr('create_first_type_title')}</div>
+        <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">${tr('create_first_type_sub')}</div>
+        <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} ${tr('manage_types')}</button>
       </div></div>`;
     }
     if(!state.addCtx.selectedTypeId) state.addCtx.selectedTypeId = state.shiftTypes[0].id;
@@ -1082,14 +1335,14 @@ function renderAddView(){
       </button>`).join('');
     return `<div class="addview">` + datebar + `
       <div class="field">
-        <label>Shift type</label>
+        <label>${tr('shift_type_label')}</label>
         <div class="type-grid">${chips}</div>
       </div>
       <div class="field">
-        <label>Notes (optional)</label>
-        <textarea id="addShiftNotes" placeholder="Anything worth remembering about this shift…">${escapeHtml(_addDraftText)}</textarea>
+        <label>${tr('notes_optional')}</label>
+        <textarea id="addShiftNotes" placeholder="${tr('shift_notes_placeholder2')}">${escapeHtml(_addDraftText)}</textarea>
       </div>
-      <button class="btn btn-primary" onclick="saveAddShift()">${ICONS.plus} Add shift</button>
+      <button class="btn btn-primary" onclick="saveAddShift()">${ICONS.plus} ${tr('add_shift')}</button>
     </div>`;
   }
 
@@ -1099,12 +1352,12 @@ function renderAddView(){
   const draftValue = editingNote ? editingNote.text : _addDraftText;
   const list = notesFor(dateStr).filter(n=>n.id!==editing);
   return `<div class="addview">` + datebar + `
-    ${editing?`<div class="editing-banner"><span>Editing an existing note</span><button onclick="cancelNoteEdit()">Cancel</button></div>`:''}
+    ${editing?`<div class="editing-banner"><span>${tr('editing_note_banner')}</span><button onclick="cancelNoteEdit()">${tr('cancel')}</button></div>`:''}
     <div class="field">
-      <textarea id="addNoteText" rows="4" placeholder="e.g. Doctor's appointment at 3pm, remember to bring ID…">${escapeHtml(draftValue||'')}</textarea>
+      <textarea id="addNoteText" rows="4" placeholder="${tr('note_placeholder')}">${escapeHtml(draftValue||'')}</textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveAddNote()">${editing?ICONS.edit:ICONS.plus}${editing?'Save changes':'Add note'}</button>
-    ${list.length?`<div class="section-title">Other notes on this day</div><div class="notelist">${list.map(n=>`
+    <button class="btn btn-primary" onclick="saveAddNote()">${editing?ICONS.edit:ICONS.plus}${editing?tr('save_changes'):tr('add_note')}</button>
+    ${list.length?`<div class="section-title">${tr('other_notes_day')}</div><div class="notelist">${list.map(n=>`
       <div class="note-mini">
         <p>${escapeHtml(n.text)}</p>
         <div class="note-mini-actions">
@@ -1130,7 +1383,7 @@ function pickAddType(id){
 function goToToday(){ state.selectedDate = todayStr(); renderApp(); }
 function saveAddShift(){
   const typeId = state.addCtx.selectedTypeId;
-  if(!typeId){ showToast('Pick a shift type'); return; }
+  if(!typeId){ showToast(tr('toast_pick_type')); return; }
   const notes = (document.getElementById('addShiftNotes')?.value || '').trim();
   const dateStr = state.selectedDate;
   if(!state.shifts[dateStr]) state.shifts[dateStr] = [];
@@ -1138,11 +1391,11 @@ function saveAddShift(){
   DB.saveShifts(state.shifts);
   _addDraftText = '';
   setTab('day');
-  showToast('Shift added');
+  showToast(tr('toast_shift_added'));
 }
 function saveAddNote(){
   const text = (document.getElementById('addNoteText')?.value || '').trim();
-  if(!text){ showToast('Write something first'); return; }
+  if(!text){ showToast(tr('toast_write_something')); return; }
   const dateStr = state.selectedDate;
   if(!state.notes[dateStr]) state.notes[dateStr] = [];
   if(state.addCtx.noteId){
@@ -1155,7 +1408,7 @@ function saveAddNote(){
   state.addCtx.noteId = null;
   _addDraftText = '';
   setTab('day');
-  showToast('Note saved');
+  showToast(tr('toast_note_saved'));
 }
 function cancelNoteEdit(){
   state.addCtx.noteId = null;
@@ -1173,7 +1426,7 @@ function renderShiftTypesManager(){
       <div class="shifttype-swatch" style="background:${t.color};color:${textColorFor(t.color)}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</div>
       <div class="shifttype-info">
         <div class="shifttype-name">${escapeHtml(t.name)}</div>
-        <div class="shifttype-meta">${t.isWork ? `${t.start}–${t.end}${t.breakMins?` · ${t.breakMins}m brk`:''}` : 'Not counted as work'}</div>
+        <div class="shifttype-meta">${t.isWork ? `${t.start}–${t.end}${t.breakMins?` · ${t.breakMins}m ${tr('brk_abbrev')}`:''}` : tr('not_counted_work')}</div>
       </div>
       <div class="shifttype-actions">
         <button onclick="openRangeAssign('${t.id}')" aria-label="Assign to range">${ICONS.range}</button>
@@ -1183,9 +1436,9 @@ function renderShiftTypesManager(){
     </div>`).join('');
   const html = `
     <div class="sheet-handle"></div>
-    <h2>Shift types<button class="icon-btn" onclick="closeModal()">${ICONS.close}</button></h2>
-    ${rows || `<div class="empty-state" style="padding:24px 8px">${ICONS.layers}<div class="title">No shift types yet</div><div>Create your first one below</div></div>`}
-    <button class="btn btn-primary" style="margin-top:6px" onclick="openShiftTypeEditor()">${ICONS.plus}New shift type</button>
+    <h2>${tr('shift_types_title')}<button class="icon-btn" onclick="closeModal()">${ICONS.close}</button></h2>
+    ${rows || `<div class="empty-state" style="padding:24px 8px">${ICONS.layers}<div class="title">${tr('no_shift_types_yet')}</div><div>${tr('create_first_below')}</div></div>`}
+    <button class="btn btn-primary" style="margin-top:6px" onclick="openShiftTypeEditor()">${ICONS.plus}${tr('new_shift_type')}</button>
   `;
   showSheet(html);
 }
@@ -1198,7 +1451,7 @@ function deleteShiftType(id){
   DB.saveShiftTypes(state.shiftTypes);
   DB.saveShifts(state.shifts);
   renderShiftTypesManager();
-  showToast('Shift type deleted');
+  showToast(tr('toast_type_deleted'));
 }
 
 /* ---- Shift type editor (create/edit) ---- */
@@ -1216,36 +1469,36 @@ function renderShiftTypeEditor(){
   const icons = TYPE_ICON_KEYS.map(k=>`<button class="icon-opt ${t.icon===k?'selected':''}" onclick="updateTypeField('icon','${k}')">${TYPE_ICONS[k]}</button>`).join('');
   const html = `
     <div class="sheet-handle"></div>
-    <h2>${t._new?'New shift type':'Edit shift type'}</h2>
+    <h2>${t._new?tr('new_shift_type'):tr('edit_shift_type')}</h2>
     <div class="field">
-      <label>Name</label>
-      <input id="typeName" type="text" placeholder="e.g. Morning shift" value="${escapeHtml(t.name)}" oninput="updateTypeField('name', this.value)">
+      <label>${tr('name_label')}</label>
+      <input id="typeName" type="text" placeholder="${tr('name_placeholder')}" value="${escapeHtml(t.name)}" oninput="updateTypeField('name', this.value)">
     </div>
     <div class="field">
       <div class="checkbox-row">
         <input type="checkbox" id="typeIsWork" ${t.isWork?'checked':''} onchange="updateTypeField('isWork', this.checked)">
-        <label for="typeIsWork">Counts as work hours</label>
+        <label for="typeIsWork">${tr('counts_as_work')}</label>
       </div>
     </div>
     ${t.isWork ? `
     <div class="field two-col">
-      <div><label>Start time</label><input type="time" value="${t.start}" onchange="updateTypeField('start', this.value)"></div>
-      <div><label>End time</label><input type="time" value="${t.end}" onchange="updateTypeField('end', this.value)"></div>
+      <div><label>${tr('start_time')}</label><input type="time" value="${t.start}" onchange="updateTypeField('start', this.value)"></div>
+      <div><label>${tr('end_time')}</label><input type="time" value="${t.end}" onchange="updateTypeField('end', this.value)"></div>
     </div>
     <div class="field">
-      <label>Break duration (minutes)</label>
+      <label>${tr('break_duration')}</label>
       <input type="number" min="0" step="5" value="${t.breakMins||0}" onchange="updateTypeField('breakMins', this.value)">
     </div>` : ''}
     <div class="field">
-      <label>Color</label>
+      <label>${tr('color_label')}</label>
       <div class="swatch-grid">${swatches}</div>
     </div>
     <div class="field">
-      <label>Icon</label>
+      <label>${tr('icon_label')}</label>
       <div class="icon-grid">${icons}</div>
     </div>
-    <button class="btn btn-primary" onclick="saveShiftType()">Save shift type</button>
-    <button class="btn btn-ghost" style="margin-top:10px" onclick="openShiftTypesManager()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveShiftType()">${tr('save_shift_type')}</button>
+    <button class="btn btn-ghost" style="margin-top:10px" onclick="openShiftTypesManager()">${tr('cancel')}</button>
   `;
   showSheet(html);
 }
@@ -1255,14 +1508,14 @@ function updateTypeField(field, value){
 }
 function saveShiftType(){
   const t = _typeEditorCtx;
-  if(!t.name || !t.name.trim()){ showToast('Give it a name first'); return; }
+  if(!t.name || !t.name.trim()){ showToast(tr('give_name_first')); return; }
   const clean = { id:t.id, name:t.name.trim(), start:t.start, end:t.end, breakMins:Number(t.breakMins)||0, color:t.color, icon:t.icon, isWork:!!t.isWork };
   const idx = state.shiftTypes.findIndex(x=>x.id===t.id);
   if(idx>=0) state.shiftTypes[idx] = clean; else state.shiftTypes.push(clean);
   DB.saveShiftTypes(state.shiftTypes);
   renderApp();
   openShiftTypesManager();
-  showToast(t._new?'Shift type created':'Shift type updated');
+  showToast(t._new?tr('toast_type_created'):tr('toast_type_updated'));
 }
 
 /* ---- Bulk range assignment ---- */
@@ -1275,26 +1528,26 @@ function renderRangeAssign(){
   const t = typeById(_rangeCtx.typeId);
   const html = `
     <div class="sheet-handle"></div>
-    <h2>Assign "${escapeHtml(t.name)}"</h2>
+    <h2>${tr('assign_prefix')} "${escapeHtml(t.name)}"</h2>
     <div class="field two-col">
-      <div><label>From</label><input type="date" value="${_rangeCtx.from}" onchange="_rangeCtx.from=this.value"></div>
-      <div><label>To</label><input type="date" value="${_rangeCtx.to}" onchange="_rangeCtx.to=this.value"></div>
+      <div><label>${tr('from_label')}</label><input type="date" value="${_rangeCtx.from}" onchange="_rangeCtx.from=this.value"></div>
+      <div><label>${tr('to_label')}</label><input type="date" value="${_rangeCtx.to}" onchange="_rangeCtx.to=this.value"></div>
     </div>
     <div class="field">
       <div class="checkbox-row">
         <input type="checkbox" id="rangeReplace" ${_rangeCtx.replace?'checked':''} onchange="_rangeCtx.replace=this.checked">
-        <label for="rangeReplace">Replace existing shifts on those days</label>
+        <label for="rangeReplace">${tr('replace_existing')}</label>
       </div>
-      <div class="field-hint">Applies "${escapeHtml(t.name)}" to every day in the range.</div>
+      <div class="field-hint">${tr('applies_hint',{n:escapeHtml(t.name)})}</div>
     </div>
-    <button class="btn btn-primary" onclick="applyRangeAssign()">Apply to range</button>
-    <button class="btn btn-ghost" style="margin-top:10px" onclick="openShiftTypesManager()">Cancel</button>
+    <button class="btn btn-primary" onclick="applyRangeAssign()">${tr('apply_to_range')}</button>
+    <button class="btn btn-ghost" style="margin-top:10px" onclick="openShiftTypesManager()">${tr('cancel')}</button>
   `;
   showSheet(html);
 }
 function applyRangeAssign(){
   const { typeId, from, to, replace } = _rangeCtx;
-  if(!from || !to || from > to){ showToast('Check your date range'); return; }
+  if(!from || !to || from > to){ showToast(tr('check_date_range')); return; }
   let d = fromDateStr(from);
   const end = fromDateStr(to);
   let count = 0;
@@ -1308,7 +1561,7 @@ function applyRangeAssign(){
   DB.saveShifts(state.shifts);
   closeModal();
   renderApp();
-  showToast(`Applied to ${count} day${count===1?'':'s'}`);
+  showToast(tr('toast_applied_days',{n:count, s:count===1?'':'s'}));
 }
 
 /* ================= ICS EXPORT ================= */
@@ -1343,7 +1596,7 @@ function exportICS(){
   a.href = URL.createObjectURL(blob);
   a.download = 'rota-shifts.ics';
   a.click();
-  showToast('Calendar file downloaded');
+  showToast(tr('toast_calendar_downloaded'));
 }
 function escapeICS(s){ return String(s).replace(/[\\;,]/g, m=>'\\'+m).replace(/\n/g,'\\n'); }
 
@@ -1357,11 +1610,11 @@ function openSwapCard(dateStr, entryId){
   const imgUrl = canvas.toDataURL('image/png');
   const html = `
     <div class="sheet-handle"></div>
-    <h2>Shift swap card</h2>
+    <h2>${tr('swap_card_title')}</h2>
     <div class="swapcard-preview"><img src="${imgUrl}"></div>
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick='downloadSwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.download}Download</button>
-      <button class="btn btn-primary" onclick='copySwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.copy}Copy image</button>
+      <button class="btn btn-ghost" onclick='downloadSwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.download}${tr('download')}</button>
+      <button class="btn btn-primary" onclick='copySwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.copy}${tr('copy_image')}</button>
     </div>
   `;
   showSheet(html);
@@ -1381,7 +1634,7 @@ function drawSwapCard(canvas, dateStr, entry, t){
   ctx.fillStyle = textHex;
   ctx.globalAlpha = .85;
   ctx.font = '600 30px Inter, sans-serif';
-  ctx.fillText('SHIFT SWAP REQUEST', 64, 96);
+  ctx.fillText(tr('swap_request'), 64, 96);
   ctx.globalAlpha = 1;
 
   ctx.font = '700 74px "Space Grotesk", sans-serif';
@@ -1392,7 +1645,7 @@ function drawSwapCard(canvas, dateStr, entry, t){
 
   ctx.fillStyle = '#14161F';
   ctx.font = '700 46px "Space Grotesk", sans-serif';
-  ctx.fillText(t.name + ' shift', 104, 380);
+  ctx.fillText(t.name + ' ' + tr('shift_suffix'), 104, 380);
 
   ctx.fillStyle = '#6B6D7A';
   ctx.font = '600 30px "JetBrains Mono", monospace';
@@ -1403,7 +1656,7 @@ function drawSwapCard(canvas, dateStr, entry, t){
     ctx.fillText(shiftDurationHours(t).toFixed(1)+'h', 104, 560);
     ctx.fillStyle = '#6B6D7A';
     ctx.font = '600 26px Inter, sans-serif';
-    ctx.fillText('total hours' + (t.breakMins?`  ·  ${t.breakMins}m break`:''), 104, 605);
+    ctx.fillText(tr('total_hours') + (t.breakMins?`  ·  ${t.breakMins}m ${tr('break_word')}`:''), 104, 605);
   }
   if(entry.notes){
     ctx.fillStyle = '#14161F';
@@ -1414,7 +1667,7 @@ function drawSwapCard(canvas, dateStr, entry, t){
   ctx.fillStyle = textHex;
   ctx.globalAlpha = .9;
   ctx.font = '600 26px Inter, sans-serif';
-  ctx.fillText('Generated with Rota', 64, H-70);
+  ctx.fillText(tr('generated_with'), 64, H-70);
 }
 function shadeColor(hex, percent){
   const num = parseInt(hex.replace('#',''),16);
@@ -1457,7 +1710,7 @@ function downloadSwapCard(dateStr, entryId){
   a.href = canvas.toDataURL('image/png');
   a.download = `shift-swap-${dateStr}.png`;
   a.click();
-  showToast('Image downloaded');
+  showToast(tr('toast_image_downloaded'));
 }
 async function copySwapCard(dateStr, entryId){
   const entry = entriesFor(dateStr).find(e=>e.id===entryId);
@@ -1469,7 +1722,7 @@ async function copySwapCard(dateStr, entryId){
     canvas.toBlob(async (blob)=>{
       if(navigator.clipboard && window.ClipboardItem){
         await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
-        showToast('Copied to clipboard');
+        showToast(tr('toast_copied'));
       } else {
         downloadSwapCard(dateStr, entryId);
       }
@@ -1483,40 +1736,55 @@ async function copySwapCard(dateStr, entryId){
 function openSettings(){
   const html = `
     <div class="sheet-handle"></div>
-    <h2>Settings</h2>
+    <h2>${tr('settings_title')}</h2>
     <div class="field">
-      <label>Appearance</label>
+      <label>${tr('language_label')}</label>
       <div class="modeToggle">
-        <button class="${state.settings.theme==='light'?'active':''}" onclick="setThemeExplicit('light')">Light</button>
-        <button class="${state.settings.theme==='dark'?'active':''}" onclick="setThemeExplicit('dark')">Dark</button>
+        <button class="${currentLang()==='es'?'active':''}" onclick="setLanguageExplicit('es')">Español</button>
+        <button class="${currentLang()==='en'?'active':''}" onclick="setLanguageExplicit('en')">English</button>
       </div>
     </div>
     <div class="field">
-      <label>Text size</label>
+      <label>${tr('appearance')}</label>
+      <div class="modeToggle">
+        <button class="${state.settings.theme==='light'?'active':''}" onclick="setThemeExplicit('light')">${tr('light')}</button>
+        <button class="${state.settings.theme==='dark'?'active':''}" onclick="setThemeExplicit('dark')">${tr('dark')}</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>${tr('text_size')}</label>
       <div class="modeToggle">
         ${Object.entries(FONT_SIZES).map(([k,f])=>`<button class="${state.settings.fontSize===k?'active':''}" onclick="setFontSize('${k}')">${f.label}</button>`).join('')}
       </div>
     </div>
     <div class="field">
-      <label>Color palette</label>
+      <label>${tr('color_palette')}</label>
       <div class="palette-grid">
         ${Object.entries(PALETTES).map(([k,p])=>`
           <button class="palette-swatch ${state.settings.palette===k?'selected':''}" style="background:${state.settings.theme==='dark'?p.dark:p.light}" onclick="setPalette('${k}')" aria-label="${p.name}" title="${p.name}"></button>
         `).join('')}
       </div>
     </div>
-    <div class="section-title" style="margin-top:6px">Export</div>
-    <button class="btn btn-ghost" style="margin-bottom:14px" onclick="exportICS()">${ICONS.download}Export to Apple / Google / Outlook (.ics)</button>
-    <div class="section-title">Data</div>
+    <div class="section-title" style="margin-top:6px">${tr('export_section')}</div>
+    <button class="btn btn-ghost" style="margin-bottom:14px" onclick="exportICS()">${ICONS.download}${tr('export_ics')}</button>
+    <div class="section-title">${tr('data_section')}</div>
     <div class="card" style="margin-bottom:14px">
       <div style="font-size:13.5px; color:var(--text-muted); line-height:1.5; margin-bottom:12px">
-        Shifts and shift types are saved locally on this device. This build is Supabase-ready — connecting an account will enable multi-device sync.
+        ${tr('data_hint')}
       </div>
-      <button class="btn btn-ghost" disabled style="opacity:.55">Connect Supabase account (coming soon)</button>
+      <button class="btn btn-ghost" disabled style="opacity:.55">${tr('connect_supabase')}</button>
     </div>
-    <button class="btn btn-danger" onclick="clearAllData()">${ICONS.trash}Erase all shifts</button>
+    <button class="btn btn-danger" onclick="clearAllData()">${ICONS.trash}${tr('erase_all')}</button>
   `;
   showSheet(html);
+}
+function setLanguageExplicit(lang){
+  state.settings.language = lang;
+  applyLanguageArrays();
+  DB.saveSettings(state.settings);
+  applyStaticLabels();
+  renderApp();
+  openSettings();
 }
 function setThemeExplicit(t){
   state.settings.theme = t;
@@ -1541,7 +1809,7 @@ function clearAllData(){
   DB.saveShifts(state.shifts);
   closeModal();
   renderApp();
-  showToast('All shifts cleared');
+  showToast(tr('toast_all_cleared'));
 }
 
 /* ================= Toast ================= */
