@@ -118,7 +118,7 @@ main{flex:1; padding:16px 16px calc(96px + var(--safe-bottom)); animation:fadein
 .agenda-time{font-family:var(--font-mono); font-size:12px; color:var(--text-muted); margin-top:2px;}
 .agenda-notes{font-size:13px; color:var(--text-muted); margin-top:6px; line-height:1.4;}
 .agenda-actions{display:flex; gap:4px; flex-shrink:0;}
-.agenda-actions button{width:30px; height:30px; border-radius:9px; border:none; background:var(--bg-sunken); color:var(--text-muted); display:flex; align-items:center; justify-content:center;}
+.agenda-actions button{width:30px; height:30px; border-radius:99px; border:none; background:var(--bg-sunken); color:var(--text-muted); display:flex; align-items:center; justify-content:center;}
 .agenda-actions button svg{width:14px; height:14px;}
 .agenda-actions button:active{transform:scale(.9);}
 .add-shift-row{display:flex; align-items:center; justify-content:center; gap:8px; border:1.5px dashed var(--border); border-radius:14px; padding:13px; color:var(--text-muted); font-weight:600; font-size:13.5px; margin-top:2px; background:transparent; transition:border-color .15s ease, color .15s ease, background .15s ease;}
@@ -221,7 +221,7 @@ main{flex:1; padding:16px 16px calc(96px + var(--safe-bottom)); animation:fadein
 
 /* ---------- Metrics ---------- */
 .modeToggle{display:flex; background:var(--bg-sunken); border-radius:12px; padding:3px; margin-bottom:16px;}
-.modeToggle button{flex:1; border:none; background:transparent; padding:9px; border-radius:9px; font-weight:700; font-size:13px; color:var(--text-muted);}
+.modeToggle button{flex:1; border:none; background:transparent; padding:99px; padding:9px; border-radius:9px; font-weight:700; font-size:13px; color:var(--text-muted);}
 .modeToggle button.active{background:var(--bg-elevated); color:var(--text); box-shadow:var(--shadow);}
 .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px;}
 .stat-card{background:var(--bg-elevated); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow:var(--shadow); position:relative; overflow:hidden;}
@@ -273,6 +273,15 @@ main{flex:1; padding:16px 16px calc(96px + var(--safe-bottom)); animation:fadein
 .legend-item{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-muted);}
 .legend-dot{width:9px; height:9px; border-radius:3px;}
 
+/* ---------- Modal Selector de Idioma ---------- */
+.lang-overlay{position:fixed; inset:0; background:rgba(10,10,16,0.75); backdrop-filter:blur(6px); z-index:100; display:flex; align-items:center; justify-content:center; padding:20px; animation:fadein .2s ease;}
+.lang-card{background:var(--bg-elevated); border:1px solid var(--border); border-radius:24px; padding:28px 24px; width:100%; max-width:380px; text-align:center; box-shadow:var(--shadow-lg); animation:sheetup .25s ease;}
+.lang-card h2{font-size:22px; margin:0 0 8px;}
+.lang-card p{font-size:14px; color:var(--text-muted); margin:0 0 24px; line-height:1.4;}
+.lang-options{display:flex; flex-direction:column; gap:12px;}
+.lang-btn{display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-radius:16px; border:2px solid var(--border); background:var(--bg-sunken); font-weight:700; font-size:16px; color:var(--text); transition:all .15s ease;}
+.lang-btn:active{transform:scale(.97); border-color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, var(--bg-sunken));}
+
 ::-webkit-scrollbar{width:0; height:0;}
 </style>
 </head>
@@ -305,41 +314,246 @@ main{flex:1; padding:16px 16px calc(96px + var(--safe-bottom)); animation:fadein
   <nav class="bottomnav">
     <button class="navbtn" data-tab="day" onclick="setTab('day')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/><path d="M12 13v4M10 15h4"/></svg>
-      <span>Day</span><span class="navdot"></span>
+      <span id="nav-lbl-day">Día</span><span class="navdot"></span>
     </button>
     <button class="navbtn" data-tab="month" onclick="setTab('month')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4M7 13h2M11 13h2M15 13h2M7 17h2M11 17h2"/></svg>
-      <span>Month</span><span class="navdot"></span>
+      <span id="nav-lbl-month">Mes</span><span class="navdot"></span>
     </button>
     <button class="navbtn" data-tab="year" onclick="setTab('year')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      <span>Year</span><span class="navdot"></span>
+      <span id="nav-lbl-year">Año</span><span class="navdot"></span>
     </button>
     <button class="navbtn navbtn-add" data-tab="add" onclick="setTab('add')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-      <span>Add</span><span class="navdot"></span>
+      <span id="nav-lbl-add">Añadir</span><span class="navdot"></span>
     </button>
   </nav>
 
 </div>
 
 <div id="modal-root"></div>
+<div id="lang-modal-root"></div>
 
 <script>
 /* =========================================================================
-   ROTA — Shift Work Calendar
-   Data layer: uses the artifact persistent key/value storage (window.storage).
-   ---------------------------------------------------------------------
-   SUPABASE READINESS
-   This app is intentionally structured so the `DB` object below is the ONLY
-   place that talks to storage. To wire up Supabase later:
-     1. npm install @supabase/supabase-js, create a client with your URL/anon key.
-     2. Replace the DB load/save functions with calls to supabase.from(...).select()
-        and .upsert(), plus supabase.auth for the user id.
-     3. Add an auth screen that gates renderApp() until a session exists.
-   Nothing else in the app needs to change — every read/write already flows
-   through DB.* and the in-memory `state` object.
+   DICCIONARIO DE TRADUCCIONES (I18N)
    ========================================================================= */
+const TRANSLATIONS = {
+  es: {
+    navDay: 'Día', navMonth: 'Mes', navYear: 'Año', navAdd: 'Añadir',
+    today: 'Hoy',
+    nothingScheduled: 'Nada programado',
+    useAddTab: 'Usa la pestaña Añadir para registrar un turno o nota',
+    allDay: 'Todo el día',
+    timeline: 'Línea de tiempo',
+    noTimedShifts: 'No hay turnos con horario hoy.',
+    addShift: 'Añadir turno',
+    addNote: 'Añadir nota',
+    createFirstType: 'Crea tu primer tipo de turno',
+    createFirstTypeDesc: 'Los tipos de turno (como Mañana o Noche) no vienen predefinidos — configúralos una vez y asígnalos a cualquier día.',
+    manageTypes: 'Gestionar tipos de turno',
+    shiftRemoved: 'Turno eliminado',
+    noteRemoved: 'Nota eliminada',
+    note: 'Nota',
+    thisWeek: 'Esta Semana',
+    thisMonth: 'Este Mes',
+    metrics: 'Métricas',
+    hoursWorked: 'Horas Trabajadas',
+    daysWorked: 'Días Trabajados',
+    offDays: 'Días Libres',
+    vacationDays: 'Días de Vacaciones',
+    hoursByType: 'Horas por tipo de turno',
+    noWorkHoursLogged: 'Sin horas registradas en este período.',
+    createShiftTypeFirst: 'Crea un tipo de turno primero',
+    editShift: 'Editar turno',
+    shiftType: 'Tipo de turno',
+    date: 'Fecha',
+    notes: 'Notas',
+    notesPlaceholder: 'Nota opcional sobre este turno…',
+    saveShift: 'Guardar turno',
+    shareSwapCard: 'Compartir tarjeta de cambio',
+    removeShift: 'Eliminar turno',
+    shiftUpdated: 'Turno actualizado',
+    shiftAdded: 'Turno añadido',
+    jumpToToday: 'Ir a hoy',
+    notesOptional: 'Notas (opcional)',
+    notesShiftPlaceholder: 'Cosas para recordar sobre este turno…',
+    editingNote: 'Editando una nota existente',
+    cancel: 'Cancelar',
+    saveChanges: 'Guardar cambios',
+    notePlaceholder: 'ej. Cita médica a las 3pm, traer documentación…',
+    otherNotesDay: 'Otras notas de este día',
+    pickShiftType: 'Elige un tipo de turno',
+    writeSomething: 'Escribe algo primero',
+    noteSaved: 'Nota guardada',
+    shiftTypesTitle: 'Tipos de turno',
+    noShiftTypesYet: 'Sin tipos de turno aún',
+    createFirstBelow: 'Crea el primero a continuación',
+    newShiftType: 'Nuevo tipo de turno',
+    editShiftType: 'Editar tipo de turno',
+    shiftTypeDeleted: 'Tipo de turno eliminado',
+    name: 'Nombre',
+    namePlaceholder: 'ej. Turno de Mañana',
+    countsAsWork: 'Cuenta como horas de trabajo',
+    startTime: 'Hora inicio',
+    endTime: 'Hora fin',
+    breakDuration: 'Descanso (minutos)',
+    color: 'Color',
+    icon: 'Icono',
+    giveItName: 'Escribe un nombre primero',
+    shiftTypeCreated: 'Tipo de turno creado',
+    shiftTypeUpdated: 'Tipo de turno actualizado',
+    assign: 'Asignar',
+    from: 'Desde',
+    to: 'Hasta',
+    replaceExisting: 'Reemplazar turnos existentes en esos días',
+    appliesToRange: 'Aplica a cada día del rango.',
+    applyToRange: 'Aplicar a rango',
+    checkDateRange: 'Revisa el rango de fechas',
+    appliedTo: 'Aplicado a',
+    days: 'días',
+    day: 'día',
+    calendarDownloaded: 'Archivo de calendario descargado',
+    swapCardTitle: 'Tarjeta de cambio de turno',
+    download: 'Descargar',
+    copyImage: 'Copiar imagen',
+    shiftSwapRequest: 'SOLICITUD DE CAMBIO DE TURNO',
+    shiftWord: 'Turno',
+    totalHours: 'horas totales',
+    breakWord: 'descanso',
+    generatedWith: 'Generado con Rota',
+    imgDownloaded: 'Imagen descargada',
+    copiedClipboard: 'Copiado al portapapeles',
+    settings: 'Ajustes',
+    appearance: 'Apariencia',
+    light: 'Claro',
+    dark: 'Oscuro',
+    export: 'Exportar',
+    exportIcs: 'Exportar a Apple / Google / Outlook (.ics)',
+    language: 'Idioma',
+    data: 'Datos',
+    localDataDesc: 'Tus turnos y configuraciones se guardan localmente en tu dispositivo.',
+    eraseAllShifts: 'Borrar todos los turnos',
+    allShiftsCleared: 'Todos los turnos eliminados',
+    selectLanguage: 'Seleccionar idioma',
+    chooseLanguageDesc: 'Elige el idioma en el que deseas utilizar Rota.',
+    notCountedAsWork: 'No cuenta como trabajo',
+    unknownShiftType: 'Tipo de turno desconocido',
+    weekdaysShort: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
+    weekdaysFull: ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'],
+    months: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+  },
+  en: {
+    navDay: 'Day', navMonth: 'Month', navYear: 'Year', navAdd: 'Add',
+    today: 'Today',
+    nothingScheduled: 'Nothing scheduled',
+    useAddTab: 'Use the Add tab below to log a shift or note',
+    allDay: 'All day',
+    timeline: 'Timeline',
+    noTimedShifts: 'No timed shifts today.',
+    addShift: 'Add shift',
+    addNote: 'Add note',
+    createFirstType: 'Create your first shift type',
+    createFirstTypeDesc: 'Shift types (like Morning or Night) aren\'t built in — set them up once, then assign them to any day.',
+    manageTypes: 'Manage shift types',
+    shiftRemoved: 'Shift removed',
+    noteRemoved: 'Note removed',
+    note: 'Note',
+    thisWeek: 'This Week',
+    thisMonth: 'This Month',
+    metrics: 'Metrics',
+    hoursWorked: 'Hours Worked',
+    daysWorked: 'Days Worked',
+    offDays: 'Off Days',
+    vacationDays: 'Vacation Days',
+    hoursByType: 'Hours by shift type',
+    noWorkHoursLogged: 'No work hours logged for this period yet.',
+    createShiftTypeFirst: 'Create a shift type first',
+    editShift: 'Edit shift',
+    shiftType: 'Shift type',
+    date: 'Date',
+    notes: 'Notes',
+    notesPlaceholder: 'Optional note for this shift…',
+    saveShift: 'Save shift',
+    shareSwapCard: 'Share swap card',
+    removeShift: 'Remove shift',
+    shiftUpdated: 'Shift updated',
+    shiftAdded: 'Shift added',
+    jumpToToday: 'Jump to today',
+    notesOptional: 'Notes (optional)',
+    notesShiftPlaceholder: 'Anything worth remembering about this shift…',
+    editingNote: 'Editing an existing note',
+    cancel: 'Cancel',
+    saveChanges: 'Save changes',
+    notePlaceholder: 'e.g. Doctor\'s appointment at 3pm, remember to bring ID…',
+    otherNotesDay: 'Other notes on this day',
+    pickShiftType: 'Pick a shift type',
+    writeSomething: 'Write something first',
+    noteSaved: 'Note saved',
+    shiftTypesTitle: 'Shift types',
+    noShiftTypesYet: 'No shift types yet',
+    createFirstBelow: 'Create your first one below',
+    newShiftType: 'New shift type',
+    editShiftType: 'Edit shift type',
+    shiftTypeDeleted: 'Shift type deleted',
+    name: 'Name',
+    namePlaceholder: 'e.g. Morning shift',
+    countsAsWork: 'Counts as work hours',
+    startTime: 'Start time',
+    endTime: 'End time',
+    breakDuration: 'Break duration (minutes)',
+    color: 'Color',
+    icon: 'Icon',
+    giveItName: 'Give it a name first',
+    shiftTypeCreated: 'Shift type created',
+    shiftTypeUpdated: 'Shift type updated',
+    assign: 'Assign',
+    from: 'From',
+    to: 'To',
+    replaceExisting: 'Replace existing shifts on those days',
+    appliesToRange: 'Applies to every day in the range.',
+    applyToRange: 'Apply to range',
+    checkDateRange: 'Check your date range',
+    appliedTo: 'Applied to',
+    days: 'days',
+    day: 'day',
+    calendarDownloaded: 'Calendar file downloaded',
+    swapCardTitle: 'Shift swap card',
+    download: 'Download',
+    copyImage: 'Copy image',
+    shiftSwapRequest: 'SHIFT SWAP REQUEST',
+    shiftWord: 'shift',
+    totalHours: 'total hours',
+    breakWord: 'break',
+    generatedWith: 'Generated with Rota',
+    imgDownloaded: 'Image downloaded',
+    copiedClipboard: 'Copied to clipboard',
+    settings: 'Settings',
+    appearance: 'Appearance',
+    light: 'Light',
+    dark: 'Dark',
+    export: 'Export',
+    exportIcs: 'Export to Apple / Google / Outlook (.ics)',
+    language: 'Language',
+    data: 'Data',
+    localDataDesc: 'Shifts and shift types are saved locally on this device.',
+    eraseAllShifts: 'Erase all shifts',
+    allShiftsCleared: 'All shifts cleared',
+    selectLanguage: 'Select Language',
+    chooseLanguageDesc: 'Choose the language you want to use for Rota.',
+    notCountedAsWork: 'Not counted as work',
+    unknownShiftType: 'Unknown shift type',
+    weekdaysShort: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    weekdaysFull: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+    months: ['January','February','March','April','May','June','July','August','September','October','November','December']
+  }
+};
+
+function t(key) {
+  const lang = state.settings.lang || 'es';
+  return (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) ? TRANSLATIONS[lang][key] : TRANSLATIONS['en'][key] || key;
+}
 
 /* ---------------- Icons (UI chrome) ---------------- */
 const ICONS = {
@@ -361,7 +575,7 @@ const ICONS = {
   pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M8 3h8l-1 6 3 3v2H6v-2l3-3-1-6Z"/></svg>'
 };
 
-/* ---------------- Icon set for shift TYPES (user-picked) ---------------- */
+/* ---------------- Icon set for shift TYPES ---------------- */
 const TYPE_ICONS = {
   sun:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
   sunset:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v7"/><path d="m6.3 12.5 1.9-1.9a3.5 3.5 0 0 1 5-.1l.2.2a3.5 3.5 0 0 0 5 0l1.9 1.8"/><path d="M3 15h18"/><path d="M5 18h14M8 21h8"/></svg>',
@@ -386,10 +600,6 @@ function textColorFor(hex){
   return lum > 0.62 ? '#14161F' : '#FFFFFF';
 }
 
-const WEEKDAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const WEEKDAYS_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
 /* ---------------- Date utils ---------------- */
 function pad(n){ return String(n).padStart(2,'0'); }
 function toDateStr(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -400,11 +610,11 @@ function mondayIndex(d){ return (d.getDay()+6)%7; }
 function timeToMin(t){ if(!t) return 0; const [h,m]=t.split(':').map(Number); return h*60+m; }
 function fmtHuman(dateStr){
   const d = fromDateStr(dateStr);
-  return WEEKDAYS_FULL[mondayIndex(d)]+', '+MONTHS[d.getMonth()]+' '+d.getDate();
+  return t('weekdaysFull')[mondayIndex(d)]+', '+t('months')[d.getMonth()]+' '+d.getDate();
 }
 function fmtHumanShort(dateStr){
   const d = fromDateStr(dateStr);
-  return MONTHS[d.getMonth()].slice(0,3)+' '+d.getDate();
+  return t('months')[d.getMonth()].slice(0,3)+' '+d.getDate();
 }
 function uid(){ return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4); }
 function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
@@ -420,7 +630,8 @@ function shiftDurationHours(type){
 
 /* ---------------- Persistence ---------------- */
 const DEFAULT_SETTINGS = {
-  theme: (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark':'light'
+  theme: (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark':'light',
+  lang: null // null activa la pantalla inicial
 };
 const DB = {
   async loadShiftTypes(){
@@ -459,9 +670,9 @@ const DB = {
 
 /* ---------------- State ---------------- */
 const state = {
-  shiftTypes: [],        // [{id,name,start,end,breakMins,color,icon,isWork}]
-  shifts: {},            // dateStr -> [{id, typeId, notes}]
-  notes: {},             // dateStr -> [{id, text}]  (standalone notes, no shift required)
+  shiftTypes: [],
+  shifts: {},
+  notes: {},
   settings: {...DEFAULT_SETTINGS},
   activeTab: 'day',
   selectedDate: todayStr(),
@@ -482,9 +693,45 @@ async function init(){
   state.shifts = shifts;
   state.notes = notes;
   state.settings = settings;
+  
   applyTheme();
+  
+  if(!state.settings.lang){
+    showLanguageModal();
+  } else {
+    renderApp();
+  }
+}
+
+function showLanguageModal(){
+  const root = document.getElementById('lang-modal-root');
+  root.innerHTML = `
+    <div class="lang-overlay">
+      <div class="lang-card">
+        <h2>Idioma / Language</h2>
+        <p>Selecciona tu idioma para continuar<br><span style="font-size:12px;opacity:0.8">Select your language to continue</span></p>
+        <div class="lang-options">
+          <button class="lang-btn" onclick="selectInitialLanguage('es')">
+            <span>Español</span>
+            <span>🇪🇸</span>
+          </button>
+          <button class="lang-btn" onclick="selectInitialLanguage('en')">
+            <span>English</span>
+            <span>🇬🇧</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function selectInitialLanguage(lang){
+  state.settings.lang = lang;
+  DB.saveSettings(state.settings);
+  document.getElementById('lang-modal-root').innerHTML = '';
   renderApp();
 }
+
 function applyTheme(){
   document.documentElement.classList.toggle('dark', state.settings.theme === 'dark');
   document.getElementById('themeBtn').innerHTML = state.settings.theme === 'dark' ? ICONS.sunTheme : ICONS.moonTheme;
@@ -503,6 +750,12 @@ function setTab(tab){
 
 /* ---------------- App shell render ---------------- */
 function renderApp(){
+  // Actualizar textos de navegación
+  document.getElementById('nav-lbl-day').textContent = t('navDay');
+  document.getElementById('nav-lbl-month').textContent = t('navMonth');
+  document.getElementById('nav-lbl-year').textContent = t('navYear');
+  document.getElementById('nav-lbl-add').textContent = t('navAdd');
+
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===state.activeTab));
   document.getElementById('metricsHdrBtn').classList.toggle('accent', state.activeTab==='metrics');
   const root = document.getElementById('view-root');
@@ -514,7 +767,7 @@ function renderApp(){
 }
 
 /* ================= DAY VIEW (hourly timeline) ================= */
-const HOUR_H = 56; // px per hour row
+const HOUR_H = 56;
 function renderDayView(){
   const dateStr = state.selectedDate;
   const isToday = dateStr === todayStr();
@@ -528,33 +781,33 @@ function renderDayView(){
   if(entries.length === 0 && dayNotes.length === 0){
     body = `<div class="empty-state">
       ${ICONS.calBlank}
-      <div class="title">Nothing scheduled</div>
-      <div>Use the Add tab below to log a shift or note</div>
+      <div class="title">${t('nothingScheduled')}</div>
+      <div>${t('useAddTab')}</div>
     </div>`;
   } else {
     if(allDayEntries.length || dayNotes.length){
-      body += `<div class="section-title" style="margin-top:0">All day</div>`;
+      body += `<div class="section-title" style="margin-top:0">${t('allDay')}</div>`;
       body += '<div class="agenda-list">'
         + allDayEntries.map(e => renderAgendaItem(e, dateStr)).join('')
         + dayNotes.map(n => renderNoteAgendaItem(n, dateStr)).join('')
         + '</div>';
     }
     if(timedEntries.length){
-      body += `<div class="section-title">Timeline</div>`;
+      body += `<div class="section-title">${t('timeline')}</div>`;
       body += renderTimeline(timedEntries, dateStr);
     } else if(allDayEntries.length || dayNotes.length){
-      body += `<div class="text-muted" style="font-size:13px; margin-top:14px">No timed shifts today.</div>`;
+      body += `<div class="text-muted" style="font-size:13px; margin-top:14px">${t('noTimedShifts')}</div>`;
     }
   }
   body += `<div class="quickadd-row">
-    <button class="add-shift-row" onclick="goAddShift()">${ICONS.plus} Add shift</button>
-    <button class="add-shift-row" onclick="goAddNote()">${ICONS.note} Add note</button>
+    <button class="add-shift-row" onclick="goAddShift()">${ICONS.plus} ${t('addShift')}</button>
+    <button class="add-shift-row" onclick="goAddNote()">${ICONS.note} ${t('addNote')}</button>
   </div>`;
   if(state.shiftTypes.length === 0){
     body += `<div class="card" style="margin-top:16px">
-      <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">Create your first shift type</div>
-      <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">Shift types (like Morning or Night) aren't built in — set them up once, then assign them to any day.</div>
-      <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} Manage shift types</button>
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">${t('createFirstType')}</div>
+      <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">${t('createFirstTypeDesc')}</div>
+      <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} ${t('manageTypes')}</button>
     </div>`;
   }
 
@@ -562,7 +815,7 @@ function renderDayView(){
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftDay(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
-        <div class="today-label">${isToday?'Today':WEEKDAYS_FULL[mondayIndex(fromDateStr(dateStr))]}</div>
+        <div class="today-label">${isToday?t('today'):t('weekdaysFull')[mondayIndex(fromDateStr(dateStr))]}</div>
         <h2 class="date-heading">${fmtHumanShort(dateStr)}</h2>
       </div>
       <button class="icon-btn" onclick="shiftDay(1)">${ICONS.chevR}</button>
@@ -607,16 +860,16 @@ function scrollTimelineIntoView(){
   });
 }
 function renderAgendaItem(entry, dateStr){
-  const t = typeById(entry.typeId);
-  if(!t){
-    return `<div class="agenda-item"><div class="agenda-body"><div class="agenda-name">Unknown shift type</div></div>
+  const tType = typeById(entry.typeId);
+  if(!tType){
+    return `<div class="agenda-item"><div class="agenda-body"><div class="agenda-name">${t('unknownShiftType')}</div></div>
       <div class="agenda-actions"><button onclick="deleteShiftEntry('${dateStr}','${entry.id}')">${ICONS.trash}</button></div></div>`;
   }
-  return `<div class="agenda-item" style="--stripe:${t.color}">
-    <div class="agenda-icon" style="background:${t.color};color:${textColorFor(t.color)}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</div>
+  return `<div class="agenda-item" style="--stripe:${tType.color}">
+    <div class="agenda-icon" style="background:${tType.color};color:${textColorFor(tType.color)}">${TYPE_ICONS[tType.icon]||TYPE_ICONS.sun}</div>
     <div class="agenda-body">
       <div class="agenda-title-row">
-        <div class="agenda-name">${escapeHtml(t.name)}</div>
+        <div class="agenda-name">${escapeHtml(tType.name)}</div>
       </div>
       ${entry.notes?`<div class="agenda-notes">${escapeHtml(entry.notes)}</div>`:''}
     </div>
@@ -630,7 +883,7 @@ function renderNoteAgendaItem(note, dateStr){
   return `<div class="agenda-item note-item">
     <div class="agenda-icon">${ICONS.note}</div>
     <div class="agenda-body">
-      <div class="agenda-name">Note</div>
+      <div class="agenda-name">${t('note')}</div>
       <div class="agenda-notes">${escapeHtml(note.text)}</div>
     </div>
     <div class="agenda-actions">
@@ -649,7 +902,7 @@ function deleteShiftEntry(dateStr, entryId){
   if(state.shifts[dateStr].length===0) delete state.shifts[dateStr];
   DB.saveShifts(state.shifts);
   renderApp();
-  showToast('Shift removed');
+  showToast(t('shiftRemoved'));
 }
 function deleteNoteEntry(dateStr, noteId){
   if(!state.notes[dateStr]) return;
@@ -657,7 +910,7 @@ function deleteNoteEntry(dateStr, noteId){
   if(state.notes[dateStr].length===0) delete state.notes[dateStr];
   DB.saveNotes(state.notes);
   renderApp();
-  showToast('Note removed');
+  showToast(t('noteRemoved'));
 }
 function editNoteInline(dateStr, noteId){
   state.selectedDate = dateStr;
@@ -696,7 +949,7 @@ function renderMonthView(){
     const dstr = toDateStr(c.date);
     const entries = entriesFor(dstr);
     const dayNotes = notesFor(dstr);
-    let dots = entries.slice(0,3).map(e=>{ const t=typeById(e.typeId); return t?`<span style="background:${t.color}"></span>`:''; }).join('');
+    let dots = entries.slice(0,3).map(e=>{ const tType=typeById(e.typeId); return tType?`<span style="background:${tType.color}"></span>`:''; }).join('');
     if(dayNotes.length) dots += `<span class="note-dot"></span>`;
     const noteText = (entries.find(e=>e.notes)||{}).notes || (dayNotes[0]&&dayNotes[0].text) || '';
     const noteBadge = noteText ? `<div class="day-note-badge">${escapeHtml(noteText.split(' ').slice(0,2).join(' '))}</div>` : '';
@@ -711,11 +964,11 @@ function renderMonthView(){
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftMonth(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
-        <h2 class="date-heading" style="font-size:20px">${MONTHS[m]} ${y}</h2>
+        <h2 class="date-heading" style="font-size:20px">${t('months')[m]} ${y}</h2>
       </div>
       <button class="icon-btn" onclick="shiftMonth(1)">${ICONS.chevR}</button>
     </div>
-    <div class="month-grid-head">${WEEKDAYS.map(w=>`<div>${w}</div>`).join('')}</div>
+    <div class="month-grid-head">${t('weekdaysShort').map(w=>`<div>${w}</div>`).join('')}</div>
     <div class="month-grid">${gridHtml}</div>
     ${legendHtml()}
   `;
@@ -750,10 +1003,10 @@ function renderYearView(){
     for(let d=1; d<=daysInMonth; d++){
       const dstr = toDateStr(new Date(y,m,d));
       const entries = entriesFor(dstr);
-      const t = entries.length ? typeById(entries[0].typeId) : null;
-      cells += `<button class="year-cell" style="background:${t?t.color:'var(--bg-sunken)'}" onclick="goToDay('${dstr}')" title="${dstr}"></button>`;
+      const tType = entries.length ? typeById(entries[0].typeId) : null;
+      cells += `<button class="year-cell" style="background:${tType?tType.color:'var(--bg-sunken)'}" onclick="goToDay('${dstr}')" title="${dstr}"></button>`;
     }
-    months += `<div class="year-month"><h3>${MONTHS[m]}</h3><div class="year-grid">${cells}</div></div>`;
+    months += `<div class="year-month"><h3>${t('months')[m]}</h3><div class="year-grid">${cells}</div></div>`;
   }
   return `
     <div class="dateflip">
@@ -790,16 +1043,16 @@ function renderMetrics(){
     if(!entries.length) return;
     let workedToday = false, offToday = false, vacToday = false;
     entries.forEach(e=>{
-      const t = typeById(e.typeId);
-      if(!t) return;
-      if(t.isWork){
-        const h = shiftDurationHours(t);
+      const tType = typeById(e.typeId);
+      if(!tType) return;
+      if(tType.isWork){
+        const h = shiftDurationHours(tType);
         totalHours += h;
-        byType[t.id] = (byType[t.id]||0) + h;
+        byType[tType.id] = (byType[tType.id]||0) + h;
         workedToday = true;
       } else {
         offToday = true;
-        if(/vacation|holiday|pto|leave/i.test(t.name)) vacToday = true;
+        if(/vacation|holiday|pto|leave|vacaciones/i.test(tType.name)) vacToday = true;
       }
     });
     if(workedToday) daysWorked++;
@@ -808,30 +1061,30 @@ function renderMetrics(){
   });
 
   const maxTypeHours = Math.max(1, ...Object.values(byType));
-  const breakdownRows = state.shiftTypes.filter(t=>t.isWork).map(t=>{
-    const h = byType[t.id]||0;
+  const breakdownRows = state.shiftTypes.filter(t=>t.isWork).map(tType=>{
+    const h = byType[tType.id]||0;
     return `<div class="bar-row">
-      <div class="bar-key">${escapeHtml(t.name)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(h/maxTypeHours*100).toFixed(0)}%;background:${t.color}"></div></div>
+      <div class="bar-key">${escapeHtml(tType.name)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(h/maxTypeHours*100).toFixed(0)}%;background:${tType.color}"></div></div>
       <div class="bar-val">${h.toFixed(1)}h</div>
     </div>`;
   }).join('');
 
   return `
-    <div class="section-title" style="margin-top:0">Metrics</div>
+    <div class="section-title" style="margin-top:0">${t('metrics')}</div>
     <div class="modeToggle">
-      <button class="${period==='week'?'active':''}" onclick="setMetricsPeriod('week')">This Week</button>
-      <button class="${period==='month'?'active':''}" onclick="setMetricsPeriod('month')">This Month</button>
+      <button class="${period==='week'?'active':''}" onclick="setMetricsPeriod('week')">${t('thisWeek')}</button>
+      <button class="${period==='month'?'active':''}" onclick="setMetricsPeriod('month')">${t('thisMonth')}</button>
     </div>
     <div class="stat-grid">
-      <div class="stat-card"><div class="lab">Hours Worked</div><div class="big-num">${totalHours.toFixed(1)}<span style="font-size:14px;color:var(--text-muted)"> h</span></div></div>
-      <div class="stat-card"><div class="lab">Days Worked</div><div class="big-num">${daysWorked}</div></div>
-      <div class="stat-card"><div class="lab">Off Days</div><div class="big-num">${offDays}</div></div>
-      <div class="stat-card"><div class="lab">Vacation Days</div><div class="big-num">${vacationDays}</div></div>
+      <div class="stat-card"><div class="lab">${t('hoursWorked')}</div><div class="big-num">${totalHours.toFixed(1)}<span style="font-size:14px;color:var(--text-muted)"> h</span></div></div>
+      <div class="stat-card"><div class="lab">${t('daysWorked')}</div><div class="big-num">${daysWorked}</div></div>
+      <div class="stat-card"><div class="lab">${t('offDays')}</div><div class="big-num">${offDays}</div></div>
+      <div class="stat-card"><div class="lab">${t('vacationDays')}</div><div class="big-num">${vacationDays}</div></div>
     </div>
-    <div class="section-title">Hours by shift type</div>
+    <div class="section-title">${t('hoursByType')}</div>
     <div class="card">
-      ${breakdownRows || `<div class="text-muted" style="font-size:13.5px">No work hours logged for this period yet.</div>`}
+      ${breakdownRows || `<div class="text-muted" style="font-size:13.5px">${t('noWorkHoursLogged')}</div>`}
     </div>
   `;
 }
@@ -845,11 +1098,11 @@ function showSheet(html){
 function closeModal(){ document.getElementById('modal-root').innerHTML = ''; }
 
 /* ================= INSTANT SHIFT MODAL (add/edit one entry) ================= */
-let _shiftModalCtx = null; // {dateStr, entryId, selectedTypeId}
+let _shiftModalCtx = null;
 function openShiftModal(dateStr, entryId){
   if(state.shiftTypes.length === 0){
     closeModal();
-    showToast('Create a shift type first');
+    showToast(t('createShiftTypeFirst'));
     openShiftTypesManager();
     return;
   }
@@ -863,28 +1116,28 @@ function openShiftModal(dateStr, entryId){
 }
 function renderShiftModal(notes){
   const { dateStr, entryId, selectedTypeId } = _shiftModalCtx;
-  const chips = state.shiftTypes.map(t=>`
-    <button class="type-chip ${t.id===selectedTypeId?'selected':''}" style="color:${t.color}" onclick="pickShiftType('${t.id}')">
-      <span style="color:${t.color}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</span>${escapeHtml(t.name)}
+  const chips = state.shiftTypes.map(tType=>`
+    <button class="type-chip ${tType.id===selectedTypeId?'selected':''}" style="color:${tType.color}" onclick="pickShiftType('${tType.id}')">
+      <span style="color:${tType.color}">${TYPE_ICONS[tType.icon]||TYPE_ICONS.sun}</span>${escapeHtml(tType.name)}
     </button>`).join('');
   const html = `
     <div class="sheet-handle"></div>
-    <h2>${entryId?'Edit shift':'Add shift'}</h2>
+    <h2>${entryId?t('editShift'):t('addShift')}</h2>
     <div class="field">
-      <label>Date</label>
+      <label>${t('date')}</label>
       <div class="card flat" style="padding:11px 14px;font-weight:700">${fmtHuman(dateStr)}</div>
     </div>
     <div class="field">
-      <label>Shift type</label>
+      <label>${t('shiftType')}</label>
       <div class="type-grid">${chips}</div>
     </div>
     <div class="field">
-      <label>Notes</label>
-      <textarea id="shiftNotesInput" placeholder="Optional note for this shift…">${escapeHtml(notes)}</textarea>
+      <label>${t('notes')}</label>
+      <textarea id="shiftNotesInput" placeholder="${t('notesPlaceholder')}">${escapeHtml(notes)}</textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveShiftEntry()">Save shift</button>
-    ${entryId && typeById(selectedTypeId) && typeById(selectedTypeId).isWork ? `<button class="btn btn-ghost" style="margin-top:10px" onclick="openSwapCard('${dateStr}','${entryId}')">${ICONS.share}Share swap card</button>` : ''}
-    ${entryId?`<button class="btn btn-danger" style="margin-top:10px" onclick="deleteShiftEntry('${dateStr}','${entryId}'); closeModal();">${ICONS.trash}Remove shift</button>`:''}
+    <button class="btn btn-primary" onclick="saveShiftEntry()">${t('saveShift')}</button>
+    ${entryId && typeById(selectedTypeId) && typeById(selectedTypeId).isWork ? `<button class="btn btn-ghost" style="margin-top:10px" onclick="openSwapCard('${dateStr}','${entryId}')">${ICONS.share}${t('shareSwapCard')}</button>` : ''}
+    ${entryId?`<button class="btn btn-danger" style="margin-top:10px" onclick="deleteShiftEntry('${dateStr}','${entryId}'); closeModal();">${ICONS.trash}${t('removeShift')}</button>`:''}
   `;
   showSheet(html);
 }
@@ -907,7 +1160,7 @@ function saveShiftEntry(){
   DB.saveShifts(state.shifts);
   closeModal();
   renderApp();
-  showToast(entryId?'Shift updated':'Shift added');
+  showToast(entryId?t('shiftUpdated'):t('shiftAdded'));
 }
 
 /* ================= ADD VIEW (composer tab: shift or note) ================= */
@@ -921,41 +1174,41 @@ function renderAddView(){
     <div class="composer-datebar">
       <button class="icon-btn" onclick="shiftDay(-1)">${ICONS.chevL}</button>
       <div class="dn-mid">
-        <div class="dn-dow">${isToday?'Today':WEEKDAYS_FULL[mondayIndex(fromDateStr(dateStr))]}</div>
+        <div class="dn-dow">${isToday?t('today'):t('weekdaysFull')[mondayIndex(fromDateStr(dateStr))]}</div>
         <div class="dn-date">${fmtHumanShort(dateStr)}</div>
-        ${isToday?'':`<button class="today-jump" onclick="goToToday()">Jump to today</button>`}
+        ${isToday?'':`<button class="today-jump" onclick="goToToday()">${t('jumpToToday')}</button>`}
       </div>
       <button class="icon-btn" onclick="shiftDay(1)">${ICONS.chevR}</button>
     </div>
     <div class="modeToggle">
-      <button class="${mode==='shift'?'active':''}" onclick="setAddMode('shift')">${ICONS.calBlank} Shift</button>
-      <button class="${mode==='note'?'active':''}" onclick="setAddMode('note')">${ICONS.note} Note</button>
+      <button class="${mode==='shift'?'active':''}" onclick="setAddMode('shift')">${ICONS.calBlank} ${t('navDay')}</button>
+      <button class="${mode==='note'?'active':''}" onclick="setAddMode('note')">${ICONS.note} ${t('note')}</button>
     </div>
   `;
 
   if(mode === 'shift'){
     if(state.shiftTypes.length === 0){
       return `<div class="addview">` + datebar + `<div class="card" style="margin-top:2px">
-        <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">Create a shift type first</div>
-        <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">Shift types (like Morning or Night) aren't built in — set one up, then assign it to any day.</div>
-        <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} Manage shift types</button>
+        <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">${t('createShiftTypeFirst')}</div>
+        <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">${t('createFirstTypeDesc')}</div>
+        <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} ${t('manageTypes')}</button>
       </div></div>`;
     }
     if(!state.addCtx.selectedTypeId) state.addCtx.selectedTypeId = state.shiftTypes[0].id;
-    const chips = state.shiftTypes.map(t=>`
-      <button class="type-chip ${t.id===state.addCtx.selectedTypeId?'selected':''}" style="color:${t.color}" onclick="pickAddType('${t.id}')">
-        <span style="color:${t.color}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</span>${escapeHtml(t.name)}
+    const chips = state.shiftTypes.map(tType=>`
+      <button class="type-chip ${tType.id===state.addCtx.selectedTypeId?'selected':''}" style="color:${tType.color}" onclick="pickAddType('${tType.id}')">
+        <span style="color:${tType.color}">${TYPE_ICONS[tType.icon]||TYPE_ICONS.sun}</span>${escapeHtml(tType.name)}
       </button>`).join('');
     return `<div class="addview">` + datebar + `
       <div class="field">
-        <label>Shift type</label>
+        <label>${t('shiftType')}</label>
         <div class="type-grid">${chips}</div>
       </div>
       <div class="field">
-        <label>Notes (optional)</label>
-        <textarea id="addShiftNotes" placeholder="Anything worth remembering about this shift…">${escapeHtml(_addDraftText)}</textarea>
+        <label>${t('notesOptional')}</label>
+        <textarea id="addShiftNotes" placeholder="${t('notesShiftPlaceholder')}">${escapeHtml(_addDraftText)}</textarea>
       </div>
-      <button class="btn btn-primary" onclick="saveAddShift()">${ICONS.plus} Add shift</button>
+      <button class="btn btn-primary" onclick="saveAddShift()">${ICONS.plus} ${t('addShift')}</button>
     </div>`;
   }
 
@@ -965,12 +1218,12 @@ function renderAddView(){
   const draftValue = editingNote ? editingNote.text : _addDraftText;
   const list = notesFor(dateStr).filter(n=>n.id!==editing);
   return `<div class="addview">` + datebar + `
-    ${editing?`<div class="editing-banner"><span>Editing an existing note</span><button onclick="cancelNoteEdit()">Cancel</button></div>`:''}
+    ${editing?`<div class="editing-banner"><span>${t('editingNote')}</span><button onclick="cancelNoteEdit()">${t('cancel')}</button></div>`:''}
     <div class="field">
-      <textarea id="addNoteText" rows="4" placeholder="e.g. Doctor's appointment at 3pm, remember to bring ID…">${escapeHtml(draftValue||'')}</textarea>
+      <textarea id="addNoteText" rows="4" placeholder="${t('notePlaceholder')}">${escapeHtml(draftValue||'')}</textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveAddNote()">${editing?ICONS.edit:ICONS.plus}${editing?'Save changes':'Add note'}</button>
-    ${list.length?`<div class="section-title">Other notes on this day</div><div class="notelist">${list.map(n=>`
+    <button class="btn btn-primary" onclick="saveAddNote()">${editing?ICONS.edit:ICONS.plus}${editing?t('saveChanges'):t('addNote')}</button>
+    ${list.length?`<div class="section-title">${t('otherNotesDay')}</div><div class="notelist">${list.map(n=>`
       <div class="note-mini">
         <p>${escapeHtml(n.text)}</p>
         <div class="note-mini-actions">
@@ -996,7 +1249,7 @@ function pickAddType(id){
 function goToToday(){ state.selectedDate = todayStr(); renderApp(); }
 function saveAddShift(){
   const typeId = state.addCtx.selectedTypeId;
-  if(!typeId){ showToast('Pick a shift type'); return; }
+  if(!typeId){ showToast(t('pickShiftType')); return; }
   const notes = (document.getElementById('addShiftNotes')?.value || '').trim();
   const dateStr = state.selectedDate;
   if(!state.shifts[dateStr]) state.shifts[dateStr] = [];
@@ -1004,11 +1257,11 @@ function saveAddShift(){
   DB.saveShifts(state.shifts);
   _addDraftText = '';
   setTab('day');
-  showToast('Shift added');
+  showToast(t('shiftAdded'));
 }
 function saveAddNote(){
   const text = (document.getElementById('addNoteText')?.value || '').trim();
-  if(!text){ showToast('Write something first'); return; }
+  if(!text){ showToast(t('writeSomething')); return; }
   const dateStr = state.selectedDate;
   if(!state.notes[dateStr]) state.notes[dateStr] = [];
   if(state.addCtx.noteId){
@@ -1021,7 +1274,7 @@ function saveAddNote(){
   state.addCtx.noteId = null;
   _addDraftText = '';
   setTab('day');
-  showToast('Note saved');
+  showToast(t('noteSaved'));
 }
 function cancelNoteEdit(){
   state.addCtx.noteId = null;
@@ -1034,24 +1287,24 @@ function openShiftTypesManager(){
   renderShiftTypesManager();
 }
 function renderShiftTypesManager(){
-  const rows = state.shiftTypes.map(t=>`
+  const rows = state.shiftTypes.map(tType=>`
     <div class="shifttype-row">
-      <div class="shifttype-swatch" style="background:${t.color};color:${textColorFor(t.color)}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</div>
+      <div class="shifttype-swatch" style="background:${tType.color};color:${textColorFor(tType.color)}">${TYPE_ICONS[tType.icon]||TYPE_ICONS.sun}</div>
       <div class="shifttype-info">
-        <div class="shifttype-name">${escapeHtml(t.name)}</div>
-        <div class="shifttype-meta">${t.isWork ? `${t.start}–${t.end}${t.breakMins?` · ${t.breakMins}m brk`:''}` : 'Not counted as work'}</div>
+        <div class="shifttype-name">${escapeHtml(tType.name)}</div>
+        <div class="shifttype-meta">${tType.isWork ? `${tType.start}–${tType.end}${tType.breakMins?` · ${tType.breakMins}m`:''}` : t('notCountedAsWork')}</div>
       </div>
       <div class="shifttype-actions">
-        <button onclick="openRangeAssign('${t.id}')" aria-label="Assign to range">${ICONS.range}</button>
-        <button onclick="openShiftTypeEditor('${t.id}')" aria-label="Edit">${ICONS.edit}</button>
-        <button onclick="deleteShiftType('${t.id}')" aria-label="Delete">${ICONS.trash}</button>
+        <button onclick="openRangeAssign('${tType.id}')" aria-label="Assign to range">${ICONS.range}</button>
+        <button onclick="openShiftTypeEditor('${tType.id}')" aria-label="Edit">${ICONS.edit}</button>
+        <button onclick="deleteShiftType('${tType.id}')" aria-label="Delete">${ICONS.trash}</button>
       </div>
     </div>`).join('');
   const html = `
     <div class="sheet-handle"></div>
-    <h2>Shift types<button class="icon-btn" onclick="closeModal()">${ICONS.close}</button></h2>
-    ${rows || `<div class="empty-state" style="padding:24px 8px">${ICONS.layers}<div class="title">No shift types yet</div><div>Create your first one below</div></div>`}
-    <button class="btn btn-primary" style="margin-top:6px" onclick="openShiftTypeEditor()">${ICONS.plus}New shift type</button>
+    <h2>${t('shiftTypesTitle')}<button class="icon-btn" onclick="closeModal()">${ICONS.close}</button></h2>
+    ${rows || `<div class="empty-state" style="padding:24px 8px">${ICONS.layers}<div class="title">${t('noShiftTypesYet')}</div><div>${t('createFirstBelow')}</div></div>`}
+    <button class="btn btn-primary" style="margin-top:6px" onclick="openShiftTypeEditor()">${ICONS.plus}${t('newShiftType')}</button>
   `;
   showSheet(html);
 }
@@ -1064,7 +1317,7 @@ function deleteShiftType(id){
   DB.saveShiftTypes(state.shiftTypes);
   DB.saveShifts(state.shifts);
   renderShiftTypesManager();
-  showToast('Shift type deleted');
+  showToast(t('shiftTypeDeleted'));
 }
 
 /* ---- Shift type editor (create/edit) ---- */
@@ -1077,41 +1330,41 @@ function openShiftTypeEditor(id){
   renderShiftTypeEditor();
 }
 function renderShiftTypeEditor(){
-  const t = _typeEditorCtx;
-  const swatches = SWATCHES.map(c=>`<button class="swatch ${t.color===c?'selected':''}" style="background:${c}" onclick="updateTypeField('color','${c}')"></button>`).join('');
-  const icons = TYPE_ICON_KEYS.map(k=>`<button class="icon-opt ${t.icon===k?'selected':''}" onclick="updateTypeField('icon','${k}')">${TYPE_ICONS[k]}</button>`).join('');
+  const tType = _typeEditorCtx;
+  const swatches = SWATCHES.map(c=>`<button class="swatch ${tType.color===c?'selected':''}" style="background:${c}" onclick="updateTypeField('color','${c}')"></button>`).join('');
+  const icons = TYPE_ICON_KEYS.map(k=>`<button class="icon-opt ${tType.icon===k?'selected':''}" onclick="updateTypeField('icon','${k}')">${TYPE_ICONS[k]}</button>`).join('');
   const html = `
     <div class="sheet-handle"></div>
-    <h2>${t._new?'New shift type':'Edit shift type'}</h2>
+    <h2>${tType._new?t('newShiftType'):t('editShiftType')}</h2>
     <div class="field">
-      <label>Name</label>
-      <input id="typeName" type="text" placeholder="e.g. Morning shift" value="${escapeHtml(t.name)}" oninput="updateTypeField('name', this.value)">
+      <label>${t('name')}</label>
+      <input id="typeName" type="text" placeholder="${t('namePlaceholder')}" value="${escapeHtml(tType.name)}" oninput="updateTypeField('name', this.value)">
     </div>
     <div class="field">
       <div class="checkbox-row">
-        <input type="checkbox" id="typeIsWork" ${t.isWork?'checked':''} onchange="updateTypeField('isWork', this.checked)">
-        <label for="typeIsWork">Counts as work hours</label>
+        <input type="checkbox" id="typeIsWork" ${tType.isWork?'checked':''} onchange="updateTypeField('isWork', this.checked)">
+        <label for="typeIsWork">${t('countsAsWork')}</label>
       </div>
     </div>
-    ${t.isWork ? `
+    ${tType.isWork ? `
     <div class="field two-col">
-      <div><label>Start time</label><input type="time" value="${t.start}" onchange="updateTypeField('start', this.value)"></div>
-      <div><label>End time</label><input type="time" value="${t.end}" onchange="updateTypeField('end', this.value)"></div>
+      <div><label>${t('startTime')}</label><input type="time" value="${tType.start}" onchange="updateTypeField('start', this.value)"></div>
+      <div><label>${t('endTime')}</label><input type="time" value="${tType.end}" onchange="updateTypeField('end', this.value)"></div>
     </div>
     <div class="field">
-      <label>Break duration (minutes)</label>
-      <input type="number" min="0" step="5" value="${t.breakMins||0}" onchange="updateTypeField('breakMins', this.value)">
+      <label>${t('breakDuration')}</label>
+      <input type="number" min="0" step="5" value="${tType.breakMins||0}" onchange="updateTypeField('breakMins', this.value)">
     </div>` : ''}
     <div class="field">
-      <label>Color</label>
+      <label>${t('color')}</label>
       <div class="swatch-grid">${swatches}</div>
     </div>
     <div class="field">
-      <label>Icon</label>
+      <label>${t('icon')}</label>
       <div class="icon-grid">${icons}</div>
     </div>
-    <button class="btn btn-primary" onclick="saveShiftType()">Save shift type</button>
-    <button class="btn btn-ghost" style="margin-top:10px" onclick="openShiftTypesManager()">Cancel</button>
+    <button class="btn btn-primary" onclick="saveShiftType()">${t('saveShift')}</button>
+    <button class="btn btn-ghost" style="margin-top:10px" onclick="openShiftTypesManager()">${t('cancel')}</button>
   `;
   showSheet(html);
 }
@@ -1120,15 +1373,15 @@ function updateTypeField(field, value){
   if(field==='isWork' || field==='color' || field==='icon') renderShiftTypeEditor();
 }
 function saveShiftType(){
-  const t = _typeEditorCtx;
-  if(!t.name || !t.name.trim()){ showToast('Give it a name first'); return; }
-  const clean = { id:t.id, name:t.name.trim(), start:t.start, end:t.end, breakMins:Number(t.breakMins)||0, color:t.color, icon:t.icon, isWork:!!t.isWork };
-  const idx = state.shiftTypes.findIndex(x=>x.id===t.id);
+  const tType = _typeEditorCtx;
+  if(!tType.name || !tType.name.trim()){ showToast(t('giveItName')); return; }
+  const clean = { id:tType.id, name:tType.name.trim(), start:tType.start, end:tType.end, breakMins:Number(tType.breakMins)||0, color:tType.color, icon:tType.icon, isWork:!!tType.isWork };
+  const idx = state.shiftTypes.findIndex(x=>x.id===tType.id);
   if(idx>=0) state.shiftTypes[idx] = clean; else state.shiftTypes.push(clean);
   DB.saveShiftTypes(state.shiftTypes);
   renderApp();
   openShiftTypesManager();
-  showToast(t._new?'Shift type created':'Shift type updated');
+  showToast(tType._new?t('shiftTypeCreated'):t('shiftTypeUpdated'));
 }
 
 /* ---- Bulk range assignment ---- */
@@ -1138,29 +1391,29 @@ function openRangeAssign(typeId){
   renderRangeAssign();
 }
 function renderRangeAssign(){
-  const t = typeById(_rangeCtx.typeId);
+  const tType = typeById(_rangeCtx.typeId);
   const html = `
     <div class="sheet-handle"></div>
-    <h2>Assign "${escapeHtml(t.name)}"</h2>
+    <h2>${t('assign')} "${escapeHtml(tType.name)}"</h2>
     <div class="field two-col">
-      <div><label>From</label><input type="date" value="${_rangeCtx.from}" onchange="_rangeCtx.from=this.value"></div>
-      <div><label>To</label><input type="date" value="${_rangeCtx.to}" onchange="_rangeCtx.to=this.value"></div>
+      <div><label>${t('from')}</label><input type="date" value="${_rangeCtx.from}" onchange="_rangeCtx.from=this.value"></div>
+      <div><label>${t('to')}</label><input type="date" value="${_rangeCtx.to}" onchange="_rangeCtx.to=this.value"></div>
     </div>
     <div class="field">
       <div class="checkbox-row">
         <input type="checkbox" id="rangeReplace" ${_rangeCtx.replace?'checked':''} onchange="_rangeCtx.replace=this.checked">
-        <label for="rangeReplace">Replace existing shifts on those days</label>
+        <label for="rangeReplace">${t('replaceExisting')}</label>
       </div>
-      <div class="field-hint">Applies "${escapeHtml(t.name)}" to every day in the range.</div>
+      <div class="field-hint">${t('appliesToRange')}</div>
     </div>
-    <button class="btn btn-primary" onclick="applyRangeAssign()">Apply to range</button>
-    <button class="btn btn-ghost" style="margin-top:10px" onclick="openShiftTypesManager()">Cancel</button>
+    <button class="btn btn-primary" onclick="applyRangeAssign()">${t('applyToRange')}</button>
+    <button class="btn btn-ghost" style="margin-top:10px" onclick="openShiftTypesManager()">${t('cancel')}</button>
   `;
   showSheet(html);
 }
 function applyRangeAssign(){
   const { typeId, from, to, replace } = _rangeCtx;
-  if(!from || !to || from > to){ showToast('Check your date range'); return; }
+  if(!from || !to || from > to){ showToast(t('checkDateRange')); return; }
   let d = fromDateStr(from);
   const end = fromDateStr(to);
   let count = 0;
@@ -1174,7 +1427,7 @@ function applyRangeAssign(){
   DB.saveShifts(state.shifts);
   closeModal();
   renderApp();
-  showToast(`Applied to ${count} day${count===1?'':'s'}`);
+  showToast(`${t('appliedTo')} ${count} ${count===1?t('day'):t('days')}`);
 }
 
 /* ================= ICS EXPORT ================= */
@@ -1182,19 +1435,19 @@ function exportICS(){
   let lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Rota//Shift Calendar//EN'];
   Object.keys(state.shifts).sort().forEach(dstr=>{
     entriesFor(dstr).forEach(e=>{
-      const t = typeById(e.typeId);
-      if(!t) return;
+      const tType = typeById(e.typeId);
+      if(!tType) return;
       const dNoDash = dstr.replace(/-/g,'');
       lines.push('BEGIN:VEVENT');
       lines.push('UID:'+e.id+'@rota');
-      lines.push('SUMMARY:'+escapeICS(t.name));
-      if(t.isWork && t.start && t.end){
-        const startMin = timeToMin(t.start);
-        let endMin = timeToMin(t.end);
+      lines.push('SUMMARY:'+escapeICS(tType.name));
+      if(tType.isWork && tType.start && tType.end){
+        const startMin = timeToMin(tType.start);
+        let endMin = timeToMin(tType.end);
         let endDate = fromDateStr(dstr);
         if(endMin <= startMin){ endDate = addDays(endDate,1); }
-        lines.push('DTSTART:'+dNoDash+'T'+t.start.replace(':','')+'00');
-        lines.push('DTEND:'+toDateStr(endDate).replace(/-/g,'')+'T'+t.end.replace(':','')+'00');
+        lines.push('DTSTART:'+dNoDash+'T'+tType.start.replace(':','')+'00');
+        lines.push('DTEND:'+toDateStr(endDate).replace(/-/g,'')+'T'+tType.end.replace(':','')+'00');
       } else {
         lines.push('DTSTART;VALUE=DATE:'+dNoDash);
         lines.push('DTEND;VALUE=DATE:'+toDateStr(addDays(fromDateStr(dstr),1)).replace(/-/g,''));
@@ -1209,34 +1462,34 @@ function exportICS(){
   a.href = URL.createObjectURL(blob);
   a.download = 'rota-shifts.ics';
   a.click();
-  showToast('Calendar file downloaded');
+  showToast(t('calendarDownloaded'));
 }
 function escapeICS(s){ return String(s).replace(/[\\;,]/g, m=>'\\'+m).replace(/\n/g,'\\n'); }
 
 /* ================= SWAP CARD (canvas share image) ================= */
 function openSwapCard(dateStr, entryId){
   const entry = entriesFor(dateStr).find(e=>e.id===entryId);
-  const t = entry ? typeById(entry.typeId) : null;
-  if(!entry || !t) return;
+  const tType = entry ? typeById(entry.typeId) : null;
+  if(!entry || !tType) return;
   const canvas = document.createElement('canvas');
-  drawSwapCard(canvas, dateStr, entry, t);
+  drawSwapCard(canvas, dateStr, entry, tType);
   const imgUrl = canvas.toDataURL('image/png');
   const html = `
     <div class="sheet-handle"></div>
-    <h2>Shift swap card</h2>
+    <h2>${t('swapCardTitle')}</h2>
     <div class="swapcard-preview"><img src="${imgUrl}"></div>
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick='downloadSwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.download}Download</button>
-      <button class="btn btn-primary" onclick='copySwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.copy}Copy image</button>
+      <button class="btn btn-ghost" onclick='downloadSwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.download}${t('download')}</button>
+      <button class="btn btn-primary" onclick='copySwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.copy}${t('copyImage')}</button>
     </div>
   `;
   showSheet(html);
 }
-function drawSwapCard(canvas, dateStr, entry, t){
+function drawSwapCard(canvas, dateStr, entry, tType){
   const W=1080, H=1080;
   canvas.width=W; canvas.height=H;
   const ctx = canvas.getContext('2d');
-  const hex = t.color;
+  const hex = tType.color;
   const textHex = textColorFor(hex);
   const grad = ctx.createLinearGradient(0,0,W,H);
   grad.addColorStop(0, shadeColor(hex,14));
@@ -1247,7 +1500,7 @@ function drawSwapCard(canvas, dateStr, entry, t){
   ctx.fillStyle = textHex;
   ctx.globalAlpha = .85;
   ctx.font = '600 30px Inter, sans-serif';
-  ctx.fillText('SHIFT SWAP REQUEST', 64, 96);
+  ctx.fillText(t('shiftSwapRequest'), 64, 96);
   ctx.globalAlpha = 1;
 
   ctx.font = '700 74px "Space Grotesk", sans-serif';
@@ -1258,18 +1511,18 @@ function drawSwapCard(canvas, dateStr, entry, t){
 
   ctx.fillStyle = '#14161F';
   ctx.font = '700 46px "Space Grotesk", sans-serif';
-  ctx.fillText(t.name + ' shift', 104, 380);
+  ctx.fillText(tType.name + ' ' + t('shiftWord'), 104, 380);
 
   ctx.fillStyle = '#6B6D7A';
   ctx.font = '600 30px "JetBrains Mono", monospace';
-  if(t.isWork){
-    ctx.fillText(t.start + '  –  ' + t.end, 104, 430);
+  if(tType.isWork){
+    ctx.fillText(tType.start + '  –  ' + tType.end, 104, 430);
     ctx.fillStyle = '#14161F';
     ctx.font = '700 88px "JetBrains Mono", monospace';
-    ctx.fillText(shiftDurationHours(t).toFixed(1)+'h', 104, 560);
+    ctx.fillText(shiftDurationHours(tType).toFixed(1)+'h', 104, 560);
     ctx.fillStyle = '#6B6D7A';
     ctx.font = '600 26px Inter, sans-serif';
-    ctx.fillText('total hours' + (t.breakMins?`  ·  ${t.breakMins}m break`:''), 104, 605);
+    ctx.fillText(t('totalHours') + (tType.breakMins?`  ·  ${tType.breakMins}m ${t('breakWord')}`:''), 104, 605);
   }
   if(entry.notes){
     ctx.fillStyle = '#14161F';
@@ -1280,7 +1533,7 @@ function drawSwapCard(canvas, dateStr, entry, t){
   ctx.fillStyle = textHex;
   ctx.globalAlpha = .9;
   ctx.font = '600 26px Inter, sans-serif';
-  ctx.fillText('Generated with Rota', 64, H-70);
+  ctx.fillText(t('generatedWith'), 64, H-70);
 }
 function shadeColor(hex, percent){
   const num = parseInt(hex.replace('#',''),16);
@@ -1315,27 +1568,27 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight){
 }
 function downloadSwapCard(dateStr, entryId){
   const entry = entriesFor(dateStr).find(e=>e.id===entryId);
-  const t = entry ? typeById(entry.typeId) : null;
-  if(!entry || !t) return;
+  const tType = entry ? typeById(entry.typeId) : null;
+  if(!entry || !tType) return;
   const canvas = document.createElement('canvas');
-  drawSwapCard(canvas, dateStr, entry, t);
+  drawSwapCard(canvas, dateStr, entry, tType);
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
   a.download = `shift-swap-${dateStr}.png`;
   a.click();
-  showToast('Image downloaded');
+  showToast(t('imgDownloaded'));
 }
 async function copySwapCard(dateStr, entryId){
   const entry = entriesFor(dateStr).find(e=>e.id===entryId);
-  const t = entry ? typeById(entry.typeId) : null;
-  if(!entry || !t) return;
+  const tType = entry ? typeById(entry.typeId) : null;
+  if(!entry || !tType) return;
   const canvas = document.createElement('canvas');
-  drawSwapCard(canvas, dateStr, entry, t);
+  drawSwapCard(canvas, dateStr, entry, tType);
   try{
     canvas.toBlob(async (blob)=>{
       if(navigator.clipboard && window.ClipboardItem){
         await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
-        showToast('Copied to clipboard');
+        showToast(t('copiedClipboard'));
       } else {
         downloadSwapCard(dateStr, entryId);
       }
@@ -1349,29 +1602,41 @@ async function copySwapCard(dateStr, entryId){
 function openSettings(){
   const html = `
     <div class="sheet-handle"></div>
-    <h2>Settings</h2>
+    <h2>${t('settings')}</h2>
     <div class="field">
-      <label>Appearance</label>
+      <label>${t('language')}</label>
       <div class="modeToggle">
-        <button class="${state.settings.theme==='light'?'active':''}" onclick="setThemeExplicit('light')">Light</button>
-        <button class="${state.settings.theme==='dark'?'active':''}" onclick="setThemeExplicit('dark')">Dark</button>
+        <button class="${state.settings.lang==='es'?'active':''}" onclick="setLanguageExplicit('es')">Español 🇪🇸</button>
+        <button class="${state.settings.lang==='en'?'active':''}" onclick="setLanguageExplicit('en')">English 🇬🇧</button>
       </div>
     </div>
-    <div class="section-title" style="margin-top:6px">Export</div>
-    <button class="btn btn-ghost" style="margin-bottom:14px" onclick="exportICS()">${ICONS.download}Export to Apple / Google / Outlook (.ics)</button>
-    <div class="section-title">Data</div>
+    <div class="field">
+      <label>${t('appearance')}</label>
+      <div class="modeToggle">
+        <button class="${state.settings.theme==='light'?'active':''}" onclick="setThemeExplicit('light')">${t('light')}</button>
+        <button class="${state.settings.theme==='dark'?'active':''}" onclick="setThemeExplicit('dark')">${t('dark')}</button>
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:6px">${t('export')}</div>
+    <button class="btn btn-ghost" style="margin-bottom:14px" onclick="exportICS()">${ICONS.download}${t('exportIcs')}</button>
+    <div class="section-title">${t('data')}</div>
     <div class="card" style="margin-bottom:14px">
       <div style="font-size:13.5px; color:var(--text-muted); line-height:1.5; margin-bottom:12px">
-        Shifts and shift types are saved locally on this device. This build is Supabase-ready — connecting an account will enable multi-device sync.
+        ${t('localDataDesc')}
       </div>
-      <button class="btn btn-ghost" disabled style="opacity:.55">Connect Supabase account (coming soon)</button>
     </div>
-    <button class="btn btn-danger" onclick="clearAllData()">${ICONS.trash}Erase all shifts</button>
+    <button class="btn btn-danger" onclick="clearAllData()">${ICONS.trash}${t('eraseAllShifts')}</button>
   `;
   showSheet(html);
 }
-function setThemeExplicit(t){
-  state.settings.theme = t;
+function setLanguageExplicit(lang){
+  state.settings.lang = lang;
+  DB.saveSettings(state.settings);
+  openSettings();
+  renderApp();
+}
+function setThemeExplicit(theme){
+  state.settings.theme = theme;
   applyTheme();
   DB.saveSettings(state.settings);
   openSettings();
@@ -1381,7 +1646,7 @@ function clearAllData(){
   DB.saveShifts(state.shifts);
   closeModal();
   renderApp();
-  showToast('All shifts cleared');
+  showToast(t('allShiftsCleared'));
 }
 
 /* ================= Toast ================= */
@@ -1390,11 +1655,11 @@ function showToast(msg){
   clearTimeout(toastTimer);
   const existing = document.querySelector('.toast');
   if(existing) existing.remove();
-  const t = document.createElement('div');
-  t.className='toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  toastTimer = setTimeout(()=>t.remove(), 2200);
+  const tDiv = document.createElement('div');
+  tDiv.className='toast';
+  tDiv.textContent = msg;
+  document.body.appendChild(tDiv);
+  toastTimer = setTimeout(()=>tDiv.remove(), 2200);
 }
 
 init();
