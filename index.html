@@ -47,7 +47,7 @@ body{
 h1,h2,h3,.display{font-family:var(--font-display); letter-spacing:-0.01em;}
 .mono{font-family:var(--font-mono);}
 button{font-family:inherit; cursor:pointer;}
-input,select,textarea{font-family:inherit; background:var(--bg-sunken); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:15px; outline:none; width:100%;}
+input,select,textarea{font-family:inherit; background:var(--bg-sunken); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:calc(15px * var(--fs-mult, 1)); outline:none; width:100%;}
 input:focus,select:focus,textarea:focus{border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);}
 textarea{resize:vertical; min-height:64px;}
 #app{max-width:560px; margin:0 auto; min-height:100%; min-height:100svh; min-height:calc(var(--vh, 1vh) * 100); display:flex; flex-direction:column; position:relative;}
@@ -56,34 +56,34 @@ textarea{resize:vertical; min-height:64px;}
 .topbar{
   position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
-  padding:calc(8px + var(--safe-top)) 14px 8px; border-bottom:1px solid var(--border);
+  padding:calc(6px + var(--safe-top)) 12px 6px; border-bottom:1px solid var(--border);
   display:flex; align-items:center; justify-content:space-between; gap:8px;
 }
 .brand{display:flex; align-items:center; gap:8px; flex-shrink:0;}
-.brand-mark{width:24px; height:24px; border-radius:8px; background:linear-gradient(135deg, #9C90FF, var(--accent)); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:var(--shadow);}
-.brand h1{font-size:16px; margin:0; font-weight:700;}
-.icon-btn{width:32px; height:32px; border-radius:10px; border:1px solid var(--border); background:var(--bg-elevated); display:flex; align-items:center; justify-content:center; color:var(--text); transition:transform .15s ease, background .15s ease; flex-shrink:0; position:relative;}
+.brand-mark{width:22px; height:22px; border-radius:7px; background:linear-gradient(135deg, #9C90FF, var(--accent)); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:var(--shadow);}
+.brand h1{font-size:calc(15px * var(--fs-mult, 1)); margin:0; font-weight:700;}
+.icon-btn{width:30px; height:30px; border-radius:9px; border:1px solid var(--border); background:var(--bg-elevated); display:flex; align-items:center; justify-content:center; color:var(--text); transition:transform .15s ease, background .15s ease; flex-shrink:0; position:relative;}
 .icon-btn:active{transform:scale(0.92);}
-.icon-btn svg{width:16px; height:16px;}
+.icon-btn svg{width:15px; height:15px;}
 .icon-btn.accent{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 35%, var(--border));}
 .header-actions{display:flex; gap:5px; overflow-x:auto; scrollbar-width:none;}
 .header-actions::-webkit-scrollbar{display:none;}
 
 /* ---------- Nav / view swap ---------- */
 main{flex:1; padding:16px 16px calc(96px + var(--safe-bottom)); animation:fadein .28s ease;}
-main.fullbleed{display:flex; flex-direction:column; min-height:0; overflow:hidden; padding:6px 8px calc(60px + var(--safe-bottom));}
-main.fullbleed > .dateflip{flex:0 0 auto; margin-bottom:6px;}
+main.fullbleed{display:flex; flex-direction:column; min-height:0; overflow:hidden; padding:4px 6px calc(52px + var(--safe-bottom));}
+main.fullbleed > .dateflip{flex:0 0 auto; margin-bottom:5px;}
 main.fullbleed > .paint-bar{flex:0 0 auto;}
-main.fullbleed > .legend{flex:0 0 auto; margin-top:6px; max-height:64px; overflow-y:auto;}
+main.fullbleed > .legend{flex:0 0 auto; margin-top:5px; max-height:64px; overflow-y:auto;}
 @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
 
 .bottomnav{
   position:fixed; left:0; right:0; bottom:0; z-index:30; max-width:560px; margin:0 auto;
   background:color-mix(in srgb, var(--bg-elevated) 92%, transparent); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
-  border-top:1px solid var(--border); padding:4px 8px calc(4px + var(--safe-bottom));
+  border-top:1px solid var(--border); padding:3px 8px calc(3px + var(--safe-bottom));
   display:grid; grid-template-columns:repeat(5,1fr); gap:2px;
 }
-.navbtn{display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 2px; border:none; background:transparent; border-radius:10px; color:var(--text-muted); font-size:9.5px; font-weight:600; transition:color .15s ease, background .15s ease;}
+.navbtn{display:flex; flex-direction:column; align-items:center; gap:2px; padding:3px 2px; border:none; background:transparent; border-radius:10px; color:var(--text-muted); font-size:calc(9.5px * var(--fs-mult, 1)); font-weight:600; transition:color .15s ease, background .15s ease;}
 .navbtn svg{width:18px; height:18px; transition:transform .15s ease;}
 .navbtn.active{color:var(--accent);}
 .navbtn.active svg{transform:translateY(-1px);}
@@ -95,24 +95,24 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:6px; max-height:64px; overflo
 /* ---------- Cards / shared ---------- */
 .card{background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);}
 .card.flat{box-shadow:none;}
-.section-title{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); font-weight:700; margin:22px 2px 10px; display:flex; align-items:center; justify-content:space-between;}
+.section-title{font-size:calc(12px * var(--fs-mult, 1)); text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); font-weight:700; margin:22px 2px 10px; display:flex; align-items:center; justify-content:space-between;}
 .section-title:first-child{margin-top:0;}
 .row-between{display:flex; align-items:center; justify-content:space-between;}
-.pillbtn{border:1px solid var(--border); background:var(--bg-elevated); border-radius:999px; padding:7px 13px; font-size:13px; font-weight:600; color:var(--text); display:flex; align-items:center; gap:6px;}
+.pillbtn{border:1px solid var(--border); background:var(--bg-elevated); border-radius:999px; padding:7px 13px; font-size:calc(13px * var(--fs-mult, 1)); font-weight:600; color:var(--text); display:flex; align-items:center; gap:6px;}
 .pillbtn:active{transform:scale(.95);}
 .pillbtn svg{width:15px; height:15px;}
-.chip{border-radius:12px; padding:10px 12px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px; border:2px solid transparent;}
+.chip{border-radius:12px; padding:10px 12px; font-size:calc(13px * var(--fs-mult, 1)); font-weight:700; display:flex; align-items:center; gap:7px; border:2px solid transparent;}
 .chip svg{width:16px; height:16px;}
-.big-num{font-family:var(--font-mono); font-weight:700; font-size:26px;}
+.big-num{font-family:var(--font-mono); font-weight:700; font-size:calc(26px * var(--fs-mult, 1));}
 .text-muted{color:var(--text-muted);}
 .empty-state{text-align:center; padding:36px 16px; color:var(--text-muted);}
 .empty-state svg{width:42px; height:42px; margin-bottom:12px; opacity:.5;}
-.empty-state .title{font-weight:700; font-size:15px; color:var(--text); margin-bottom:4px;}
+.empty-state .title{font-weight:700; font-size:calc(15px * var(--fs-mult, 1)); color:var(--text); margin-bottom:4px;}
 
 /* ---------- Day view (agenda, compact) ---------- */
 .dateflip{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px;}
-.dateflip .today-label{font-size:13px; color:var(--text-muted); font-weight:600;}
-.dateflip .date-heading{font-size:22px; font-weight:700; margin:1px 0 0;}
+.dateflip .today-label{font-size:calc(13px * var(--fs-mult, 1)); color:var(--text-muted); font-weight:600;}
+.dateflip .date-heading{font-size:calc(22px * var(--fs-mult, 1)); font-weight:700; margin:1px 0 0;}
 .agenda-list{display:flex; flex-direction:column; gap:10px;}
 .agenda-item{display:flex; align-items:flex-start; gap:12px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:16px; padding:13px 14px; box-shadow:var(--shadow); position:relative; overflow:hidden; transition:box-shadow .15s ease, transform .15s ease;}
 .agenda-item::before{content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--stripe,var(--accent));}
@@ -120,14 +120,14 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:6px; max-height:64px; overflo
 .agenda-icon svg{width:19px; height:19px;}
 .agenda-body{flex:1; min-width:0;}
 .agenda-title-row{display:flex; align-items:center; justify-content:space-between; gap:8px;}
-.agenda-name{font-weight:700; font-size:14.5px;}
-.agenda-time{font-family:var(--font-mono); font-size:12px; color:var(--text-muted); margin-top:2px;}
-.agenda-notes{font-size:13px; color:var(--text-muted); margin-top:6px; line-height:1.4;}
+.agenda-name{font-weight:700; font-size:calc(14.5px * var(--fs-mult, 1));}
+.agenda-time{font-family:var(--font-mono); font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); margin-top:2px;}
+.agenda-notes{font-size:calc(13px * var(--fs-mult, 1)); color:var(--text-muted); margin-top:6px; line-height:1.4;}
 .agenda-actions{display:flex; gap:4px; flex-shrink:0;}
 .agenda-actions button{width:30px; height:30px; border-radius:9px; border:none; background:var(--bg-sunken); color:var(--text-muted); display:flex; align-items:center; justify-content:center;}
 .agenda-actions button svg{width:14px; height:14px;}
 .agenda-actions button:active{transform:scale(.9);}
-.add-shift-row{display:flex; align-items:center; justify-content:center; gap:8px; border:1.5px dashed var(--border); border-radius:14px; padding:13px; color:var(--text-muted); font-weight:600; font-size:13.5px; margin-top:2px; background:transparent; transition:border-color .15s ease, color .15s ease, background .15s ease;}
+.add-shift-row{display:flex; align-items:center; justify-content:center; gap:8px; border:1.5px dashed var(--border); border-radius:14px; padding:13px; color:var(--text-muted); font-weight:600; font-size:calc(13.5px * var(--fs-mult, 1)); margin-top:2px; background:transparent; transition:border-color .15s ease, color .15s ease, background .15s ease;}
 .add-shift-row svg{width:16px; height:16px;}
 .add-shift-row:active{transform:scale(.98);}
 .add-shift-row:hover{border-color:var(--accent); color:var(--accent);}
@@ -135,26 +135,26 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:6px; max-height:64px; overflo
 .quickadd-row .add-shift-row{flex:1; margin-top:0;}
 .agenda-item.note-item::before{background:var(--text-muted);}
 .agenda-item.note-item .agenda-icon{background:var(--bg-sunken); color:var(--text-muted);}
-.agenda-item.note-item .agenda-name{color:var(--text-muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em;}
-.agenda-item.note-item .agenda-notes{color:var(--text); font-size:14px; margin-top:3px;}
+.agenda-item.note-item .agenda-name{color:var(--text-muted); font-size:calc(11px * var(--fs-mult, 1)); text-transform:uppercase; letter-spacing:.06em;}
+.agenda-item.note-item .agenda-notes{color:var(--text); font-size:calc(14px * var(--fs-mult, 1)); margin-top:3px;}
 
 /* ---------- Hourly timeline (Day view) ---------- */
 .timeline-wrap{position:relative; border-radius:16px; background:var(--bg-elevated); border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden; margin-top:2px;}
 .timeline-hours{position:absolute; inset:0;}
 .hour-row{height:56px; border-top:1px solid var(--border); position:relative;}
 .hour-row:first-child{border-top:none;}
-.hour-label{position:absolute; left:10px; top:-7px; font-size:10px; font-weight:600; color:var(--text-muted); font-family:var(--font-mono); background:var(--bg-elevated); padding:0 4px; z-index:1;}
+.hour-label{position:absolute; left:10px; top:-7px; font-size:calc(10px * var(--fs-mult, 1)); font-weight:600; color:var(--text-muted); font-family:var(--font-mono); background:var(--bg-elevated); padding:0 4px; z-index:1;}
 .hour-row:first-child .hour-label{top:2px;}
 .timeline-events{position:absolute; top:0; left:56px; right:8px; bottom:0;}
 .timeline-event{position:absolute; left:0; right:0; border-radius:10px; padding:6px 10px; overflow:hidden; box-shadow:var(--shadow); cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; z-index:2;}
 .timeline-event:active{transform:scale(.97);}
-.te-name{font-weight:700; font-size:12.5px; line-height:1.25;}
-.te-time{font-family:var(--font-mono); font-size:10.5px; opacity:.85; margin-top:1px;}
-.te-notes{font-size:10.5px; opacity:.85; margin-top:3px; line-height:1.35;}
+.te-name{font-weight:700; font-size:calc(12.5px * var(--fs-mult, 1)); line-height:1.25;}
+.te-time{font-family:var(--font-mono); font-size:calc(10.5px * var(--fs-mult, 1)); opacity:.85; margin-top:1px;}
+.te-notes{font-size:calc(10.5px * var(--fs-mult, 1)); opacity:.85; margin-top:3px; line-height:1.35;}
 .timeline-event.note-event{background:var(--bg-sunken); color:var(--text); border:1.5px dashed var(--text-muted); box-shadow:none;}
-.timeline-event.note-event .te-name{display:flex; align-items:center; gap:6px; color:var(--text-muted); text-transform:uppercase; font-size:11.5px; letter-spacing:.04em;}
+.timeline-event.note-event .te-name{display:flex; align-items:center; gap:6px; color:var(--text-muted); text-transform:uppercase; font-size:calc(11.5px * var(--fs-mult, 1)); letter-spacing:.04em;}
 .timeline-event.note-event .te-name svg{width:13px; height:13px; flex-shrink:0;}
-.timeline-event.note-event .te-notes{color:var(--text); opacity:1; font-size:13px; font-weight:500; margin-top:4px;}
+.timeline-event.note-event .te-notes{color:var(--text); opacity:1; font-size:calc(13px * var(--fs-mult, 1)); font-weight:500; margin-top:4px;}
 .note-time-row{display:flex; align-items:center; gap:8px;}
 .note-time-row input[type="time"]{flex:1;}
 .note-time-row .clear-time-btn{flex-shrink:0; width:38px; height:38px; border-radius:12px; border:1px solid var(--border); background:var(--bg-elevated); color:var(--text-muted); display:flex; align-items:center; justify-content:center;}
@@ -166,14 +166,14 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:6px; max-height:64px; overflo
 
 /* ---------- Month grid ---------- */
 .month-grid-head{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px; margin-bottom:3px; flex:0 0 auto;}
-.month-grid-head div{text-align:center; font-size:10.5px; font-weight:700; color:var(--text-muted);}
+.month-grid-head div{text-align:center; font-size:calc(10.5px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted);}
 .month-grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px; flex:1 1 auto; min-height:0;}
-.day-cell{width:100%; height:100%; min-width:0; min-height:0; border-radius:14px; background:var(--bg-elevated); border:1.5px solid color-mix(in srgb, var(--accent) 28%, var(--border)); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 2px; gap:2px; position:relative; font-weight:700; font-size:13.5px; overflow:hidden;}
+.day-cell{width:100%; height:100%; min-width:0; min-height:0; border-radius:14px; background:var(--bg-elevated); border:1.5px solid color-mix(in srgb, var(--accent) 28%, var(--border)); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 2px; gap:2px; position:relative; font-weight:700; font-size:calc(13.5px * var(--fs-mult, 1)); overflow:hidden;}
 .day-cell{transition:transform .1s ease, box-shadow .15s ease;}
 .day-cell:active{transform:scale(.93);}
 .day-cell.outside{opacity:.25;}
 .day-cell.today{outline:2px solid var(--accent); outline-offset:-2px; background:color-mix(in srgb, var(--accent) 10%, var(--bg-elevated));}
-.day-cell .dnum{position:absolute; top:6px; left:7px; line-height:1; font-size:11.5px; font-weight:700; transition:font-size .1s ease; color:#000; z-index:1;}
+.day-cell .dnum{position:absolute; top:6px; left:7px; line-height:1; font-size:calc(11.5px * var(--fs-mult, 1)); font-weight:700; transition:font-size .1s ease; color:#000; z-index:1;}
 html.dark .day-cell .dnum{color:#fff;}
 .day-cell.painted .dnum{background:rgba(255,255,255,.55); color:#14161F; padding:1px 6px; border-radius:7px; box-shadow:0 1px 3px rgba(0,0,0,.15);}
 .day-dots{display:flex; gap:4px; margin-top:5px; flex-wrap:wrap; justify-content:center; max-width:100%;}
@@ -198,24 +198,24 @@ html.dark .day-cell .dnum{color:#fff;}
 .week-day-row:active{transform:scale(.98);}
 .week-day-row.today{outline:2px solid var(--accent); outline-offset:-2px; background:color-mix(in srgb, var(--accent) 8%, var(--bg-elevated));}
 .week-day-date{display:flex; flex-direction:column; align-items:center; justify-content:center; width:44px; flex-shrink:0; border-right:1px solid var(--border); padding-right:12px;}
-.week-day-date .wd-dow{font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em;}
-.week-day-date .wd-num{font-size:21px; font-weight:700; font-family:var(--font-display); margin-top:2px; line-height:1;}
+.week-day-date .wd-dow{font-size:calc(10px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em;}
+.week-day-date .wd-num{font-size:calc(21px * var(--fs-mult, 1)); font-weight:700; font-family:var(--font-display); margin-top:2px; line-height:1;}
 .week-day-row.today .wd-num, .week-day-row.today .wd-dow{color:var(--accent);}
 .week-day-body{flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; justify-content:center;}
 .week-chip-row{display:flex; flex-wrap:wrap; gap:6px;}
-.week-chip{display:inline-flex; align-items:center; gap:5px; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:700; max-width:100%; overflow:hidden;}
+.week-chip{display:inline-flex; align-items:center; gap:5px; border-radius:8px; padding:4px 8px; font-size:calc(11px * var(--fs-mult, 1)); font-weight:700; max-width:100%; overflow:hidden;}
 .week-chip svg{width:12px; height:12px; flex-shrink:0;}
 .week-chip span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .week-chip .wc-time{opacity:.85; font-family:var(--font-mono); font-weight:600;}
-.week-note-chip{display:inline-flex; align-items:center; gap:5px; border-radius:8px; padding:4px 9px; font-size:11.5px; font-weight:600; background:var(--note-bg); color:var(--note-text); border:1px solid var(--note-border);}
-.week-empty{font-size:12.5px; color:var(--text-muted);}
-.week-hours{font-size:11px; color:var(--text-muted); font-family:var(--font-mono); font-weight:600; flex-shrink:0; align-self:center; padding-left:4px;}
+.week-note-chip{display:inline-flex; align-items:center; gap:5px; border-radius:8px; padding:4px 9px; font-size:calc(11.5px * var(--fs-mult, 1)); font-weight:600; background:var(--note-bg); color:var(--note-text); border:1px solid var(--note-border);}
+.week-empty{font-size:calc(12.5px * var(--fs-mult, 1)); color:var(--text-muted);}
+.week-hours{font-size:calc(11px * var(--fs-mult, 1)); color:var(--text-muted); font-family:var(--font-mono); font-weight:600; flex-shrink:0; align-self:center; padding-left:4px;}
 
 /* ---------- Year view ---------- */
 .year-month{margin-bottom:20px;}
-.year-month h3{font-size:14px; margin:0 0 8px 2px; font-weight:700;}
+.year-month h3{font-size:calc(14px * var(--fs-mult, 1)); margin:0 0 8px 2px; font-weight:700;}
 .year-grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px;}
-.year-cell{aspect-ratio:1/1; width:100%; min-width:0; margin:0; border-radius:7px; background:var(--bg-sunken); display:flex; align-items:center; justify-content:center; padding:0; border:1px solid color-mix(in srgb, var(--accent) 22%, transparent); font-family:var(--font-mono); font-size:10px; font-weight:700; color:#000; line-height:1; -webkit-appearance:none; appearance:none; position:relative; overflow:hidden;}
+.year-cell{aspect-ratio:1/1; width:100%; min-width:0; margin:0; border-radius:7px; background:var(--bg-sunken); display:flex; align-items:center; justify-content:center; padding:0; border:1px solid color-mix(in srgb, var(--accent) 22%, transparent); font-family:var(--font-mono); font-size:calc(10px * var(--fs-mult, 1)); font-weight:700; color:#000; line-height:1; -webkit-appearance:none; appearance:none; position:relative; overflow:hidden;}
 html.dark .year-cell{color:#fff;}
 .year-cell.multi-shift{background:color-mix(in srgb, var(--text-muted) 12%, var(--bg-sunken));}
 .year-cell .mini-strip{position:absolute; left:2px; right:2px; bottom:2px; height:2.5px; border-radius:2px; overflow:hidden; display:flex; gap:1px;}
@@ -232,19 +232,19 @@ html.dark .year-cell{color:#fff;}
 .sheet-close{position:absolute; top:14px; right:14px; z-index:10; width:36px; height:36px; border-radius:50%; background:var(--bg-elevated); box-shadow:var(--shadow); border:1px solid var(--border); color:var(--text); display:flex; align-items:center; justify-content:center;}
 .sheet-close svg{width:16px; height:16px;}
 .sheet-close:active{transform:scale(.9);}
-.sheet h2{font-size:20px; margin:0 0 14px; display:flex; align-items:center; justify-content:space-between;}
+.sheet h2{font-size:calc(20px * var(--fs-mult, 1)); margin:0 0 14px; display:flex; align-items:center; justify-content:space-between;}
 .field{margin-bottom:14px;}
-.field label{display:block; font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;}
-.field-hint{font-size:12px; color:var(--text-muted); margin-top:6px; line-height:1.4;}
+.field label{display:block; font-size:calc(12px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;}
+.field-hint{font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); margin-top:6px; line-height:1.4;}
 .type-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
-.type-chip{border-radius:14px; padding:12px 6px; text-align:center; border:2px solid var(--border); background:var(--bg-elevated); font-weight:700; font-size:12.5px; display:flex; flex-direction:column; align-items:center; gap:5px; color:var(--text); transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;}
+.type-chip{border-radius:14px; padding:12px 6px; text-align:center; border:2px solid var(--border); background:var(--bg-elevated); font-weight:700; font-size:calc(12.5px * var(--fs-mult, 1)); display:flex; flex-direction:column; align-items:center; gap:5px; color:var(--text); transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;}
 .type-chip svg{width:18px; height:18px;}
 .type-chip.selected{border-color:currentColor; box-shadow:var(--shadow); background:color-mix(in srgb, currentColor 10%, var(--bg-elevated));}
 .type-chip:active{transform:scale(.96);}
 .two-col{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
 .checkbox-row{display:flex; align-items:center; gap:10px; background:var(--bg-sunken); border-radius:12px; padding:12px 14px;}
 .checkbox-row input{width:20px; height:20px; padding:0; flex-shrink:0; accent-color:var(--accent);}
-.checkbox-row label{margin:0; font-size:13.5px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--text);}
+.checkbox-row label{margin:0; font-size:calc(13.5px * var(--fs-mult, 1)); font-weight:600; text-transform:none; letter-spacing:0; color:var(--text);}
 .palette-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:10px;}
 .palette-swatch{aspect-ratio:1/1; width:100%; border-radius:50%; border:none; padding:0; position:relative; box-shadow:var(--shadow);}
 .palette-swatch.selected::after{content:''; position:absolute; inset:-4px; border:2px solid var(--text); border-radius:50%;}
@@ -257,7 +257,7 @@ html.dark .year-cell{color:#fff;}
 .icon-opt{aspect-ratio:1/1; border-radius:10px; border:1.5px solid var(--border); background:var(--bg-sunken); display:flex; align-items:center; justify-content:center; color:var(--text);}
 .icon-opt svg{width:17px; height:17px;}
 .icon-opt.selected{border-color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, var(--bg-sunken)); color:var(--accent);}
-.btn{width:100%; padding:14px; border-radius:14px; border:none; font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:center; gap:8px;}
+.btn{width:100%; padding:14px; border-radius:14px; border:none; font-weight:700; font-size:calc(15px * var(--fs-mult, 1)); display:flex; align-items:center; justify-content:center; gap:8px;}
 .btn svg{width:18px; height:18px; flex-shrink:0;}
 .btn-primary{background:var(--accent); color:var(--accent-text);}
 .btn-primary:active{transform:scale(.98);}
@@ -273,8 +273,8 @@ html.dark .year-cell{color:#fff;}
 .shifttype-swatch{width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
 .shifttype-swatch svg{width:19px; height:19px;}
 .shifttype-info{flex:1; min-width:0;}
-.shifttype-name{font-weight:700; font-size:14.5px;}
-.shifttype-meta{font-size:12px; color:var(--text-muted); font-family:var(--font-mono); margin-top:2px;}
+.shifttype-name{font-weight:700; font-size:calc(14.5px * var(--fs-mult, 1));}
+.shifttype-meta{font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); font-family:var(--font-mono); margin-top:2px;}
 .shifttype-actions{display:flex; gap:4px;}
 .shifttype-actions button{width:32px; height:32px; border-radius:9px; border:none; background:var(--bg-sunken); color:var(--text-muted); display:flex; align-items:center; justify-content:center;}
 .shifttype-actions button svg{width:15px; height:15px;}
@@ -282,23 +282,23 @@ html.dark .year-cell{color:#fff;}
 
 /* ---------- Metrics ---------- */
 .modeToggle{display:flex; background:var(--bg-sunken); border-radius:12px; padding:3px; margin-bottom:16px;}
-.modeToggle button{flex:1; border:none; background:transparent; padding:9px; border-radius:9px; font-weight:700; font-size:13px; color:var(--text-muted);}
+.modeToggle button{flex:1; border:none; background:transparent; padding:9px; border-radius:9px; font-weight:700; font-size:calc(13px * var(--fs-mult, 1)); color:var(--text-muted);}
 .modeToggle button.active{background:var(--bg-elevated); color:var(--text); box-shadow:var(--shadow);}
 .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px;}
 .stat-card{background:var(--bg-elevated); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow:var(--shadow); position:relative; overflow:hidden;}
 .stat-card::before{content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent); opacity:.55;}
-.stat-card .lab{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700; margin-bottom:6px;}
+.stat-card .lab{font-size:calc(11px * var(--fs-mult, 1)); text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700; margin-bottom:6px;}
 .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
-.bar-key{width:96px; font-size:12.5px; font-weight:700; color:var(--text-muted); flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.bar-key{width:96px; font-size:calc(12.5px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted); flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .bar-track{flex:1; height:10px; border-radius:6px; background:var(--bg-sunken); overflow:hidden;}
 .bar-fill{height:100%; border-radius:6px;}
-.bar-val{width:52px; text-align:right; font-family:var(--font-mono); font-size:12.5px; font-weight:600; flex-shrink:0;}
+.bar-val{width:52px; text-align:right; font-family:var(--font-mono); font-size:calc(12.5px * var(--fs-mult, 1)); font-weight:600; flex-shrink:0;}
 
 /* ---------- Swap card ---------- */
 .swapcard-preview{border-radius:20px; overflow:hidden; box-shadow:var(--shadow-lg); margin-bottom:16px;}
 .swapcard-preview img{width:100%; display:block;}
 
-.toast{position:fixed; left:50%; bottom:calc(100px + var(--safe-bottom)); transform:translateX(-50%); background:var(--text); color:var(--bg); padding:11px 18px; border-radius:99px; font-size:13.5px; font-weight:600; z-index:90; box-shadow:var(--shadow-lg); animation:toastin .2s ease; max-width:88%; text-align:center;}
+.toast{position:fixed; left:50%; bottom:calc(100px + var(--safe-bottom)); transform:translateX(-50%); background:var(--text); color:var(--bg); padding:11px 18px; border-radius:99px; font-size:calc(13.5px * var(--fs-mult, 1)); font-weight:600; z-index:90; box-shadow:var(--shadow-lg); animation:toastin .2s ease; max-width:88%; text-align:center;}
 @keyframes toastin{from{opacity:0; transform:translate(-50%,8px);} to{opacity:1; transform:translate(-50%,0);}}
 
 /* ---------- Add / composer view ---------- */
@@ -306,43 +306,46 @@ html.dark .year-cell{color:#fff;}
 .addview .composer-datebar .icon-btn{width:32px; height:32px; border-radius:10px;}
 .addview .composer-datebar .icon-btn svg{width:16px; height:16px;}
 .addview .dn-mid{flex:1; text-align:center; min-width:0;}
-.addview .dn-dow{font-size:10.5px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em;}
-.addview .dn-date{font-size:15px; font-weight:700; margin-top:1px;}
-.addview .today-jump{font-size:10.5px; font-weight:700; color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, transparent); border:none; border-radius:999px; padding:2px 8px; margin-top:2px;}
+.addview .dn-dow{font-size:calc(10.5px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em;}
+.addview .dn-date{font-size:calc(15px * var(--fs-mult, 1)); font-weight:700; margin-top:1px;}
+.addview .today-jump{font-size:calc(10.5px * var(--fs-mult, 1)); font-weight:700; color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, transparent); border:none; border-radius:999px; padding:2px 8px; margin-top:2px;}
 .addview .modeToggle{margin-bottom:16px;}
 .addview .modeToggle button{display:flex; align-items:center; justify-content:center; gap:6px;}
 .addview .modeToggle button svg{width:15px; height:15px;}
 .addview .field{margin-bottom:12px;}
 .addview .field label{margin-bottom:5px;}
 .addview .type-grid{grid-template-columns:repeat(3,1fr); gap:6px;}
-.addview .type-chip{padding:9px 4px; font-size:11.5px; gap:3px; border-radius:12px;}
+.addview .type-chip{padding:9px 4px; font-size:calc(11.5px * var(--fs-mult, 1)); gap:3px; border-radius:12px;}
 .addview .type-chip svg{width:15px; height:15px;}
-.addview textarea{min-height:52px; font-size:14px; padding:9px 11px;}
+.addview textarea{min-height:52px; font-size:calc(14px * var(--fs-mult, 1)); padding:9px 11px;}
 .addview .section-title{margin:18px 2px 8px;}
 .addview .btn{padding:12px;}
 
 .notelist{display:flex; flex-direction:column; gap:8px; margin-top:6px;}
 .note-mini{display:flex; align-items:flex-start; gap:10px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:14px; padding:11px 12px;}
-.note-mini p{flex:1; min-width:0; margin:0; font-size:13.5px; line-height:1.45; color:var(--text);}
+.note-mini p{flex:1; min-width:0; margin:0; font-size:calc(13.5px * var(--fs-mult, 1)); line-height:1.45; color:var(--text);}
 .note-mini .note-mini-actions{display:flex; gap:4px; flex-shrink:0;}
 .note-mini .note-mini-actions button{width:26px; height:26px; border-radius:8px; border:none; background:var(--bg-sunken); color:var(--text-muted); display:flex; align-items:center; justify-content:center;}
 .note-mini .note-mini-actions button svg{width:13px; height:13px;}
-.editing-banner{display:flex; align-items:center; justify-content:space-between; gap:8px; background:color-mix(in srgb, var(--accent) 12%, transparent); border:1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); color:var(--accent); border-radius:12px; padding:8px 12px; font-size:12px; font-weight:700; margin-bottom:12px;}
-.editing-banner button{background:none; border:none; color:var(--accent); font-weight:700; font-size:11.5px; text-decoration:underline;}
+.editing-banner{display:flex; align-items:center; justify-content:space-between; gap:8px; background:color-mix(in srgb, var(--accent) 12%, transparent); border:1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); color:var(--accent); border-radius:12px; padding:8px 12px; font-size:calc(12px * var(--fs-mult, 1)); font-weight:700; margin-bottom:12px;}
+.editing-banner button{background:none; border:none; color:var(--accent); font-weight:700; font-size:calc(11.5px * var(--fs-mult, 1)); text-decoration:underline;}
 
 .legend{display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:14px;}
-.legend-item{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-muted);}
+.legend-item{display:flex; align-items:center; gap:6px; font-size:calc(12px * var(--fs-mult, 1)); font-weight:600; color:var(--text-muted);}
 
 /* ---------- Paint bar (Month view) ---------- */
 .paint-bar{flex:0 0 auto; margin-top:8px;}
-.paint-bar-row{display:flex; justify-content:flex-end;}
-.paint-toggle{display:flex; align-items:center; gap:5px; padding:5px 10px; border:none; background:transparent; color:var(--text-muted); font-weight:600; font-size:11.5px; border-radius:99px; opacity:.7;}
+.paint-bar-row{display:flex; justify-content:flex-end; align-items:center;}
+.paint-bar-row.is-active{justify-content:space-between;}
+.paint-toggle{display:flex; align-items:center; gap:5px; padding:5px 10px; border:none; background:transparent; color:var(--text-muted); font-weight:600; font-size:calc(11.5px * var(--fs-mult, 1)); border-radius:99px; opacity:.7;}
 .paint-toggle svg{width:13px; height:13px;}
+.paint-status{display:flex; align-items:center; gap:5px; padding:5px 10px; color:var(--accent); font-weight:600; font-size:calc(11.5px * var(--fs-mult, 1)); border-radius:99px; background:color-mix(in srgb, var(--accent) 10%, transparent);}
+.paint-status svg{width:13px; height:13px;}
 .paint-bar.active .paint-toggle{color:var(--accent); opacity:1; background:color-mix(in srgb, var(--accent) 10%, transparent);}
 .paint-strip{display:flex; flex-direction:column; gap:6px; padding:8px 2px 2px; margin-top:2px; border-top:1px solid var(--border);}
-.paint-hint{font-size:11px; color:var(--text-muted); text-align:center; padding:0 6px;}
+.paint-hint{font-size:calc(11px * var(--fs-mult, 1)); color:var(--text-muted); text-align:center; padding:0 6px;}
 .paint-chip-row{display:flex; flex-wrap:wrap; gap:5px; padding:2px; justify-content:center;}
-.paint-chip{flex:0 0 auto; display:flex; align-items:center; gap:4px; border-radius:9px; padding:5px 8px; font-size:10.5px; font-weight:600; border:1.5px solid transparent; background:var(--bg-sunken); color:var(--text); white-space:nowrap;}
+.paint-chip{flex:0 0 auto; display:flex; align-items:center; gap:4px; border-radius:9px; padding:5px 8px; font-size:calc(10.5px * var(--fs-mult, 1)); font-weight:600; border:1.5px solid transparent; background:var(--bg-sunken); color:var(--text); white-space:nowrap;}
 .paint-chip svg{width:12px; height:12px;}
 .paint-chip.selected{border-color:currentColor; box-shadow:var(--shadow);}
 .paint-chip:active{transform:scale(.95);}
@@ -779,7 +782,7 @@ function showLanguagePicker(){
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14161F" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
         </div>
         <h2 style="justify-content:center; margin-bottom:6px">Choose your language / Elige tu idioma</h2>
-        <div class="text-muted" style="font-size:13px; margin-bottom:20px">You can change this later in Settings. / Puedes cambiarlo más tarde en Ajustes.</div>
+        <div class="text-muted" style="font-size:calc(13px * var(--fs-mult, 1)); margin-bottom:20px">You can change this later in Settings. / Puedes cambiarlo más tarde en Ajustes.</div>
         <div class="btn-row" style="flex-direction:column; gap:10px">
           <button class="btn btn-primary" onclick="chooseLanguage('es')">Español</button>
           <button class="btn btn-primary" onclick="chooseLanguage('en')">English</button>
@@ -822,8 +825,7 @@ function applyTheme(){
 }
 function applyFontSize(){
   const fs = FONT_SIZES[state.settings.fontSize] || FONT_SIZES.md;
-  const app = document.getElementById('app');
-  if(app) app.style.zoom = fs.zoom + '%';
+  document.documentElement.style.setProperty('--fs-mult', fs.zoom/100);
 }
 function toggleTheme(){
   state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark';
@@ -893,7 +895,7 @@ function renderDayView(){
       body += `<div class="section-title">${tr('timeline')}</div>`;
       body += renderTimeline(timedEntries, dateStr, timedNotes);
     } else if(allDayEntries.length || allDayNotes.length){
-      body += `<div class="text-muted" style="font-size:13px; margin-top:14px">${tr('no_timed_shifts')}</div>`;
+      body += `<div class="text-muted" style="font-size:calc(13px * var(--fs-mult, 1)); margin-top:14px">${tr('no_timed_shifts')}</div>`;
     }
   }
   body += `<div class="quickadd-row">
@@ -902,8 +904,8 @@ function renderDayView(){
   </div>`;
   if(state.shiftTypes.length === 0){
     body += `<div class="card" style="margin-top:16px">
-      <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">${tr('create_first_type_title')}</div>
-      <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">${tr('create_first_type_sub')}</div>
+      <div style="font-weight:700;font-size:calc(14.5px * var(--fs-mult, 1));margin-bottom:6px">${tr('create_first_type_title')}</div>
+      <div class="text-muted" style="font-size:calc(13px * var(--fs-mult, 1));line-height:1.5;margin-bottom:12px">${tr('create_first_type_sub')}</div>
       <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} ${tr('manage_types')}</button>
     </div>`;
   }
@@ -1073,7 +1075,7 @@ function renderWeekView(){
         ${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}<span>${escapeHtml(t.name)}</span>${t.isWork && t.start && t.end ? `<span class="wc-time">${t.start}–${t.end}</span>` : ''}
       </span>`;
     }).join('');
-    const noteChips = dayNotes.map(n=>`<span class="week-note-chip">${ICONS.note}${n.time?`<span class="mono" style="font-size:10.5px; opacity:.85">${escapeHtml(n.time)}</span>`:''}<span>${escapeHtml(n.text)}</span></span>`).join('');
+    const noteChips = dayNotes.map(n=>`<span class="week-note-chip">${ICONS.note}${n.time?`<span class="mono" style="font-size:calc(10.5px * var(--fs-mult, 1)); opacity:.85">${escapeHtml(n.time)}</span>`:''}<span>${escapeHtml(n.text)}</span></span>`).join('');
 
     let body;
     if(!entries.length && !dayNotes.length){
@@ -1097,7 +1099,7 @@ function renderWeekView(){
       <button class="icon-btn" onclick="shiftWeek(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
         <div class="today-label">${tr('week_label')}</div>
-        <h2 class="date-heading" style="font-size:19px">${rangeLabel}</h2>
+        <h2 class="date-heading" style="font-size:calc(19px * var(--fs-mult, 1))">${rangeLabel}</h2>
       </div>
       <button class="icon-btn" onclick="shiftWeek(1)">${ICONS.chevR}</button>
     </div>
@@ -1161,8 +1163,8 @@ function renderMonthView(){
     const badgeFontSize = dayNotes.length <= 1 ? 9.5 : dayNotes.length === 2 ? 8.5 : dayNotes.length === 3 ? 7.8 : dayNotes.length === 4 ? 7.2 : 6.6;
     const noteBadges = hasNote ? `<div class="day-notes-wrap">${shown.map(n=>{
       const text = (n.text||'').trim();
-      return `<div class="day-note-badge" style="font-size:${badgeFontSize}px" title="${escapeHtml(text)}">${escapeHtml(text)}</div>`;
-    }).join('')}${overflowCount>0 ? `<div class="day-note-badge" style="font-size:${badgeFontSize}px">+${overflowCount}</div>` : ''}</div>` : '';
+      return `<div class="day-note-badge" style="font-size:calc(${badgeFontSize}px * var(--fs-mult, 1))" title="${escapeHtml(text)}">${escapeHtml(text)}</div>`;
+    }).join('')}${overflowCount>0 ? `<div class="day-note-badge" style="font-size:calc(${badgeFontSize}px * var(--fs-mult, 1))">+${overflowCount}</div>` : ''}</div>` : '';
     const clickHandler = (paintActive && state.paintMode.typeIds.length) ? `paintDay('${dstr}')` : `openDayQuick('${dstr}')`;
     return `<button class="day-cell ${c.outside?'outside':''} ${dstr===todaystr?'today':''} ${painted?'painted':''} ${multiShift?'multi-shift':''} ${hasNote?'has-note':''} ${noteOnLight?'note-on-light':''}" style="${bgStyle}" onclick="${clickHandler}">
       <span class="dnum">${c.date.getDate()}</span>
@@ -1175,7 +1177,7 @@ function renderMonthView(){
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftMonth(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
-        <h2 class="date-heading" style="font-size:17px">${MONTHS[m]} ${y}</h2>
+        <h2 class="date-heading" style="font-size:calc(17px * var(--fs-mult, 1))">${MONTHS[m]} ${y}</h2>
       </div>
       <button class="icon-btn" onclick="shiftMonth(1)">${ICONS.chevR}</button>
     </div>
@@ -1194,10 +1196,13 @@ function renderPaintBar(){
     </button>`).join('');
   return `
     <div class="paint-bar ${active?'active':''}">
-      <div class="paint-bar-row">
-        <button class="paint-toggle" onclick="togglePaintMode()">
-          ${ICONS.edit}${tr('paint_bar')}${active?` · ${tr('paint_done')}`:''}
-        </button>
+      <div class="paint-bar-row ${active?'is-active':''}">
+        ${active ? `
+          <span class="paint-status">${ICONS.edit}${tr('paint_bar')}</span>
+          <button class="paint-toggle" onclick="togglePaintMode()">${tr('paint_done')}</button>
+        ` : `
+          <button class="paint-toggle" onclick="togglePaintMode()">${ICONS.edit}${tr('paint_bar')}</button>
+        `}
       </div>
       ${active ? `
         <div class="paint-strip">
@@ -1250,12 +1255,12 @@ function renderDayQuickSheet(){
     if(!t) return '';
     return `<div class="week-chip" style="background:${t.color};color:${textColorFor(t.color)}">
       ${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}<span>${escapeHtml(t.name)}</span>
-      <button onclick="quickDeleteShift('${dstr}','${e.id}')" style="background:rgba(0,0,0,.18);border:none;border-radius:50%;width:15px;height:15px;display:flex;align-items:center;justify-content:center;color:inherit;margin-left:2px;padding:0;font-size:9px;line-height:1">✕</button>
+      <button onclick="quickDeleteShift('${dstr}','${e.id}')" style="background:rgba(0,0,0,.18);border:none;border-radius:50%;width:15px;height:15px;display:flex;align-items:center;justify-content:center;color:inherit;margin-left:2px;padding:0;font-size:calc(9px * var(--fs-mult, 1));line-height:1">✕</button>
     </div>`;
   }).join('');
   const noteItems = dayNotes.map(n=>`
     <div class="note-mini">
-      <p>${n.time?`<span class="mono" style="color:var(--text-muted); font-size:11.5px; margin-right:6px">${escapeHtml(n.time)}</span>`:''}${escapeHtml(n.text)}</p>
+      <p>${n.time?`<span class="mono" style="color:var(--text-muted); font-size:calc(11.5px * var(--fs-mult, 1)); margin-right:6px">${escapeHtml(n.time)}</span>`:''}${escapeHtml(n.text)}</p>
       <div class="note-mini-actions">
         <button onclick="quickDeleteNote('${dstr}','${n.id}')" aria-label="Delete">${ICONS.trash}</button>
       </div>
@@ -1267,7 +1272,7 @@ function renderDayQuickSheet(){
   const html = `
     <div class="sheet-handle"></div>
     <h2>${fmtHuman(dstr)}</h2>
-    ${shiftChips ? `<div class="week-chip-row" style="margin-bottom:14px">${shiftChips}</div>` : `<div class="text-muted" style="font-size:13px;margin-bottom:14px">${tr('no_shifts')}</div>`}
+    ${shiftChips ? `<div class="week-chip-row" style="margin-bottom:14px">${shiftChips}</div>` : `<div class="text-muted" style="font-size:calc(13px * var(--fs-mult, 1));margin-bottom:14px">${tr('no_shifts')}</div>`}
     ${state.shiftTypes.length ? `<div class="field"><label>${tr('add_shift')}</label><div class="type-grid">${typeChips}</div></div>` : ''}
     <div class="field">
       <label>${tr('add_note')}</label>
@@ -1460,14 +1465,14 @@ function renderMetrics(){
       <button class="${period==='month'?'active':''}" onclick="setMetricsPeriod('month')">${tr('this_month')}</button>
     </div>
     <div class="stat-grid">
-      <div class="stat-card"><div class="lab">${tr('hours_worked')}</div><div class="big-num">${totalHours.toFixed(1)}<span style="font-size:14px;color:var(--text-muted)"> h</span></div></div>
+      <div class="stat-card"><div class="lab">${tr('hours_worked')}</div><div class="big-num">${totalHours.toFixed(1)}<span style="font-size:calc(14px * var(--fs-mult, 1));color:var(--text-muted)"> h</span></div></div>
       <div class="stat-card"><div class="lab">${tr('days_worked')}</div><div class="big-num">${daysWorked}</div></div>
       <div class="stat-card"><div class="lab">${tr('off_days')}</div><div class="big-num">${offDays}</div></div>
       <div class="stat-card"><div class="lab">${tr('vacation_days')}</div><div class="big-num">${vacationDays}</div></div>
     </div>
     <div class="section-title">${tr('hours_by_type')}</div>
     <div class="card">
-      ${breakdownRows || `<div class="text-muted" style="font-size:13.5px">${tr('no_hours_logged')}</div>`}
+      ${breakdownRows || `<div class="text-muted" style="font-size:calc(13.5px * var(--fs-mult, 1))">${tr('no_hours_logged')}</div>`}
     </div>
   `;
 }
@@ -1575,8 +1580,8 @@ function renderAddView(){
   if(mode === 'shift'){
     if(state.shiftTypes.length === 0){
       return `<div class="addview">` + datebar + `<div class="card" style="margin-top:2px">
-        <div style="font-weight:700;font-size:14.5px;margin-bottom:6px">${tr('create_first_type_title')}</div>
-        <div class="text-muted" style="font-size:13px;line-height:1.5;margin-bottom:12px">${tr('create_first_type_sub')}</div>
+        <div style="font-weight:700;font-size:calc(14.5px * var(--fs-mult, 1));margin-bottom:6px">${tr('create_first_type_title')}</div>
+        <div class="text-muted" style="font-size:calc(13px * var(--fs-mult, 1));line-height:1.5;margin-bottom:12px">${tr('create_first_type_sub')}</div>
         <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} ${tr('manage_types')}</button>
       </div></div>`;
     }
@@ -1619,7 +1624,7 @@ function renderAddView(){
     <button class="btn btn-primary" onclick="saveAddNote()">${editing?ICONS.edit:ICONS.plus}${editing?tr('save_changes'):tr('add_note')}</button>
     ${list.length?`<div class="section-title">${tr('other_notes_day')}</div><div class="notelist">${list.map(n=>`
       <div class="note-mini">
-        <p>${n.time?`<span class="mono" style="color:var(--text-muted); font-size:11.5px; margin-right:6px">${escapeHtml(n.time)}</span>`:''}${escapeHtml(n.text)}</p>
+        <p>${n.time?`<span class="mono" style="color:var(--text-muted); font-size:calc(11.5px * var(--fs-mult, 1)); margin-right:6px">${escapeHtml(n.time)}</span>`:''}${escapeHtml(n.text)}</p>
         <div class="note-mini-actions">
           <button onclick="editNoteInline('${dateStr}','${n.id}')" aria-label="Edit">${ICONS.edit}</button>
           <button onclick="deleteNoteEntry('${dateStr}','${n.id}')" aria-label="Delete">${ICONS.trash}</button>
@@ -2037,7 +2042,7 @@ function openSettings(){
     <button class="btn btn-ghost" style="margin-bottom:14px" onclick="exportICS()">${ICONS.download}${tr('export_ics')}</button>
     <div class="section-title">${tr('data_section')}</div>
     <div class="card" style="margin-bottom:14px">
-      <div style="font-size:13.5px; color:var(--text-muted); line-height:1.5; margin-bottom:12px">
+      <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
         ${tr('data_hint')}
       </div>
       <button class="btn btn-ghost" disabled style="opacity:.55">${tr('connect_supabase')}</button>
