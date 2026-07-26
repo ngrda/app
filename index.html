@@ -56,35 +56,35 @@ textarea{resize:vertical; min-height:64px;}
 .topbar{
   position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
-  padding:calc(12px + var(--safe-top)) 16px 12px; border-bottom:1px solid var(--border);
+  padding:calc(8px + var(--safe-top)) 14px 8px; border-bottom:1px solid var(--border);
   display:flex; align-items:center; justify-content:space-between; gap:8px;
 }
-.brand{display:flex; align-items:center; gap:9px; flex-shrink:0;}
-.brand-mark{width:30px; height:30px; border-radius:9px; background:linear-gradient(135deg, #9C90FF, var(--accent)); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:var(--shadow);}
-.brand h1{font-size:19px; margin:0; font-weight:700;}
-.icon-btn{width:38px; height:38px; border-radius:12px; border:1px solid var(--border); background:var(--bg-elevated); display:flex; align-items:center; justify-content:center; color:var(--text); transition:transform .15s ease, background .15s ease; flex-shrink:0; position:relative;}
+.brand{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+.brand-mark{width:24px; height:24px; border-radius:8px; background:linear-gradient(135deg, #9C90FF, var(--accent)); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:var(--shadow);}
+.brand h1{font-size:16px; margin:0; font-weight:700;}
+.icon-btn{width:32px; height:32px; border-radius:10px; border:1px solid var(--border); background:var(--bg-elevated); display:flex; align-items:center; justify-content:center; color:var(--text); transition:transform .15s ease, background .15s ease; flex-shrink:0; position:relative;}
 .icon-btn:active{transform:scale(0.92);}
-.icon-btn svg{width:18px; height:18px;}
+.icon-btn svg{width:16px; height:16px;}
 .icon-btn.accent{color:var(--accent); border-color:color-mix(in srgb, var(--accent) 35%, var(--border));}
-.header-actions{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none;}
+.header-actions{display:flex; gap:5px; overflow-x:auto; scrollbar-width:none;}
 .header-actions::-webkit-scrollbar{display:none;}
 
 /* ---------- Nav / view swap ---------- */
 main{flex:1; padding:16px 16px calc(96px + var(--safe-bottom)); animation:fadein .28s ease;}
-main.fullbleed{display:flex; flex-direction:column; min-height:0; overflow:hidden; padding:10px 10px calc(76px + var(--safe-bottom));}
-main.fullbleed > .dateflip{flex:0 0 auto; margin-bottom:8px;}
+main.fullbleed{display:flex; flex-direction:column; min-height:0; overflow:hidden; padding:6px 8px calc(60px + var(--safe-bottom));}
+main.fullbleed > .dateflip{flex:0 0 auto; margin-bottom:6px;}
 main.fullbleed > .paint-bar{flex:0 0 auto;}
-main.fullbleed > .legend{flex:0 0 auto; margin-top:8px; max-height:64px; overflow-y:auto;}
+main.fullbleed > .legend{flex:0 0 auto; margin-top:6px; max-height:64px; overflow-y:auto;}
 @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
 
 .bottomnav{
   position:fixed; left:0; right:0; bottom:0; z-index:30; max-width:560px; margin:0 auto;
   background:color-mix(in srgb, var(--bg-elevated) 92%, transparent); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
-  border-top:1px solid var(--border); padding:8px 8px calc(8px + var(--safe-bottom));
+  border-top:1px solid var(--border); padding:4px 8px calc(4px + var(--safe-bottom));
   display:grid; grid-template-columns:repeat(5,1fr); gap:2px;
 }
-.navbtn{display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 2px; border:none; background:transparent; border-radius:12px; color:var(--text-muted); font-size:10.5px; font-weight:600; transition:color .15s ease, background .15s ease;}
-.navbtn svg{width:21px; height:21px; transition:transform .15s ease;}
+.navbtn{display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 2px; border:none; background:transparent; border-radius:10px; color:var(--text-muted); font-size:9.5px; font-weight:600; transition:color .15s ease, background .15s ease;}
+.navbtn svg{width:18px; height:18px; transition:transform .15s ease;}
 .navbtn.active{color:var(--accent);}
 .navbtn.active svg{transform:translateY(-1px);}
 .navbtn.active .navdot{opacity:1; transform:scale(1);}
@@ -165,9 +165,9 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:8px; max-height:64px; overflo
 .now-line span{position:absolute; left:-4px; top:-4.5px; width:9px; height:9px; border-radius:50%; background:var(--danger); box-shadow:0 0 0 3px color-mix(in srgb, var(--danger) 25%, transparent);}
 
 /* ---------- Month grid ---------- */
-.month-grid-head{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:3px; margin-bottom:4px; flex:0 0 auto;}
-.month-grid-head div{text-align:center; font-size:11.5px; font-weight:700; color:var(--text-muted);}
-.month-grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:3px; flex:1 1 auto; min-height:0;}
+.month-grid-head{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px; margin-bottom:3px; flex:0 0 auto;}
+.month-grid-head div{text-align:center; font-size:10.5px; font-weight:700; color:var(--text-muted);}
+.month-grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px; flex:1 1 auto; min-height:0;}
 .day-cell{width:100%; height:100%; min-width:0; min-height:0; border-radius:14px; background:var(--bg-elevated); border:1.5px solid color-mix(in srgb, var(--accent) 28%, var(--border)); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 2px; gap:2px; position:relative; font-weight:700; font-size:13.5px; overflow:hidden;}
 .day-cell{transition:transform .1s ease, box-shadow .15s ease;}
 .day-cell:active{transform:scale(.93);}
@@ -1175,7 +1175,7 @@ function renderMonthView(){
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftMonth(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
-        <h2 class="date-heading" style="font-size:20px">${MONTHS[m]} ${y}</h2>
+        <h2 class="date-heading" style="font-size:17px">${MONTHS[m]} ${y}</h2>
       </div>
       <button class="icon-btn" onclick="shiftMonth(1)">${ICONS.chevR}</button>
     </div>
