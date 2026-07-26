@@ -173,10 +173,10 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:5px; max-height:64px; overflo
 .day-cell:active{transform:scale(.93);}
 .day-cell.outside{opacity:.25;}
 .day-cell.today{outline:2px solid var(--accent); outline-offset:-2px; background:color-mix(in srgb, var(--accent) 10%, var(--bg-elevated));}
-.day-cell .dnum{position:absolute; top:4px; left:6px; line-height:1; font-size:calc(11.5px * var(--fs-mult, 1)); font-weight:700; transition:font-size .1s ease; color:#000; z-index:1; display:flex; align-items:baseline; gap:3px;}
+.day-cell .dnum{position:absolute; top:4px; left:6px; line-height:1; font-size:calc(11.5px * var(--fs-mult, 1)); font-weight:700; transition:font-size .1s ease; color:#000; z-index:1;}
 html.dark .day-cell .dnum{color:#fff;}
 .day-cell.painted .dnum{background:rgba(255,255,255,.55); color:#14161F; padding:1px 6px; border-radius:7px; box-shadow:0 1px 3px rgba(0,0,0,.15);}
-.day-cell .dnum .dabbr{font-size:calc(8.5px * var(--fs-mult, 1)); font-weight:800; letter-spacing:.2px; opacity:.85;}
+.day-cell .dtype{position:absolute; bottom:3px; left:50%; transform:translateX(-50%); line-height:1; font-size:calc(8.5px * var(--fs-mult, 1)); font-weight:800; letter-spacing:.3px; z-index:1; background:rgba(255,255,255,.55); color:#14161F; padding:1px 6px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.15); max-width:calc(100% - 6px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .day-dots{display:flex; gap:4px; margin-top:5px; flex-wrap:wrap; justify-content:center; max-width:100%;}
 .day-dots span{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
 .day-dots span.note-dot{border-radius:2px; background:var(--text-muted);}
@@ -674,63 +674,44 @@ const DB = {
     try{ localStorage.setItem('rota:'+key, JSON.stringify(value)); }
     catch(e){ console.error('localStorage save failed', e); }
   },
-  async loadShiftTypes(){
-    if(this.hasArtifactStorage()){
-      try{ const r = await window.storage.get('shiftTypes', false); return r ? JSON.parse(r.value) : []; }
-      catch(e){ /* fall through to localStorage */ }
+  // This device's own storage is always the source of truth for its data. It must keep
+  // working even if the artifact/share link is regenerated or reset — the only way this
+  // data goes away is the person clearing it from inside the app (Settings > Erase).
+  async _load(key, emptyValue){
+    const local = this.lsGet(key);
+    if(local !== null){
+      if(this.hasArtifactStorage()){
+        try{ window.storage.set(key, JSON.stringify(local), false).catch(()=>{}); } catch(e){ /* best-effort sync only */ }
+      }
+      return local;
     }
-    return this.lsGet('shiftTypes') || [];
-  },
-  async saveShiftTypes(arr){
     if(this.hasArtifactStorage()){
-      try{ await window.storage.set('shiftTypes', JSON.stringify(arr), false); return; }
-      catch(e){ console.error('save shiftTypes failed', e); }
+      try{
+        const r = await window.storage.get(key, false);
+        const remote = r ? JSON.parse(r.value) : null;
+        if(remote !== null){ this.lsSet(key, remote); return remote; }
+      }catch(e){ /* nothing remote yet — fall through to default */ }
     }
-    this.lsSet('shiftTypes', arr);
+    return emptyValue;
   },
-  async loadShifts(){
+  async _save(key, value){
+    this.lsSet(key, value);
     if(this.hasArtifactStorage()){
-      try{ const r = await window.storage.get('shifts', false); return r ? JSON.parse(r.value) : {}; }
-      catch(e){ /* fall through to localStorage */ }
+      try{ await window.storage.set(key, JSON.stringify(value), false); }
+      catch(e){ console.error('save '+key+' failed (artifact storage)', e); }
     }
-    return this.lsGet('shifts') || {};
   },
-  async saveShifts(obj){
-    if(this.hasArtifactStorage()){
-      try{ await window.storage.set('shifts', JSON.stringify(obj), false); return; }
-      catch(e){ console.error('save shifts failed', e); }
-    }
-    this.lsSet('shifts', obj);
-  },
-  async loadNotes(){
-    if(this.hasArtifactStorage()){
-      try{ const r = await window.storage.get('notes', false); return r ? JSON.parse(r.value) : {}; }
-      catch(e){ /* fall through to localStorage */ }
-    }
-    return this.lsGet('notes') || {};
-  },
-  async saveNotes(obj){
-    if(this.hasArtifactStorage()){
-      try{ await window.storage.set('notes', JSON.stringify(obj), false); return; }
-      catch(e){ console.error('save notes failed', e); }
-    }
-    this.lsSet('notes', obj);
-  },
+  async loadShiftTypes(){ return this._load('shiftTypes', []); },
+  async saveShiftTypes(arr){ return this._save('shiftTypes', arr); },
+  async loadShifts(){ return this._load('shifts', {}); },
+  async saveShifts(obj){ return this._save('shifts', obj); },
+  async loadNotes(){ return this._load('notes', {}); },
+  async saveNotes(obj){ return this._save('notes', obj); },
   async loadSettings(){
-    if(this.hasArtifactStorage()){
-      try{ const r = await window.storage.get('settings', false); return r ? {...DEFAULT_SETTINGS, ...JSON.parse(r.value)} : {...DEFAULT_SETTINGS}; }
-      catch(e){ /* fall through to localStorage */ }
-    }
-    const stored = this.lsGet('settings');
-    return stored ? {...DEFAULT_SETTINGS, ...stored} : {...DEFAULT_SETTINGS};
+    const raw = await this._load('settings', null);
+    return raw ? {...DEFAULT_SETTINGS, ...raw} : {...DEFAULT_SETTINGS};
   },
-  async saveSettings(obj){
-    if(this.hasArtifactStorage()){
-      try{ await window.storage.set('settings', JSON.stringify(obj), false); return; }
-      catch(e){ console.error('save settings failed', e); }
-    }
-    this.lsSet('settings', obj);
-  }
+  async saveSettings(obj){ return this._save('settings', obj); }
 };
 
 /* ---------------- State ---------------- */
@@ -1179,8 +1160,9 @@ function renderMonthView(){
     }).join('')}${overflowCount>0 ? `<div class="day-note-badge" style="font-size:calc(${badgeFontSize}px * var(--fs-mult, 1))">+${overflowCount}</div>` : ''}</div>` : '';
     const clickHandler = (paintActive && state.paintMode.typeIds.length) ? `paintDay('${dstr}')` : `openDayQuick('${dstr}')`;
     return `<button class="day-cell ${c.outside?'outside':''} ${dstr===todaystr?'today':''} ${painted?'painted':''} ${multiShift?'multi-shift':''} ${hasNote?'has-note':''} ${noteOnLight?'note-on-light':''}" style="${bgStyle}" onclick="${clickHandler}">
-      <span class="dnum">${c.date.getDate()}${abbrText ? `<span class="dabbr">${escapeHtml(abbrText)}</span>` : ''}</span>
+      <span class="dnum">${c.date.getDate()}</span>
       ${noteBadges}
+      ${abbrText ? `<span class="dtype">${escapeHtml(abbrText)}</span>` : ''}
       ${stripHtml}
     </button>`;
   }).join('');
