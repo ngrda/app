@@ -173,9 +173,10 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:5px; max-height:64px; overflo
 .day-cell:active{transform:scale(.93);}
 .day-cell.outside{opacity:.25;}
 .day-cell.today{outline:2px solid var(--accent); outline-offset:-2px; background:color-mix(in srgb, var(--accent) 10%, var(--bg-elevated));}
-.day-cell .dnum{position:absolute; top:6px; left:7px; line-height:1; font-size:calc(11.5px * var(--fs-mult, 1)); font-weight:700; transition:font-size .1s ease; color:#000; z-index:1;}
+.day-cell .dnum{position:absolute; top:4px; left:6px; line-height:1; font-size:calc(11.5px * var(--fs-mult, 1)); font-weight:700; transition:font-size .1s ease; color:#000; z-index:1; display:flex; align-items:baseline; gap:3px;}
 html.dark .day-cell .dnum{color:#fff;}
 .day-cell.painted .dnum{background:rgba(255,255,255,.55); color:#14161F; padding:1px 6px; border-radius:7px; box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.day-cell .dnum .dabbr{font-size:calc(8.5px * var(--fs-mult, 1)); font-weight:800; letter-spacing:.2px; opacity:.85;}
 .day-dots{display:flex; gap:4px; margin-top:5px; flex-wrap:wrap; justify-content:center; max-width:100%;}
 .day-dots span{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
 .day-dots span.note-dot{border-radius:2px; background:var(--text-muted);}
@@ -751,6 +752,12 @@ const state = {
 function typeById(id){ return state.shiftTypes.find(t=>t.id===id); }
 function entriesFor(dateStr){ return state.shifts[dateStr] || []; }
 function notesFor(dateStr){ return state.notes[dateStr] || []; }
+function shiftAbbr(name){
+  if(!name) return '';
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if(words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  return name.trim().slice(0,2).toUpperCase();
+}
 
 /* ---------------- Init ---------------- */
 async function init(){
@@ -1149,6 +1156,10 @@ function renderMonthView(){
     const multiShift = typeColors.length > 1;
     const bgStyle = singleColor ? `background:${singleColor};` : (multiShift ? `background:${multiColorGradient(typeColors)};` : '');
     const painted = !!singleColor || multiShift;
+    // Show a short abbreviation of the shift type name next to the day number — color alone
+    // isn't always enough to tell shifts apart at a glance, so the letters give a quick label.
+    const dayTypes = [...new Map(entries.map(e=>{ const t=typeById(e.typeId); return t ? [t.id,t] : null; }).filter(Boolean)).values()];
+    const abbrText = dayTypes.length ? dayTypes.slice(0,2).map(t=>shiftAbbr(t.name)).join('/') + (dayTypes.length>2 ? `+${dayTypes.length-2}` : '') : '';
     const stripHtml = '';
     const hasNote = dayNotes.length > 0;
     // Contrast: when notes sit on a colored (painted) day, decide badge text color from the
@@ -1161,13 +1172,14 @@ function renderMonthView(){
     const shown = dayNotes.slice(0, maxBadges);
     const overflowCount = dayNotes.length - shown.length;
     const badgeFontSize = dayNotes.length <= 1 ? 9.5 : dayNotes.length === 2 ? 8.5 : dayNotes.length === 3 ? 7.8 : dayNotes.length === 4 ? 7.2 : 6.6;
+    const badgeLines = dayNotes.length <= 1 ? 3 : dayNotes.length === 2 ? 2 : 1;
     const noteBadges = hasNote ? `<div class="day-notes-wrap">${shown.map(n=>{
       const text = (n.text||'').trim();
-      return `<div class="day-note-badge" style="font-size:calc(${badgeFontSize}px * var(--fs-mult, 1))" title="${escapeHtml(text)}">${escapeHtml(text)}</div>`;
+      return `<div class="day-note-badge" style="font-size:calc(${badgeFontSize}px * var(--fs-mult, 1)); -webkit-line-clamp:${badgeLines};" title="${escapeHtml(text)}">${escapeHtml(text)}</div>`;
     }).join('')}${overflowCount>0 ? `<div class="day-note-badge" style="font-size:calc(${badgeFontSize}px * var(--fs-mult, 1))">+${overflowCount}</div>` : ''}</div>` : '';
     const clickHandler = (paintActive && state.paintMode.typeIds.length) ? `paintDay('${dstr}')` : `openDayQuick('${dstr}')`;
     return `<button class="day-cell ${c.outside?'outside':''} ${dstr===todaystr?'today':''} ${painted?'painted':''} ${multiShift?'multi-shift':''} ${hasNote?'has-note':''} ${noteOnLight?'note-on-light':''}" style="${bgStyle}" onclick="${clickHandler}">
-      <span class="dnum">${c.date.getDate()}</span>
+      <span class="dnum">${c.date.getDate()}${abbrText ? `<span class="dabbr">${escapeHtml(abbrText)}</span>` : ''}</span>
       ${noteBadges}
       ${stripHtml}
     </button>`;
