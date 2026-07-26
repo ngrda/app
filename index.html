@@ -533,7 +533,8 @@ const I18N = {
     settings_title:'Settings', appearance:'Appearance', light:'Light', dark:'Dark',
     text_size:'Text size', color_palette:'Color palette', export_section:'Export',
     export_ics:'Export to Apple / Google / Outlook (.ics)', data_section:'Data',
-    data_hint:'Shifts and shift types are saved locally on this device. This build is Supabase-ready — connecting an account will enable multi-device sync.',
+    data_hint:'Shifts and shift types are saved locally on this device. This build is Supabase-ready — connecting an account will enable multi-device sync. If you added this app to your Home Screen, removing that icon can sometimes make your phone forget this local data — download a backup below first, and use it to restore instantly if that happens.',
+    backup_export:'Download backup', backup_import:'Restore from backup', toast_backup_saved:'Backup downloaded', toast_backup_restored:'Backup restored', toast_backup_invalid:'That file is not a valid backup',
     connect_supabase:'Connect Supabase account (coming soon)', erase_all:'Erase all shifts', language_label:'Language',
     toast_image_downloaded:'Image downloaded', toast_copied:'Copied to clipboard', toast_all_cleared:'All shifts cleared',
     toast_create_type_first:'Create a shift type first', toast_pick_type:'Pick a shift type',
@@ -585,7 +586,8 @@ const I18N = {
     settings_title:'Ajustes', appearance:'Apariencia', light:'Claro', dark:'Oscuro',
     text_size:'Tamaño de texto', color_palette:'Paleta de colores', export_section:'Exportar',
     export_ics:'Exportar a Apple / Google / Outlook (.ics)', data_section:'Datos',
-    data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo. Esta versión está lista para Supabase — conectar una cuenta habilitará la sincronización multidispositivo.',
+    data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo. Esta versión está lista para Supabase — conectar una cuenta habilitará la sincronización multidispositivo. Si añadiste esta app a la pantalla de inicio, eliminar ese icono a veces hace que el móvil olvide estos datos locales — descarga una copia de seguridad abajo, y úsala para restaurar al instante si eso pasa.',
+    backup_export:'Descargar copia de seguridad', backup_import:'Restaurar copia de seguridad', toast_backup_saved:'Copia de seguridad descargada', toast_backup_restored:'Copia de seguridad restaurada', toast_backup_invalid:'Ese archivo no parece una copia de seguridad válida',
     connect_supabase:'Conectar cuenta de Supabase (próximamente)', erase_all:'Borrar todos los turnos', language_label:'Idioma',
     toast_image_downloaded:'Imagen descargada', toast_copied:'Copiado al portapapeles', toast_all_cleared:'Todos los turnos borrados',
     toast_create_type_first:'Crea primero un tipo de turno', toast_pick_type:'Elige un tipo de turno',
@@ -733,9 +735,13 @@ const state = {
 function typeById(id){ return state.shiftTypes.find(t=>t.id===id); }
 function entriesFor(dateStr){ return state.shifts[dateStr] || []; }
 function notesFor(dateStr){ return state.notes[dateStr] || []; }
+function slashify(str){
+  if(!str) return str;
+  return str.replace(/\s*&\s*/g, '/').replace(/\s+y\s+/gi, '/');
+}
 function shiftAbbr(name){
   if(!name) return '';
-  const words = name.trim().split(/\s+/).filter(Boolean);
+  const words = slashify(name).trim().split(/\s+/).filter(Boolean);
   if(words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
   return name.trim().slice(0,2).toUpperCase();
 }
@@ -1156,7 +1162,7 @@ function renderMonthView(){
     const badgeLines = dayNotes.length <= 1 ? 3 : dayNotes.length === 2 ? 2 : 1;
     const noteBadges = hasNote ? `<div class="day-notes-wrap">${shown.map(n=>{
       const text = (n.text||'').trim();
-      return `<div class="day-note-badge" style="font-size:calc(${badgeFontSize}px * var(--fs-mult, 1)); -webkit-line-clamp:${badgeLines};" title="${escapeHtml(text)}">${escapeHtml(text)}</div>`;
+      return `<div class="day-note-badge" style="font-size:calc(${badgeFontSize}px * var(--fs-mult, 1)); -webkit-line-clamp:${badgeLines};" title="${escapeHtml(text)}">${escapeHtml(slashify(text))}</div>`;
     }).join('')}${overflowCount>0 ? `<div class="day-note-badge" style="font-size:calc(${badgeFontSize}px * var(--fs-mult, 1))">+${overflowCount}</div>` : ''}</div>` : '';
     const clickHandler = (paintActive && state.paintMode.typeIds.length) ? `paintDay('${dstr}')` : `openDayQuick('${dstr}')`;
     return `<button class="day-cell ${c.outside?'outside':''} ${dstr===todaystr?'today':''} ${painted?'painted':''} ${multiShift?'multi-shift':''} ${hasNote?'has-note':''} ${noteOnLight?'note-on-light':''}" style="${bgStyle}" onclick="${clickHandler}">
@@ -1867,6 +1873,53 @@ function exportICS(){
 }
 function escapeICS(s){ return String(s).replace(/[\\;,]/g, m=>'\\'+m).replace(/\n/g,'\\n'); }
 
+/* ---- Backup / restore: the real safety net against local storage getting wiped
+   (e.g. iOS can sometimes forget a web app's local data when its Home Screen icon
+   is removed and re-added). Exporting a backup file and restoring it always works,
+   regardless of what the browser/OS did to local storage. ---- */
+function exportBackup(){
+  const payload = {
+    app:'rota-shift-calendar', version:1, exportedAt:new Date().toISOString(),
+    shiftTypes: state.shiftTypes, shifts: state.shifts, notes: state.notes, settings: state.settings
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rota-backup-' + todayStr() + '.json';
+  a.click();
+  showToast(tr('toast_backup_saved'));
+}
+function importBackupFile(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || typeof data !== 'object' || (!data.shiftTypes && !data.shifts && !data.notes)){
+        showToast(tr('toast_backup_invalid'));
+        return;
+      }
+      if(Array.isArray(data.shiftTypes)) state.shiftTypes = data.shiftTypes;
+      if(data.shifts && typeof data.shifts === 'object') state.shifts = data.shifts;
+      if(data.notes && typeof data.notes === 'object') state.notes = data.notes;
+      if(data.settings && typeof data.settings === 'object') state.settings = {...DEFAULT_SETTINGS, ...data.settings};
+      DB.saveShiftTypes(state.shiftTypes);
+      DB.saveShifts(state.shifts);
+      DB.saveNotes(state.notes);
+      DB.saveSettings(state.settings);
+      applyLanguageArrays();
+      applyTheme();
+      closeModal();
+      renderApp();
+      showToast(tr('toast_backup_restored'));
+    }catch(e){
+      console.error('Backup restore failed', e);
+      showToast(tr('toast_backup_invalid'));
+    }
+  };
+  reader.readAsText(file);
+}
+
 /* ================= SWAP CARD (canvas share image) ================= */
 function openSwapCard(dateStr, entryId){
   const entry = entriesFor(dateStr).find(e=>e.id===entryId);
@@ -2039,7 +2092,10 @@ function openSettings(){
       <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
         ${tr('data_hint')}
       </div>
-      <button class="btn btn-ghost" disabled style="opacity:.55">${tr('connect_supabase')}</button>
+      <button class="btn btn-ghost" style="margin-bottom:8px" onclick="exportBackup()">${ICONS.download}${tr('backup_export')}</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('backupFileInput').click()">${ICONS.upload||ICONS.download}${tr('backup_import')}</button>
+      <input type="file" id="backupFileInput" accept="application/json" style="display:none" onchange="importBackupFile(this.files[0]); this.value='';">
+      <button class="btn btn-ghost" disabled style="opacity:.55; margin-top:8px">${tr('connect_supabase')}</button>
     </div>
     <button class="btn btn-danger" onclick="clearAllData()">${ICONS.trash}${tr('erase_all')}</button>
   `;
