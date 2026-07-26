@@ -737,17 +737,26 @@ function entriesFor(dateStr){ return state.shifts[dateStr] || []; }
 function notesFor(dateStr){ return state.notes[dateStr] || []; }
 function slashify(str){
   if(!str) return str;
-  return str.replace(/\s*&\s*/g, '/').replace(/\s+y\s+/gi, '/');
+  return str.replace(/\s*&\s*/g, '/').replace(/\s+y\s+/gi, '/').replace(/\s+and\s+/gi, '/');
 }
 function shiftAbbr(name){
   if(!name) return '';
-  const words = slashify(name).trim().split(/\s+/).filter(Boolean);
+  // "Mañana y Tarde" / "Morning and Afternoon" / "A & B" -> abbreviate each side to its
+  // initial letter and join with "/" (M/T, M/A, A/B), instead of the generic two-word rule.
+  const parts = name.trim().split(/\s*(?:&|\by\b|\band\b)\s*/i).filter(Boolean);
+  if(parts.length >= 2){
+    return parts.map(p => (p.trim()[0] || '')).join('/').toUpperCase();
+  }
+  const words = name.trim().split(/\s+/).filter(Boolean);
   if(words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
   return name.trim().slice(0,2).toUpperCase();
 }
 
 /* ---------------- Init ---------------- */
 async function init(){
+  if(navigator.storage && navigator.storage.persist){
+    navigator.storage.persist().catch(()=>{});
+  }
   const [shiftTypes, shifts, notes, settings] = await Promise.all([DB.loadShiftTypes(), DB.loadShifts(), DB.loadNotes(), DB.loadSettings()]);
   state.shiftTypes = shiftTypes;
   state.shifts = shifts;
