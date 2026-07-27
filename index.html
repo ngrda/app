@@ -251,6 +251,23 @@ html.dark .year-cell{color:#fff;}
 .month-pick-btn:active{transform:scale(.96);}
 .month-pick-btn.is-today{color:var(--accent);}
 .month-pick-btn.selected{border-color:var(--accent); box-shadow:var(--shadow); background:color-mix(in srgb, var(--accent) 12%, var(--bg-elevated));}
+
+/* ---------- Day picker (day view) ---------- */
+.day-pick-grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; margin-top:2px;}
+.day-pick-cell{aspect-ratio:1; border-radius:12px; border:2px solid transparent; background:var(--bg-sunken); font-weight:700; font-size:calc(13px * var(--fs-mult, 1)); color:var(--text); display:flex; align-items:center; justify-content:center; transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;}
+.day-pick-cell:active{transform:scale(.9);}
+.day-pick-cell.outside{opacity:.3;}
+.day-pick-cell.is-today{color:var(--accent);}
+.day-pick-cell.selected{border-color:var(--accent); box-shadow:var(--shadow); background:color-mix(in srgb, var(--accent) 14%, var(--bg-elevated));}
+
+/* ---------- Week picker (week view) ---------- */
+.week-pick-grid{display:flex; flex-direction:column; gap:6px; margin-top:2px;}
+.week-pick-row{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; border-radius:14px; border:2px solid transparent; background:transparent; padding:4px; transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;}
+.week-pick-row:active{transform:scale(.98);}
+.week-pick-row.selected{border-color:var(--accent); box-shadow:var(--shadow); background:color-mix(in srgb, var(--accent) 10%, var(--bg-elevated));}
+.week-pick-cell{aspect-ratio:1; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:calc(13px * var(--fs-mult, 1)); color:var(--text); background:var(--bg-sunken);}
+.week-pick-cell.outside{opacity:.3;}
+.week-pick-cell.is-today{color:var(--accent);}
 .palette-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:10px;}
 .palette-swatch{aspect-ratio:1/1; width:100%; border-radius:50%; border:none; padding:0; position:relative; box-shadow:var(--shadow);}
 .palette-swatch.selected::after{content:''; position:absolute; inset:-4px; border:2px solid var(--text); border-radius:50%;}
@@ -1037,7 +1054,7 @@ function renderDayView(){
   return `
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftDay(-1)">${ICONS.chevL}</button>
-      <div style="text-align:center">
+      <div style="text-align:center; cursor:pointer" onclick="openDayPicker()">
         <div class="today-label">${isToday?tr('today'):WEEKDAYS_FULL[mondayIndex(fromDateStr(dateStr))]}</div>
         <h2 class="date-heading">${fmtHumanShort(dateStr)}</h2>
       </div>
@@ -1222,7 +1239,7 @@ function renderWeekView(){
   return `
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftWeek(-1)">${ICONS.chevL}</button>
-      <div style="text-align:center">
+      <div style="text-align:center; cursor:pointer" onclick="openWeekPicker()">
         <div class="today-label">${tr('week_label')}</div>
         <h2 class="date-heading" style="font-size:calc(19px * var(--fs-mult, 1))">${rangeLabel}</h2>
       </div>
@@ -1521,6 +1538,112 @@ function renderMonthPickerSheet(){
 }
 function pickMonth(y, m){
   state.monthCursor = {y, m};
+  closeModal();
+  renderApp();
+}
+
+/* ================= DAY PICKER SHEET ================= */
+let _dayPickerCursor = null;
+function openDayPicker(){
+  const d = fromDateStr(state.selectedDate);
+  _dayPickerCursor = { y: d.getFullYear(), m: d.getMonth() };
+  renderDayPickerSheet();
+}
+function shiftDayPickerMonth(n){
+  let {y,m} = _dayPickerCursor;
+  m += n;
+  if(m<0){ m=11; y--; } if(m>11){ m=0; y++; }
+  _dayPickerCursor = {y,m};
+  renderDayPickerSheet();
+}
+function renderDayPickerSheet(){
+  const {y,m} = _dayPickerCursor;
+  const first = new Date(y,m,1);
+  const startOffset = mondayIndex(first);
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const cells = [];
+  for(let i=0;i<startOffset;i++){ const d = addDays(first, -(startOffset-i)); cells.push({date:d, outside:true}); }
+  for(let d=1; d<=daysInMonth; d++) cells.push({date:new Date(y,m,d), outside:false});
+  while(cells.length % 7 !== 0) cells.push({date:addDays(cells[cells.length-1].date,1), outside:true});
+  const todaystr = todayStr();
+  const gridHtml = cells.map(c=>{
+    const dstr = toDateStr(c.date);
+    const isSelected = dstr === state.selectedDate;
+    const isToday = dstr === todaystr;
+    return `<button class="day-pick-cell ${c.outside?'outside':''} ${isSelected?'selected':''} ${isToday?'is-today':''}" onclick="pickDay('${dstr}')">${c.date.getDate()}</button>`;
+  }).join('');
+  const html = `
+    <div class="sheet-handle"></div>
+    <div class="dateflip" style="margin-bottom:10px">
+      <button class="icon-btn" onclick="shiftDayPickerMonth(-1)">${ICONS.chevL}</button>
+      <h2 class="date-heading" style="font-size:calc(17px * var(--fs-mult, 1))">${MONTHS[m]} ${y}</h2>
+      <button class="icon-btn" onclick="shiftDayPickerMonth(1)">${ICONS.chevR}</button>
+    </div>
+    <div class="month-grid-head">${WEEKDAYS.map(w=>`<div>${w}</div>`).join('')}</div>
+    <div class="day-pick-grid">${gridHtml}</div>
+    <button class="btn btn-ghost" style="margin-top:14px" onclick="pickDay('${todaystr}')">${tr('today')}</button>
+  `;
+  showSheet(html);
+}
+function pickDay(dstr){
+  state.selectedDate = dstr;
+  closeModal();
+  renderApp();
+}
+
+/* ================= WEEK PICKER SHEET ================= */
+let _weekPickerCursor = null;
+function openWeekPicker(){
+  const d = fromDateStr(state.weekCursor);
+  _weekPickerCursor = { y: d.getFullYear(), m: d.getMonth() };
+  renderWeekPickerSheet();
+}
+function shiftWeekPickerMonth(n){
+  let {y,m} = _weekPickerCursor;
+  m += n;
+  if(m<0){ m=11; y--; } if(m>11){ m=0; y++; }
+  _weekPickerCursor = {y,m};
+  renderWeekPickerSheet();
+}
+function renderWeekPickerSheet(){
+  const {y,m} = _weekPickerCursor;
+  const first = new Date(y,m,1);
+  const startOffset = mondayIndex(first);
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const cells = [];
+  for(let i=0;i<startOffset;i++){ const d = addDays(first, -(startOffset-i)); cells.push({date:d, outside:true}); }
+  for(let d=1; d<=daysInMonth; d++) cells.push({date:new Date(y,m,d), outside:false});
+  while(cells.length % 7 !== 0) cells.push({date:addDays(cells[cells.length-1].date,1), outside:true});
+  const todaystr = todayStr();
+  const selectedWeekStart = toDateStr(getWeekStart(state.weekCursor));
+  const nRows = cells.length / 7;
+  const rowsHtml = [];
+  for(let r=0; r<nRows; r++){
+    const rowCells = cells.slice(r*7, r*7+7);
+    const rowWeekStart = toDateStr(getWeekStart(toDateStr(rowCells[0].date)));
+    const isSelectedRow = rowWeekStart === selectedWeekStart;
+    const cellsHtml = rowCells.map(c=>{
+      const dstr = toDateStr(c.date);
+      const isToday = dstr === todaystr;
+      return `<span class="week-pick-cell ${c.outside?'outside':''} ${isToday?'is-today':''}">${c.date.getDate()}</span>`;
+    }).join('');
+    rowsHtml.push(`<button class="week-pick-row ${isSelectedRow?'selected':''}" onclick="pickWeek('${rowWeekStart}')">${cellsHtml}</button>`);
+  }
+  const html = `
+    <div class="sheet-handle"></div>
+    <div class="dateflip" style="margin-bottom:10px">
+      <button class="icon-btn" onclick="shiftWeekPickerMonth(-1)">${ICONS.chevL}</button>
+      <h2 class="date-heading" style="font-size:calc(17px * var(--fs-mult, 1))">${MONTHS[m]} ${y}</h2>
+      <button class="icon-btn" onclick="shiftWeekPickerMonth(1)">${ICONS.chevR}</button>
+    </div>
+    <div class="month-grid-head">${WEEKDAYS.map(w=>`<div>${w}</div>`).join('')}</div>
+    <div class="week-pick-grid">${rowsHtml.join('')}</div>
+    <button class="btn btn-ghost" style="margin-top:14px" onclick="pickWeek('${toDateStr(getWeekStart(todaystr))}')">${tr('this_week')}</button>
+  `;
+  showSheet(html);
+}
+function pickWeek(weekStartStr){
+  state.weekCursor = weekStartStr;
   closeModal();
   renderApp();
 }
