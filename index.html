@@ -296,8 +296,6 @@ html.dark .year-cell{color:#fff;}
 .bar-val{width:52px; text-align:right; font-family:var(--font-mono); font-size:calc(12.5px * var(--fs-mult, 1)); font-weight:600; flex-shrink:0;}
 
 /* ---------- Swap card ---------- */
-.swapcard-preview{border-radius:20px; overflow:hidden; box-shadow:var(--shadow-lg); margin-bottom:16px;}
-.swapcard-preview img{width:100%; display:block;}
 
 .toast{position:fixed; left:50%; bottom:calc(100px + var(--safe-bottom)); transform:translateX(-50%); background:var(--text); color:var(--bg); padding:11px 18px; border-radius:99px; font-size:calc(13.5px * var(--fs-mult, 1)); font-weight:600; z-index:90; box-shadow:var(--shadow-lg); animation:toastin .2s ease; max-width:88%; text-align:center;}
 @keyframes toastin{from{opacity:0; transform:translate(-50%,8px);} to{opacity:1; transform:translate(-50%,0);}}
@@ -375,9 +373,6 @@ html.dark .year-cell{color:#fff;}
       <button class="icon-btn" onclick="openSettings()" aria-label="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
-      <button class="icon-btn" onclick="exportBackup()" aria-label="Backup" title="Backup">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-      </button>
       <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme"></button>
     </div>
   </header>
@@ -446,7 +441,8 @@ const ICONS = {
   range:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4M8 14h2M14 14h2"/></svg>',
   layers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg>',
   note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M15 3v6h6"/><path d="M8 13h6M8 17h4"/></svg>',
-  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M8 3h8l-1 6 3 3v2H6v-2l3-3-1-6Z"/></svg>'
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M8 3h8l-1 6 3 3v2H6v-2l3-3-1-6Z"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>'
 };
 
 /* ---------------- Icon set for shift TYPES (user-picked) ---------------- */
@@ -517,7 +513,7 @@ const I18N = {
     hours_by_type:'Hours by shift type', no_hours_logged:'No work hours logged for this period yet.',
     edit_shift:'Edit shift', add_shift_title:'Add shift', date_label:'Date', shift_type_label:'Shift type',
     notes_label:'Notes', notes_placeholder:'Optional note for this shift…', save_shift:'Save shift',
-    share_swap_card:'Share swap card', remove_shift:'Remove shift',
+    remove_shift:'Remove shift',
     mode_shift:'Shift', mode_note:'Note', jump_today:'Jump to today',
     notes_optional:'Notes (optional)', shift_notes_placeholder2:'Anything worth remembering about this shift…',
     editing_note_banner:'Editing an existing note', cancel:'Cancel',
@@ -534,26 +530,29 @@ const I18N = {
     replace_existing:'Replace existing shifts on those days',
     applies_hint:'Applies "{n}" to every day in the range.', apply_to_range:'Apply to range', check_date_range:'Check your date range',
     settings_title:'Settings', appearance:'Appearance', light:'Light', dark:'Dark',
-    text_size:'Text size', color_palette:'Color palette', export_section:'Export',
-    export_ics:'Export to Apple / Google / Outlook (.ics)', data_section:'Data',
-    data_hint:'Shifts and shift types are saved locally on this device. This build is Supabase-ready — connecting an account will enable multi-device sync. If you added this app to your Home Screen, removing that icon can sometimes make your phone forget this local data — download a backup below first, and use it to restore instantly if that happens.',
-    backup_export:'Download backup', backup_import:'Restore from backup', toast_backup_saved:'Backup downloaded', toast_backup_restored:'Backup restored', toast_backup_invalid:'That file is not a valid backup',
+    text_size:'Text size', color_palette:'Color palette', data_section:'Data',
+    data_hint:'Shifts and shift types are saved locally on this device. This build is Supabase-ready — connecting an account will enable multi-device sync.',
+    reminders_section:'Reminders', reminders_hint:'When you add a note, you can choose to be notified a custom number of hours before it. Only works while this app is open on your phone — it cannot wake your phone up on its own.', reminders_enable:'Enable note reminders', reminders_on:'Note reminders on', reminders_denied:'Notifications are blocked for this site — enable them in your phone/browser settings first.', reminders_unsupported:'This browser does not support notifications.',
+    reminder_title:'Reminder', reminder_body:'In 1 hour ({time}): {text}', reminder_body_hours:'{hours}h before ({time}): {text}',
+    weekly_digest_section:'Weekly summary', weekly_digest_hint:'Get a notification every Sunday listing the notes you have coming up that week.', weekly_digest_enable:'Enable weekly summary', weekly_digest_on:'Weekly summary on',
+    weekly_digest_onboarding_title:'Stay on top of your notes?', weekly_digest_onboarding_sub:'Rota can send you a notification every Sunday with the notes you have for that week. You can also get reminded before any single note, with however many hours of notice you choose. Turn this on now?',
+    weekly_digest_onboarding_yes:'Yes, notify me', weekly_digest_onboarding_no:'Not now',
+    toast_weekly_digest_on:'Weekly summary enabled',
+    weekly_digest_title:'This week\'s notes', weekly_digest_body_none:'You have no notes scheduled this week.', weekly_digest_body:'You have {n} note{s} this week:', weekly_digest_more:'…and {n} more',
+    note_notify_label:'Notify me before this', note_notify_hours_label:'Hours before', toast_need_time_for_notify:'Add a time above first so Rota knows when to remind you',
     connect_supabase:'Connect Supabase account (coming soon)', erase_all:'Erase all shifts', language_label:'Language',
-    toast_image_downloaded:'Image downloaded', toast_copied:'Copied to clipboard', toast_all_cleared:'All shifts cleared',
+    toast_all_cleared:'All shifts cleared',
     toast_create_type_first:'Create a shift type first', toast_pick_type:'Pick a shift type',
     toast_shift_added:'Shift added', toast_shift_updated:'Shift updated', toast_shift_removed:'Shift removed',
     toast_note_removed:'Note removed', toast_note_saved:'Note saved', toast_write_something:'Write something first',
     render_error_msg:'Something went wrong showing this screen.', render_error_retry:'Go to month view',
     toast_type_created:'Shift type created', toast_type_updated:'Shift type updated', toast_type_deleted:'Shift type deleted',
-    toast_applied_days:'Applied to {n} day{s}', toast_calendar_downloaded:'Calendar file downloaded',
+    toast_applied_days:'Applied to {n} day{s}',
     paint_bar:'Paint', paint_hint:'Tap one or more shifts, then tap days to paint them all at once', paint_done:'Done',
     language_picker_title:'Choose your language', language_picker_sub:'You can change this later in Settings.',
     default_morning:'Morning', default_afternoon:'Afternoon', default_night:'Night',
     default_morning_afternoon:'Morning & Afternoon', default_off:'Off', default_vacation:'Vacation', default_extra:'Extra',
-    open_full_day:'Open full day view',
-    swap_card_title:'Shift swap card', download:'Download', copy_image:'Copy image',
-    swap_request:'SHIFT SWAP REQUEST', shift_suffix:'shift', total_hours:'total hours', break_word:'break',
-    generated_with:'Generated with Rota'
+    open_full_day:'Open full day view'
   },
   es: {
     nav_day:'Día', nav_week:'Semana', nav_month:'Mes', nav_year:'Año', nav_add:'Añadir',
@@ -570,7 +569,7 @@ const I18N = {
     hours_by_type:'Horas por tipo de turno', no_hours_logged:'Aún no hay horas registradas para este período.',
     edit_shift:'Editar turno', add_shift_title:'Añadir turno', date_label:'Fecha', shift_type_label:'Tipo de turno',
     notes_label:'Notas', notes_placeholder:'Nota opcional para este turno…', save_shift:'Guardar turno',
-    share_swap_card:'Compartir tarjeta de cambio', remove_shift:'Eliminar turno',
+    remove_shift:'Eliminar turno',
     mode_shift:'Turno', mode_note:'Nota', jump_today:'Ir a hoy',
     notes_optional:'Notas (opcional)', shift_notes_placeholder2:'Algo que valga la pena recordar sobre este turno…',
     editing_note_banner:'Editando una nota existente', cancel:'Cancelar',
@@ -587,26 +586,29 @@ const I18N = {
     replace_existing:'Reemplazar los turnos existentes en esos días',
     applies_hint:'Aplica "{n}" a todos los días del rango.', apply_to_range:'Aplicar al rango', check_date_range:'Revisa el rango de fechas',
     settings_title:'Ajustes', appearance:'Apariencia', light:'Claro', dark:'Oscuro',
-    text_size:'Tamaño de texto', color_palette:'Paleta de colores', export_section:'Exportar',
-    export_ics:'Exportar a Apple / Google / Outlook (.ics)', data_section:'Datos',
-    data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo. Esta versión está lista para Supabase — conectar una cuenta habilitará la sincronización multidispositivo. Si añadiste esta app a la pantalla de inicio, eliminar ese icono a veces hace que el móvil olvide estos datos locales — descarga una copia de seguridad abajo, y úsala para restaurar al instante si eso pasa.',
-    backup_export:'Descargar copia de seguridad', backup_import:'Restaurar copia de seguridad', toast_backup_saved:'Copia de seguridad descargada', toast_backup_restored:'Copia de seguridad restaurada', toast_backup_invalid:'Ese archivo no parece una copia de seguridad válida',
+    text_size:'Tamaño de texto', color_palette:'Paleta de colores', data_section:'Datos',
+    data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo. Esta versión está lista para Supabase — conectar una cuenta habilitará la sincronización multidispositivo.',
+    reminders_section:'Recordatorios', reminders_hint:'Al añadir una nota puedes elegir que te avisemos con las horas de antelación que quieras. Solo funciona mientras esta app esté abierta en tu móvil — no puede despertar el móvil por sí sola.', reminders_enable:'Activar avisos de notas', reminders_on:'Avisos de notas activados', reminders_denied:'Las notificaciones están bloqueadas para esta web — actívalas primero en los ajustes de tu móvil/navegador.', reminders_unsupported:'Este navegador no admite notificaciones.',
+    reminder_title:'Recordatorio', reminder_body:'En 1 hora ({time}): {text}', reminder_body_hours:'{hours}h antes ({time}): {text}',
+    weekly_digest_section:'Resumen semanal', weekly_digest_hint:'Recibe una notificación cada domingo con las notas que tienes esa semana.', weekly_digest_enable:'Activar resumen semanal', weekly_digest_on:'Resumen semanal activado',
+    weekly_digest_onboarding_title:'¿Quieres recibir avisos de tus notas?', weekly_digest_onboarding_sub:'Rota puede enviarte una notificación cada domingo con las notas que tienes para esa semana. También puedes pedir que te avise antes de cada nota concreta, con las horas de antelación que elijas. ¿Lo activamos ahora?',
+    weekly_digest_onboarding_yes:'Sí, avísame', weekly_digest_onboarding_no:'Ahora no',
+    toast_weekly_digest_on:'Resumen semanal activado',
+    weekly_digest_title:'Notas de esta semana', weekly_digest_body_none:'No tienes notas programadas esta semana.', weekly_digest_body:'Tienes {n} nota{s} esta semana:', weekly_digest_more:'…y {n} más',
+    note_notify_label:'Avisarme antes de esto', note_notify_hours_label:'Horas de antelación', toast_need_time_for_notify:'Añade antes una hora para que Rota sepa cuándo avisarte',
     connect_supabase:'Conectar cuenta de Supabase (próximamente)', erase_all:'Borrar todos los turnos', language_label:'Idioma',
-    toast_image_downloaded:'Imagen descargada', toast_copied:'Copiado al portapapeles', toast_all_cleared:'Todos los turnos borrados',
+    toast_all_cleared:'Todos los turnos borrados',
     toast_create_type_first:'Crea primero un tipo de turno', toast_pick_type:'Elige un tipo de turno',
     toast_shift_added:'Turno añadido', toast_shift_updated:'Turno actualizado', toast_shift_removed:'Turno eliminado',
     toast_note_removed:'Nota eliminada', toast_note_saved:'Nota guardada', toast_write_something:'Escribe algo primero',
     render_error_msg:'Algo salió mal al mostrar esta pantalla.', render_error_retry:'Ir a la vista mensual',
     toast_type_created:'Tipo de turno creado', toast_type_updated:'Tipo de turno actualizado', toast_type_deleted:'Tipo de turno eliminado',
-    toast_applied_days:'Aplicado a {n} día{s}', toast_calendar_downloaded:'Archivo de calendario descargado',
+    toast_applied_days:'Aplicado a {n} día{s}',
     paint_bar:'Pintar', paint_hint:'Toca uno o varios turnos y luego toca los días para aplicarlos todos a la vez', paint_done:'Listo',
     language_picker_title:'Elige tu idioma', language_picker_sub:'Puedes cambiarlo más tarde en Ajustes.',
     default_morning:'Mañana', default_afternoon:'Tarde', default_night:'Noche',
     default_morning_afternoon:'Mañana y Tarde', default_off:'Libre', default_vacation:'Vacaciones', default_extra:'Extra',
-    open_full_day:'Ver día completo',
-    swap_card_title:'Tarjeta de cambio de turno', download:'Descargar', copy_image:'Copiar imagen',
-    swap_request:'SOLICITUD DE CAMBIO DE TURNO', shift_suffix:'turno', total_hours:'horas totales', break_word:'descanso',
-    generated_with:'Generado con Rota'
+    open_full_day:'Ver día completo'
   }
 };
 function tr(key, vars){
@@ -667,7 +669,10 @@ const DEFAULT_SETTINGS = {
   theme: (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark':'light',
   palette: 'violet',
   fontSize: 'md',
-  language: null
+  language: null,
+  remindersEnabled: false,
+  weeklyDigestEnabled: false,
+  weeklyDigestAsked: false
 };
 const DB = {
   hasArtifactStorage(){ return typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function'; },
@@ -766,12 +771,15 @@ async function init(){
   state.notes = notes;
   state.settings = settings;
   applyTheme();
+  checkReminders();
+  checkWeeklyDigest();
   if(!state.settings.language){
     showLanguagePicker();
   } else {
     applyLanguageArrays();
     applyStaticLabels();
     renderApp();
+    if(!state.settings.weeklyDigestAsked) showNotifOnboarding();
   }
 }
 function applyStaticLabels(){
@@ -804,6 +812,7 @@ function chooseLanguage(lang){
   seedDefaultShiftTypesIfNeeded();
   document.getElementById('modal-root').innerHTML = '';
   renderApp();
+  if(!state.settings.weeklyDigestAsked) showNotifOnboarding();
 }
 function seedDefaultShiftTypesIfNeeded(){
   if(state.shiftTypes.length > 0) return;
@@ -818,6 +827,61 @@ function seedDefaultShiftTypesIfNeeded(){
   ];
   state.shiftTypes = defaults.map(d => ({ id: uid(), ...d }));
   DB.saveShiftTypes(state.shiftTypes);
+}
+function showNotifOnboarding(){
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="overlay" style="align-items:center">
+      <div class="sheet" style="border-radius:24px; max-width:400px; text-align:center; padding:32px 24px calc(28px + var(--safe-bottom))">
+        <div class="brand-mark" style="margin:0 auto 16px; width:44px; height:44px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14161F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+        </div>
+        <h2 style="justify-content:center; margin-bottom:6px">${tr('weekly_digest_onboarding_title')}</h2>
+        <div class="text-muted" style="font-size:calc(13.5px * var(--fs-mult, 1)); margin-bottom:20px; line-height:1.5">${tr('weekly_digest_onboarding_sub')}</div>
+        <div class="btn-row" style="flex-direction:column; gap:10px">
+          <button class="btn btn-primary" onclick="acceptWeeklyDigestOnboarding()">${tr('weekly_digest_onboarding_yes')}</button>
+          <button class="btn btn-ghost" onclick="declineWeeklyDigestOnboarding()">${tr('weekly_digest_onboarding_no')}</button>
+        </div>
+      </div>
+    </div>`;
+}
+function finishNotifOnboarding(){
+  document.getElementById('modal-root').innerHTML = '';
+  renderApp();
+}
+function acceptWeeklyDigestOnboarding(){
+  state.settings.weeklyDigestAsked = true;
+  if(typeof Notification === 'undefined'){
+    state.settings.weeklyDigestEnabled = false;
+    DB.saveSettings(state.settings);
+    showToast(tr('reminders_unsupported'));
+    finishNotifOnboarding();
+    return;
+  }
+  const grantHandler = (perm)=>{
+    if(perm === 'granted'){
+      state.settings.weeklyDigestEnabled = true;
+      state.settings.remindersEnabled = true;
+      showToast(tr('toast_weekly_digest_on'));
+      checkWeeklyDigest();
+    } else {
+      state.settings.weeklyDigestEnabled = false;
+      showToast(tr('reminders_denied'));
+    }
+    DB.saveSettings(state.settings);
+    finishNotifOnboarding();
+  };
+  if(Notification.permission === 'granted'){
+    grantHandler('granted');
+  } else {
+    Notification.requestPermission().then(grantHandler);
+  }
+}
+function declineWeeklyDigestOnboarding(){
+  state.settings.weeklyDigestAsked = true;
+  state.settings.weeklyDigestEnabled = false;
+  DB.saveSettings(state.settings);
+  finishNotifOnboarding();
 }
 function applyTheme(){
   document.documentElement.classList.toggle('dark', state.settings.theme === 'dark');
@@ -995,10 +1059,11 @@ function renderAgendaItem(entry, dateStr){
   </div>`;
 }
 function renderNoteAgendaItem(note, dateStr){
+  const notifyBadge = note.notify ? `<span class="mono" style="display:inline-flex; align-items:center; gap:3px; color:var(--accent); font-size:calc(11px * var(--fs-mult, 1)); margin-left:8px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>${Number(note.notifyHours)||1}h</span>` : '';
   return `<div class="agenda-item note-item">
     <div class="agenda-icon">${ICONS.note}</div>
     <div class="agenda-body">
-      <div class="agenda-name">${tr('note_label')}</div>
+      <div class="agenda-title-row"><div class="agenda-name">${tr('note_label')}</div>${notifyBadge}</div>
       <div class="agenda-notes">${escapeHtml(note.text)}</div>
     </div>
     <div class="agenda-actions">
@@ -1294,6 +1359,16 @@ function renderDayQuickSheet(){
       <label>${tr('note_time_label')}</label>
       <input type="time" id="quickNoteTime">
     </div>
+    <div class="field">
+      <div class="checkbox-row">
+        <input type="checkbox" id="quickNoteNotify" onchange="toggleQuickNoteNotifyHours()">
+        <label for="quickNoteNotify" style="display:flex; align-items:center; gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>${tr('note_notify_label')}</label>
+      </div>
+    </div>
+    <div class="field" id="quickNoteNotifyHoursField" style="display:none">
+      <label>${tr('note_notify_hours_label')}</label>
+      <input type="number" id="quickNoteNotifyHours" min="1" max="72" step="0.5" value="1">
+    </div>
     <button class="btn btn-primary" onclick="quickSaveNote('${dstr}')">${ICONS.plus}${tr('add_note')}</button>
     ${noteItems ? `<div class="section-title">${tr('other_notes_day')}</div><div class="notelist">${noteItems}</div>` : ''}
     <button class="btn btn-ghost" style="margin-top:14px" onclick="closeModal(); goToDay('${dstr}')">${tr('open_full_day')}</button>
@@ -1317,13 +1392,24 @@ function quickDeleteShift(dstr, entryId){
   renderDayQuickSheet();
   showToast(tr('toast_shift_removed'));
 }
+function toggleQuickNoteNotifyHours(){
+  const checked = !!document.getElementById('quickNoteNotify')?.checked;
+  const field = document.getElementById('quickNoteNotifyHoursField');
+  if(field) field.style.display = checked ? '' : 'none';
+}
 function quickSaveNote(dstr){
   const text = (document.getElementById('quickNoteText')?.value || '').trim();
   const time = (document.getElementById('quickNoteTime')?.value || '').trim();
+  const notifyChecked = !!document.getElementById('quickNoteNotify')?.checked;
+  let notifyHoursVal = parseFloat(document.getElementById('quickNoteNotifyHours')?.value);
+  if(isNaN(notifyHoursVal) || notifyHoursVal <= 0) notifyHoursVal = 1;
   if(!text){ showToast(tr('toast_write_something')); return; }
+  if(notifyChecked && !time){ showToast(tr('toast_need_time_for_notify')); return; }
+  const notify = notifyChecked && !!time;
   if(!state.notes[dstr]) state.notes[dstr] = [];
-  state.notes[dstr].push({ id: uid(), text, time });
+  state.notes[dstr].push({ id: uid(), text, time, notify, notifyHours: notifyHoursVal });
   DB.saveNotes(state.notes);
+  if(notify) ensureNoteRemindersPermission();
   renderApp();
   closeModal();
   showToast(tr('toast_note_saved'));
@@ -1538,7 +1624,6 @@ function renderShiftModal(notes){
       <textarea id="shiftNotesInput" placeholder="${tr('notes_placeholder')}">${escapeHtml(notes)}</textarea>
     </div>
     <button class="btn btn-primary" onclick="saveShiftEntry()">${tr('save_shift')}</button>
-    ${entryId && typeById(selectedTypeId) && typeById(selectedTypeId).isWork ? `<button class="btn btn-ghost" style="margin-top:10px" onclick="openSwapCard('${dateStr}','${entryId}')">${ICONS.share}${tr('share_swap_card')}</button>` : ''}
     ${entryId?`<button class="btn btn-danger" style="margin-top:10px" onclick="deleteShiftEntry('${dateStr}','${entryId}'); closeModal();">${ICONS.trash}${tr('remove_shift')}</button>`:''}
   `;
   showSheet(html);
@@ -1620,6 +1705,8 @@ function renderAddView(){
   const editingNote = editing ? notesFor(dateStr).find(n=>n.id===editing) : null;
   const draftValue = editingNote ? editingNote.text : _addDraftText;
   const draftTime = editingNote ? (editingNote.time || '') : _addDraftTime;
+  const draftNotify = editingNote ? !!editingNote.notify : false;
+  const draftNotifyHours = editingNote && Number(editingNote.notifyHours) > 0 ? editingNote.notifyHours : 1;
   const list = notesFor(dateStr).filter(n=>n.id!==editing);
   return `<div class="addview">` + datebar + `
     ${editing?`<div class="editing-banner"><span>${tr('editing_note_banner')}</span><button onclick="cancelNoteEdit()">${tr('cancel')}</button></div>`:''}
@@ -1632,6 +1719,16 @@ function renderAddView(){
         <input type="time" id="addNoteTime" value="${escapeHtml(draftTime)}">
         <button class="clear-time-btn" type="button" onclick="clearAddNoteTime()" aria-label="${tr('clear_time')}">${ICONS.close}</button>
       </div>
+    </div>
+    <div class="field">
+      <div class="checkbox-row">
+        <input type="checkbox" id="addNoteNotify" ${draftNotify?'checked':''} onchange="toggleAddNoteNotifyHours()">
+        <label for="addNoteNotify" style="display:flex; align-items:center; gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>${tr('note_notify_label')}</label>
+      </div>
+    </div>
+    <div class="field" id="addNoteNotifyHoursField" style="${draftNotify?'':'display:none'}">
+      <label>${tr('note_notify_hours_label')}</label>
+      <input type="number" id="addNoteNotifyHours" min="1" max="72" step="0.5" value="${draftNotifyHours}">
     </div>
     <button class="btn btn-primary" onclick="saveAddNote()">${editing?ICONS.edit:ICONS.plus}${editing?tr('save_changes'):tr('add_note')}</button>
     ${list.length?`<div class="section-title">${tr('other_notes_day')}</div><div class="notelist">${list.map(n=>`
@@ -1647,6 +1744,11 @@ function renderAddView(){
 function clearAddNoteTime(){
   const el = document.getElementById('addNoteTime');
   if(el) el.value = '';
+}
+function toggleAddNoteNotifyHours(){
+  const checked = !!document.getElementById('addNoteNotify')?.checked;
+  const field = document.getElementById('addNoteNotifyHoursField');
+  if(field) field.style.display = checked ? '' : 'none';
 }
 function setAddMode(mode){
   _addDraftText = '';
@@ -1675,19 +1777,47 @@ function saveAddShift(){
   setTab(state.returnTab || 'day');
   showToast(tr('toast_shift_added'));
 }
+function ensureNoteRemindersPermission(){
+  // Best-effort: if someone opts a note into a reminder, make sure notifications can
+  // actually fire — requesting permission and flipping the master switch on — instead
+  // of silently doing nothing until they separately find the toggle in Settings.
+  if(typeof Notification === 'undefined') return;
+  if(Notification.permission === 'granted'){
+    if(!state.settings.remindersEnabled){ state.settings.remindersEnabled = true; DB.saveSettings(state.settings); }
+    return;
+  }
+  if(Notification.permission !== 'denied'){
+    Notification.requestPermission().then(perm=>{
+      if(perm === 'granted'){
+        state.settings.remindersEnabled = true;
+        DB.saveSettings(state.settings);
+      } else {
+        showToast(tr('reminders_denied'));
+      }
+    });
+  } else {
+    showToast(tr('reminders_denied'));
+  }
+}
 function saveAddNote(){
   const text = (document.getElementById('addNoteText')?.value || '').trim();
   const time = (document.getElementById('addNoteTime')?.value || '').trim();
+  const notifyChecked = !!document.getElementById('addNoteNotify')?.checked;
+  let notifyHoursVal = parseFloat(document.getElementById('addNoteNotifyHours')?.value);
+  if(isNaN(notifyHoursVal) || notifyHoursVal <= 0) notifyHoursVal = 1;
   if(!text){ showToast(tr('toast_write_something')); return; }
+  if(notifyChecked && !time){ showToast(tr('toast_need_time_for_notify')); return; }
+  const notify = notifyChecked && !!time;
   const dateStr = state.selectedDate;
   if(!state.notes[dateStr]) state.notes[dateStr] = [];
   if(state.addCtx.noteId){
     const n = state.notes[dateStr].find(x=>x.id===state.addCtx.noteId);
-    if(n){ n.text = text; n.time = time; }
+    if(n){ n.text = text; n.time = time; n.notify = notify; n.notifyHours = notifyHoursVal; }
   } else {
-    state.notes[dateStr].push({ id: uid(), text, time });
+    state.notes[dateStr].push({ id: uid(), text, time, notify, notifyHours: notifyHoursVal });
   }
   DB.saveNotes(state.notes);
+  if(notify) ensureNoteRemindersPermission();
   state.addCtx.noteId = null;
   _addDraftText = '';
   _addDraftTime = '';
@@ -1849,220 +1979,137 @@ function applyRangeAssign(){
   showToast(tr('toast_applied_days',{n:count, s:count===1?'':'s'}));
 }
 
-/* ================= ICS EXPORT ================= */
-function exportICS(){
-  let lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Rota//Shift Calendar//EN'];
-  Object.keys(state.shifts).sort().forEach(dstr=>{
-    entriesFor(dstr).forEach(e=>{
-      const t = typeById(e.typeId);
-      if(!t) return;
-      const dNoDash = dstr.replace(/-/g,'');
-      lines.push('BEGIN:VEVENT');
-      lines.push('UID:'+e.id+'@rota');
-      lines.push('SUMMARY:'+escapeICS(t.name));
-      if(t.isWork && t.start && t.end){
-        const startMin = timeToMin(t.start);
-        let endMin = timeToMin(t.end);
-        let endDate = fromDateStr(dstr);
-        if(endMin <= startMin){ endDate = addDays(endDate,1); }
-        lines.push('DTSTART:'+dNoDash+'T'+t.start.replace(':','')+'00');
-        lines.push('DTEND:'+toDateStr(endDate).replace(/-/g,'')+'T'+t.end.replace(':','')+'00');
-      } else {
-        lines.push('DTSTART;VALUE=DATE:'+dNoDash);
-        lines.push('DTEND;VALUE=DATE:'+toDateStr(addDays(fromDateStr(dstr),1)).replace(/-/g,''));
-      }
-      if(e.notes) lines.push('DESCRIPTION:'+escapeICS(e.notes));
-      lines.push('END:VEVENT');
-    });
-  });
-  lines.push('END:VCALENDAR');
-  const blob = new Blob([lines.join('\r\n')], {type:'text/calendar'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'rota-shifts.ics';
-  a.click();
-  showToast(tr('toast_calendar_downloaded'));
+/* ---- Reminders: notifies 1 hour before a timed note (e.g. an appointment). This only
+   works while the app/tab is actually open and running in the browser — a web page has
+   no way to wake the phone up or fire a notification while it's fully closed; that would
+   need a real backend push service. This is the best a client-only page can honestly do. ---- */
+function firedRemindersGet(){ return DB.lsGet('remindersFired') || {}; }
+function firedRemindersMark(id){
+  const fired = firedRemindersGet();
+  fired[id] = Date.now();
+  const cutoff = Date.now() - 2*24*60*60*1000;
+  Object.keys(fired).forEach(k=>{ if(fired[k] < cutoff) delete fired[k]; });
+  DB.lsSet('remindersFired', fired);
 }
-function escapeICS(s){ return String(s).replace(/[\\;,]/g, m=>'\\'+m).replace(/\n/g,'\\n'); }
-
-/* ---- Backup / restore: the real safety net against local storage getting wiped
-   (e.g. iOS can sometimes forget a web app's local data when its Home Screen icon
-   is removed and re-added). Exporting a backup file and restoring it always works,
-   regardless of what the browser/OS did to local storage. ---- */
-function exportBackup(){
-  const payload = {
-    app:'rota-shift-calendar', version:1, exportedAt:new Date().toISOString(),
-    shiftTypes: state.shiftTypes, shifts: state.shifts, notes: state.notes, settings: state.settings
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'rota-backup-' + todayStr() + '.json';
-  a.click();
-  showToast(tr('toast_backup_saved'));
-}
-function importBackupFile(file){
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try{
-      const data = JSON.parse(reader.result);
-      if(!data || typeof data !== 'object' || (!data.shiftTypes && !data.shifts && !data.notes)){
-        showToast(tr('toast_backup_invalid'));
-        return;
-      }
-      if(Array.isArray(data.shiftTypes)) state.shiftTypes = data.shiftTypes;
-      if(data.shifts && typeof data.shifts === 'object') state.shifts = data.shifts;
-      if(data.notes && typeof data.notes === 'object') state.notes = data.notes;
-      if(data.settings && typeof data.settings === 'object') state.settings = {...DEFAULT_SETTINGS, ...data.settings};
-      DB.saveShiftTypes(state.shiftTypes);
-      DB.saveShifts(state.shifts);
-      DB.saveNotes(state.notes);
-      DB.saveSettings(state.settings);
-      applyLanguageArrays();
-      applyTheme();
-      closeModal();
-      renderApp();
-      showToast(tr('toast_backup_restored'));
-    }catch(e){
-      console.error('Backup restore failed', e);
-      showToast(tr('toast_backup_invalid'));
+function checkReminders(){
+  if(!state.settings.remindersEnabled) return;
+  if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  const now = new Date();
+  const dstr = todayStr();
+  const fired = firedRemindersGet();
+  notesFor(dstr).forEach(n=>{
+    if(!n.time || !n.notify) return;
+    const id = dstr + ':' + n.id;
+    if(fired[id]) return;
+    const [h,mi] = n.time.split(':').map(Number);
+    if(isNaN(h) || isNaN(mi)) return;
+    const leadHours = Number(n.notifyHours) > 0 ? Number(n.notifyHours) : 1;
+    const leadMinutes = Math.round(leadHours*60);
+    const eventTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, mi, 0);
+    const reminderTime = new Date(eventTime.getTime() - leadMinutes*60000);
+    if(now >= reminderTime && now < eventTime){
+      try{ new Notification(tr('reminder_title'), { body: tr('reminder_body_hours', {hours:leadHours, time:n.time, text:n.text||''}) }); }
+      catch(e){ console.error('Notification failed', e); }
+      firedRemindersMark(id);
     }
-  };
-  reader.readAsText(file);
+  });
 }
 
-/* ================= SWAP CARD (canvas share image) ================= */
-function openSwapCard(dateStr, entryId){
-  const entry = entriesFor(dateStr).find(e=>e.id===entryId);
-  const t = entry ? typeById(entry.typeId) : null;
-  if(!entry || !t) return;
-  const canvas = document.createElement('canvas');
-  drawSwapCard(canvas, dateStr, entry, t);
-  const imgUrl = canvas.toDataURL('image/png');
-  const html = `
-    <div class="sheet-handle"></div>
-    <h2>${tr('swap_card_title')}</h2>
-    <div class="swapcard-preview"><img src="${imgUrl}"></div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" onclick='downloadSwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.download}${tr('download')}</button>
-      <button class="btn btn-primary" onclick='copySwapCard(${JSON.stringify(dateStr)}, ${JSON.stringify(entryId)})'>${ICONS.copy}${tr('copy_image')}</button>
-    </div>
-  `;
-  showSheet(html);
+/* ---- Weekly digest: every Sunday, if enabled, lists the notes coming up in the next
+   7 days (today through next Saturday) in a single notification. Fires at most once
+   per Sunday, only while the app/tab is open, same real-world limits as reminders above. ---- */
+function weeklyDigestFiredGet(){ return DB.lsGet('weeklyDigestFired') || {}; }
+function weeklyDigestFiredMark(dstr){
+  const fired = weeklyDigestFiredGet();
+  fired[dstr] = Date.now();
+  const cutoff = Date.now() - 30*24*60*60*1000;
+  Object.keys(fired).forEach(k=>{ if(fired[k] < cutoff) delete fired[k]; });
+  DB.lsSet('weeklyDigestFired', fired);
 }
-function drawSwapCard(canvas, dateStr, entry, t){
-  const W=1080, H=1080;
-  canvas.width=W; canvas.height=H;
-  const ctx = canvas.getContext('2d');
-  const hex = t.color;
-  const textHex = textColorFor(hex);
-  const grad = ctx.createLinearGradient(0,0,W,H);
-  grad.addColorStop(0, shadeColor(hex,14));
-  grad.addColorStop(1, shadeColor(hex,-18));
-  ctx.fillStyle = grad;
-  roundRect(ctx,0,0,W,H,48); ctx.fill();
-
-  ctx.fillStyle = textHex;
-  ctx.globalAlpha = .85;
-  ctx.font = '600 30px Inter, sans-serif';
-  ctx.fillText(tr('swap_request'), 64, 96);
-  ctx.globalAlpha = 1;
-
-  ctx.font = '700 74px "Space Grotesk", sans-serif';
-  ctx.fillText(fmtHuman(dateStr), 60, 210, W-120);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  roundRect(ctx,60,290,W-120,H-290-220,36); ctx.fill();
-
-  ctx.fillStyle = '#14161F';
-  ctx.font = '700 46px "Space Grotesk", sans-serif';
-  ctx.fillText(t.name + ' ' + tr('shift_suffix'), 104, 380);
-
-  ctx.fillStyle = '#6B6D7A';
-  ctx.font = '600 30px "JetBrains Mono", monospace';
-  if(t.isWork){
-    ctx.fillText(t.start + '  –  ' + t.end, 104, 430);
-    ctx.fillStyle = '#14161F';
-    ctx.font = '700 88px "JetBrains Mono", monospace';
-    ctx.fillText(shiftDurationHours(t).toFixed(1)+'h', 104, 560);
-    ctx.fillStyle = '#6B6D7A';
-    ctx.font = '600 26px Inter, sans-serif';
-    ctx.fillText(tr('total_hours') + (t.breakMins?`  ·  ${t.breakMins}m ${tr('break_word')}`:''), 104, 605);
+function checkWeeklyDigest(){
+  if(!state.settings.weeklyDigestEnabled) return;
+  if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  const now = new Date();
+  if(now.getDay() !== 0) return; // 0 = Sunday
+  const dstr = todayStr();
+  const fired = weeklyDigestFiredGet();
+  if(fired[dstr]) return;
+  const items = [];
+  for(let i=0;i<7;i++){
+    const ds = toDateStr(addDays(now, i));
+    notesFor(ds).forEach(n=>{ items.push({ds, n}); });
   }
-  if(entry.notes){
-    ctx.fillStyle = '#14161F';
-    ctx.font = '500 28px Inter, sans-serif';
-    wrapText(ctx, entry.notes, 104, 700, W-120-88, 38);
+  let body;
+  if(items.length === 0){
+    body = tr('weekly_digest_body_none');
+  } else {
+    const shown = items.slice(0,5).map(it=>`${fmtHumanShort(it.ds)}: ${it.n.text}`);
+    body = tr('weekly_digest_body', {n:items.length, s:items.length===1?'':'s'}) + '\n' + shown.join('\n');
+    if(items.length > 5) body += '\n' + tr('weekly_digest_more', {n:items.length-5});
   }
-
-  ctx.fillStyle = textHex;
-  ctx.globalAlpha = .9;
-  ctx.font = '600 26px Inter, sans-serif';
-  ctx.fillText(tr('generated_with'), 64, H-70);
+  try{ new Notification(tr('weekly_digest_title'), { body }); }
+  catch(e){ console.error('Notification failed', e); }
+  weeklyDigestFiredMark(dstr);
 }
-function shadeColor(hex, percent){
-  const num = parseInt(hex.replace('#',''),16);
-  let r=(num>>16), g=(num>>8&0x00FF), b=(num&0x0000FF);
-  r=Math.min(255,Math.max(0,r+Math.round(2.55*percent)));
-  g=Math.min(255,Math.max(0,g+Math.round(2.55*percent)));
-  b=Math.min(255,Math.max(0,b+Math.round(2.55*percent)));
-  return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
-}
-function roundRect(ctx,x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
-function wrapText(ctx, text, x, y, maxWidth, lineHeight){
-  const words = text.split(' ');
-  let line = '';
-  let cy = y;
-  for(const w of words){
-    const test = line + w + ' ';
-    if(ctx.measureText(test).width > maxWidth && line){
-      ctx.fillText(line, x, cy);
-      line = w + ' ';
-      cy += lineHeight;
-    } else line = test;
+function enableReminders(){
+  if(typeof Notification === 'undefined'){ showToast(tr('reminders_unsupported')); return; }
+  if(Notification.permission === 'granted'){
+    state.settings.remindersEnabled = true;
+    DB.saveSettings(state.settings);
+    showToast(tr('reminders_on'));
+    renderApp();
+    return;
   }
-  ctx.fillText(line, x, cy);
+  Notification.requestPermission().then(perm=>{
+    if(perm === 'granted'){
+      state.settings.remindersEnabled = true;
+      DB.saveSettings(state.settings);
+      showToast(tr('reminders_on'));
+    } else {
+      state.settings.remindersEnabled = false;
+      DB.saveSettings(state.settings);
+      showToast(tr('reminders_denied'));
+    }
+    renderApp();
+  });
 }
-function downloadSwapCard(dateStr, entryId){
-  const entry = entriesFor(dateStr).find(e=>e.id===entryId);
-  const t = entry ? typeById(entry.typeId) : null;
-  if(!entry || !t) return;
-  const canvas = document.createElement('canvas');
-  drawSwapCard(canvas, dateStr, entry, t);
-  const a = document.createElement('a');
-  a.href = canvas.toDataURL('image/png');
-  a.download = `shift-swap-${dateStr}.png`;
-  a.click();
-  showToast(tr('toast_image_downloaded'));
+function disableReminders(){
+  state.settings.remindersEnabled = false;
+  DB.saveSettings(state.settings);
+  renderApp();
 }
-async function copySwapCard(dateStr, entryId){
-  const entry = entriesFor(dateStr).find(e=>e.id===entryId);
-  const t = entry ? typeById(entry.typeId) : null;
-  if(!entry || !t) return;
-  const canvas = document.createElement('canvas');
-  drawSwapCard(canvas, dateStr, entry, t);
-  try{
-    canvas.toBlob(async (blob)=>{
-      if(navigator.clipboard && window.ClipboardItem){
-        await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
-        showToast(tr('toast_copied'));
-      } else {
-        downloadSwapCard(dateStr, entryId);
-      }
-    });
-  }catch(e){
-    downloadSwapCard(dateStr, entryId);
+function enableWeeklyDigest(){
+  if(typeof Notification === 'undefined'){ showToast(tr('reminders_unsupported')); return; }
+  if(Notification.permission === 'granted'){
+    state.settings.weeklyDigestEnabled = true;
+    DB.saveSettings(state.settings);
+    showToast(tr('toast_weekly_digest_on'));
+    renderApp();
+    openSettings();
+    return;
   }
+  Notification.requestPermission().then(perm=>{
+    if(perm === 'granted'){
+      state.settings.weeklyDigestEnabled = true;
+      DB.saveSettings(state.settings);
+      showToast(tr('toast_weekly_digest_on'));
+    } else {
+      state.settings.weeklyDigestEnabled = false;
+      DB.saveSettings(state.settings);
+      showToast(tr('reminders_denied'));
+    }
+    renderApp();
+    openSettings();
+  });
 }
+function disableWeeklyDigest(){
+  state.settings.weeklyDigestEnabled = false;
+  DB.saveSettings(state.settings);
+  renderApp();
+  openSettings();
+}
+setInterval(checkReminders, 30000);
+setInterval(checkWeeklyDigest, 60000);
 
 /* ================= SETTINGS SHEET ================= */
 function openSettings(){
@@ -2097,17 +2144,30 @@ function openSettings(){
         `).join('')}
       </div>
     </div>
-    <div class="section-title" style="margin-top:6px">${tr('export_section')}</div>
-    <button class="btn btn-ghost" style="margin-bottom:14px" onclick="exportICS()">${ICONS.download}${tr('export_ics')}</button>
-    <div class="section-title">${tr('data_section')}</div>
+    <div class="section-title" style="margin-top:6px">${tr('reminders_section')}</div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
+        ${tr('reminders_hint')}
+      </div>
+      ${state.settings.remindersEnabled
+        ? `<button class="btn btn-ghost" onclick="disableReminders()">${ICONS.trash}${tr('reminders_on')} · ${tr('paint_done')}</button>`
+        : `<button class="btn btn-primary" onclick="enableReminders()">${tr('reminders_enable')}</button>`}
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-weight:700; font-size:calc(13.5px * var(--fs-mult, 1)); margin-bottom:6px; display:flex; align-items:center; gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>${tr('weekly_digest_section')}</div>
+      <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
+        ${tr('weekly_digest_hint')}
+      </div>
+      ${state.settings.weeklyDigestEnabled
+        ? `<button class="btn btn-ghost" onclick="disableWeeklyDigest()">${ICONS.trash}${tr('weekly_digest_on')} · ${tr('paint_done')}</button>`
+        : `<button class="btn btn-primary" onclick="enableWeeklyDigest()">${tr('weekly_digest_enable')}</button>`}
+    </div>
+    <div class="section-title" style="margin-top:6px">${tr('data_section')}</div>
     <div class="card" style="margin-bottom:14px">
       <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
         ${tr('data_hint')}
       </div>
-      <button class="btn btn-ghost" style="margin-bottom:8px" onclick="exportBackup()">${ICONS.download}${tr('backup_export')}</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('backupFileInput').click()">${ICONS.upload||ICONS.download}${tr('backup_import')}</button>
-      <input type="file" id="backupFileInput" accept="application/json" style="display:none" onchange="importBackupFile(this.files[0]); this.value='';">
-      <button class="btn btn-ghost" disabled style="opacity:.55; margin-top:8px">${tr('connect_supabase')}</button>
+      <button class="btn btn-ghost" disabled style="opacity:.55">${tr('connect_supabase')}</button>
     </div>
     <button class="btn btn-danger" onclick="clearAllData()">${ICONS.trash}${tr('erase_all')}</button>
   `;
