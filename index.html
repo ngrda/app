@@ -2516,42 +2516,47 @@ function monthCellsMatrix(y, m){
   while(cells.length % 7 !== 0) cells.push({ date: addDays(cells[cells.length - 1].date, 1), outside: true });
   return cells;
 }
+function calRowsFromCells(cells, compact){
+  const todaystr = todayStr();
+  let rows = '';
+  for(let i = 0; i < cells.length; i += 7){
+    const week = cells.slice(i, i + 7);
+    rows += '<tr>' + week.map(c=>{
+      const dstr = toDateStr(c.date);
+      const cls = 'exp-cal-td' + (c.outside ? ' outside' : '') + (dstr === todaystr ? ' today' : '') + (compact ? ' compact' : '');
+      return '<td class="' + cls + '">' + exportDayCellHTML(c.date, compact) + '</td>';
+    }).join('') + '</tr>';
+  }
+  return rows;
+}
 function buildMonthCalendarBlock(y, m, compact){
   const cells = monthCellsMatrix(y, m);
-  const todaystr = todayStr();
-  const head = WEEKDAYS.map(w => '<div class="exp-cal-head">' + w + '</div>').join('');
-  const body = cells.map(c=>{
-    const dstr = toDateStr(c.date);
-    const cls = 'exp-cal-cell' + (c.outside ? ' outside' : '') + (dstr === todaystr ? ' today' : '') + (compact ? ' compact' : '');
-    return '<div class="' + cls + '">' + exportDayCellHTML(c.date, compact) + '</div>';
-  }).join('');
+  const headHtml = '<tr>' + WEEKDAYS.map(w => '<th>' + w + '</th>').join('') + '</tr>';
+  const rows = calRowsFromCells(cells, compact);
   return '<div class="exp-cal-month-wrap' + (compact ? ' compact-wrap' : '') + '">' +
     '<div class="exp-cal-title">' + MONTHS[m] + ' ' + y + '</div>' +
-    '<div class="exp-cal-grid-head">' + head + '</div>' +
-    '<div class="exp-cal-grid' + (compact ? ' compact' : '') + '">' + body + '</div>' +
+    '<table class="exp-cal-table' + (compact ? ' compact' : '') + '"><thead>' + headHtml + '</thead><tbody>' + rows + '</tbody></table>' +
     '</div>';
 }
 function buildWeekCalendarBlock(start){
-  const head = WEEKDAYS.map(w => '<div class="exp-cal-head">' + w + '</div>').join('');
   const cells = [];
-  for(let i = 0; i < 7; i++) cells.push(addDays(start, i));
-  const todaystr = todayStr();
-  const body = cells.map(date=>{
-    const dstr = toDateStr(date);
-    const cls = 'exp-cal-cell week-mode' + (dstr === todaystr ? ' today' : '');
-    return '<div class="' + cls + '">' + exportDayCellHTML(date, false) + '</div>';
-  }).join('');
-  return '<div class="exp-cal-grid-head">' + head + '</div>' +
-    '<div class="exp-cal-grid week-mode">' + body + '</div>';
+  for(let i = 0; i < 7; i++) cells.push({ date: addDays(start, i), outside: false });
+  const headHtml = '<tr>' + WEEKDAYS.map(w => '<th>' + w + '</th>').join('') + '</tr>';
+  const rows = calRowsFromCells(cells, false).replace(/class="exp-cal-td/g, 'class="exp-cal-td week-mode');
+  return '<table class="exp-cal-table week-mode"><thead>' + headHtml + '</thead><tbody>' + rows + '</tbody></table>';
 }
 function buildCalendarSectionHTML(period, start, end){
   if(period === 'weekly') return buildWeekCalendarBlock(start);
   if(period === 'annual'){
     const y = start.getFullYear();
-    let out = '<div class="exp-cal-year-grid">';
-    for(let m = 0; m < 12; m++) out += buildMonthCalendarBlock(y, m, true);
-    out += '</div>';
-    return out;
+    const blocks = [];
+    for(let m = 0; m < 12; m++) blocks.push(buildMonthCalendarBlock(y, m, true));
+    let rows = '';
+    for(let i = 0; i < blocks.length; i += 3){
+      const chunk = blocks.slice(i, i + 3);
+      rows += '<tr>' + chunk.map(b => '<td class="exp-year-td">' + b + '</td>').join('') + '</tr>';
+    }
+    return '<table class="exp-year-table"><tbody>' + rows + '</tbody></table>';
   }
   return buildMonthCalendarBlock(start.getFullYear(), start.getMonth(), false);
 }
@@ -2587,21 +2592,20 @@ function exportDataPDF(){
     '.exp-summary{margin-top:24px;font-size:13px;color:#14161F;font-weight:600;}' +
     '.exp-footer{margin-top:36px;font-size:11px;color:#9B9DB0;}' +
     '.exp-cal-title{font-weight:700;font-size:15px;margin:0 0 8px;}' +
-    '.exp-cal-grid-head{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;}' +
-    '.exp-cal-head{text-align:center;font-size:10px;font-weight:700;color:#6B6D7A;}' +
-    '.exp-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}' +
-    '.exp-cal-cell{border:1px solid #E4E3DC;border-radius:7px;padding:4px;min-height:78px;font-size:10px;overflow:hidden;}' +
-    '.exp-cal-cell.week-mode{min-height:110px;font-size:11px;}' +
-    '.exp-cal-cell.outside{opacity:.32;}' +
-    '.exp-cal-cell.today{border:2px solid #6C5CE7;}' +
-    '.exp-cal-cell.compact{min-height:30px;padding:2px;font-size:7.5px;}' +
+    '.exp-cal-table{width:100%;table-layout:fixed;border-collapse:collapse;}' +
+    '.exp-cal-table th{text-align:center;font-size:10px;font-weight:700;color:#6B6D7A;padding:0 0 4px;}' +
+    '.exp-cal-table td.exp-cal-td{border:1px solid #E4E3DC;vertical-align:top;padding:4px;height:78px;font-size:10px;overflow:hidden;}' +
+    '.exp-cal-table.week-mode td.exp-cal-td{height:130px;font-size:11px;padding:6px;}' +
+    '.exp-cal-td.outside{opacity:.32;}' +
+    '.exp-cal-td.today{border:2px solid #6C5CE7;}' +
+    '.exp-cal-table.compact td.exp-cal-td{height:28px;padding:2px;font-size:7.5px;}' +
     '.exp-cell-num{font-weight:700;margin-bottom:2px;}' +
-    '.exp-chip-row{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:2px;}' +
-    '.exp-chip{display:inline-block;border-radius:4px;padding:1px 4px;font-weight:700;font-size:9px;line-height:1.4;}' +
-    '.exp-cal-cell.compact .exp-chip{font-size:6.5px;padding:0 2px;}' +
+    '.exp-chip-row{margin-bottom:2px;}' +
+    '.exp-chip{display:inline-block;border-radius:4px;padding:1px 4px;margin:0 2px 2px 0;font-weight:700;font-size:9px;line-height:1.4;}' +
+    '.exp-cal-table.compact .exp-chip{font-size:6.5px;padding:0 2px;margin:0 1px 1px 0;}' +
     '.exp-cell-note{color:#8A5A00;font-size:9px;line-height:1.3;}' +
-    '.exp-cal-year-grid{display:flex;flex-wrap:wrap;gap:16px;}' +
-    '.exp-cal-month-wrap{width:calc(33.333% - 11px);}' +
+    '.exp-year-table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;}' +
+    '.exp-year-td{width:33.333%;vertical-align:top;padding:0 8px 16px 0;}' +
     '.exp-cal-month-wrap.compact-wrap{page-break-inside:avoid;break-inside:avoid;}' +
     '@media print{ .toolbar{display:none;} body{background:#fff;} .exp-sheet{padding:0;max-width:none;} }';
   const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rota — ' + escapeHtml(label) + '</title><style>' + css + '</style></head><body>' +
