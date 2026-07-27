@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Rota — Shift Calendar</title>
 <meta name="theme-color" content="#14161F">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="mobile-web-app-capable" content="yes">
+<!-- Intentionally NOT using apple-mobile-web-app-capable / mobile-web-app-capable:
+     making this a "standalone" home-screen app causes iOS to isolate its storage from
+     regular Safari and wipe that storage when the icon is removed. Leaving it as a
+     normal saved link means it opens inside Safari (with the address bar visible) and
+     shares Safari's storage for this site, so removing the icon does NOT erase data. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -581,7 +583,7 @@ const I18N = {
     applies_hint:'Applies "{n}" to every day in the range.', apply_to_range:'Apply to range', check_date_range:'Check your date range',
     settings_title:'Settings', appearance:'Appearance', light:'Light', dark:'Dark',
     text_size:'Text size', color_palette:'Color palette', data_section:'Data',
-    data_hint:'Shifts and shift types are saved locally on this device, and automatically backed up to your account as you use the app. If you added Rota to your phone\'s home screen and deleted that icon, iOS erases the local copy — but reopening Rota from the same link restores everything from your account automatically. As an extra safety net, you can also download a manual backup below.',
+    data_hint:'Shifts and shift types are saved locally on this device (in this browser). The home-screen icon now opens as a normal saved link rather than a separate standalone app, so deleting that icon does not erase your data — Safari keeps it. Data is tied to this specific browser though, so if you switch phones or browsers, download a backup below and restore it there.',
     reminders_section:'Reminders', reminders_hint:'When you add a note, you can choose to be notified a custom number of hours before it. Only works while this app is open on your phone — it cannot wake your phone up on its own.', reminders_enable:'Enable note reminders', reminders_on:'Note reminders on', reminders_denied:'Notifications are blocked for this site — enable them in your phone/browser settings first.', reminders_unsupported:'This browser does not support notifications.',
     reminder_title:'Reminder', reminder_body:'In 1 hour ({time}): {text}', reminder_body_hours:'{hours}h before ({time}): {text}',
     weekly_digest_section:'Weekly summary', weekly_digest_hint:'Get a notification every Sunday listing the notes you have coming up that week.', weekly_digest_enable:'Enable weekly summary', weekly_digest_on:'Weekly summary on',
@@ -661,7 +663,7 @@ const I18N = {
     applies_hint:'Aplica "{n}" a todos los días del rango.', apply_to_range:'Aplicar al rango', check_date_range:'Revisa el rango de fechas',
     settings_title:'Ajustes', appearance:'Apariencia', light:'Claro', dark:'Oscuro',
     text_size:'Tamaño de texto', color_palette:'Paleta de colores', data_section:'Datos',
-    data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo, y también se guardan automáticamente en tu cuenta mientras usas la app. Si añadiste Rota a la pantalla de inicio de tu móvil y borraste ese icono, iOS elimina la copia local — pero al volver a abrir Rota desde el mismo enlace, todo se recupera automáticamente desde tu cuenta. Como protección extra, también puedes descargar una copia de seguridad manual abajo.',
+    data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo (en este navegador). El icono de la pantalla de inicio ahora se abre como un enlace guardado normal, no como una app aislada, así que borrar ese icono ya no elimina tus datos — Safari los conserva. Aun así los datos están ligados a este navegador concreto, así que si cambias de móvil o navegador, descarga una copia de seguridad abajo y restáurala allí.',
     reminders_section:'Recordatorios', reminders_hint:'Al añadir una nota puedes elegir que te avisemos con las horas de antelación que quieras. Solo funciona mientras esta app esté abierta en tu móvil — no puede despertar el móvil por sí sola.', reminders_enable:'Activar avisos de notas', reminders_on:'Avisos de notas activados', reminders_denied:'Las notificaciones están bloqueadas para esta web — actívalas primero en los ajustes de tu móvil/navegador.', reminders_unsupported:'Este navegador no admite notificaciones.',
     reminder_title:'Recordatorio', reminder_body:'En 1 hora ({time}): {text}', reminder_body_hours:'{hours}h antes ({time}): {text}',
     weekly_digest_section:'Resumen semanal', weekly_digest_hint:'Recibe una notificación cada domingo con las notas que tienes esa semana.', weekly_digest_enable:'Activar resumen semanal', weekly_digest_on:'Resumen semanal activado',
