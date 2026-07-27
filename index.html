@@ -2566,10 +2566,11 @@ function exportDataPDF(){
     '.toolbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#14161F;color:#fff;padding:12px 18px;}' +
     '.toolbar-title{font-weight:700;font-size:14px;}' +
     '.toolbar-actions{display:flex;align-items:center;gap:8px;}' +
-    '.toolbar button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;padding:8px 14px;font-weight:600;font-size:13px;}' +
+    '.toolbar button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;padding:14px 22px;font-weight:700;font-size:16px;}' +
     '.toolbar button:hover{background:rgba(255,255,255,.18);}' +
-    '.toolbar .exp-close{width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;border-radius:50%;}' +
+    '.toolbar .exp-close{width:48px;height:48px;padding:0;display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1;border-radius:50%;}' +
     '.exp-sheet{max-width:900px;margin:0 auto;background:#fff;padding:28px 32px;}' +
+    '.exp-sheet.wide{max-width:none;padding:28px 40px;}' +
     '.exp-sheet + .exp-sheet{page-break-before:always;}' +
     'h1{font-size:20px;margin:0 0 2px;font-weight:700;}' +
     '.exp-sub{color:#6B6D7A;margin-bottom:20px;font-size:13px;}' +
@@ -2619,7 +2620,7 @@ function exportDataPDF(){
       (totalHours > 0 ? '<div class="exp-summary">' + tr('export_total_hours') + ': ' + totalHours.toFixed(1) + 'h</div>' : '') +
       '<div class="exp-footer">' + tr('export_generated_on') + ' ' + genDate.toLocaleDateString() + '</div>' +
     '</div>' +
-    '<div class="exp-sheet">' +
+    '<div class="exp-sheet wide">' +
       '<div class="exp-page-label">' + tr('export_calendar_title') + '</div>' +
       '<h1>Rota</h1>' +
       '<div class="exp-sub">' + escapeHtml(label) + '</div>' +
