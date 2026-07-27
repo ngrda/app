@@ -454,6 +454,7 @@ html.dark .year-cell{color:#fff;}
 </div>
 
 <div id="modal-root"></div>
+<input type="file" id="backupFileInput" accept="application/json,.json" style="display:none" onchange="importBackupFile(this)">
 
 <script>
 window.addEventListener('error', function(e){ console.error('Unhandled error', e.error||e.message); e.preventDefault && e.preventDefault(); });
@@ -580,7 +581,7 @@ const I18N = {
     applies_hint:'Applies "{n}" to every day in the range.', apply_to_range:'Apply to range', check_date_range:'Check your date range',
     settings_title:'Settings', appearance:'Appearance', light:'Light', dark:'Dark',
     text_size:'Text size', color_palette:'Color palette', data_section:'Data',
-    data_hint:'Shifts and shift types are saved locally on this device. This build is Supabase-ready — connecting an account will enable multi-device sync.',
+    data_hint:'Shifts and shift types are saved locally on this device, and automatically backed up to your account as you use the app. If you added Rota to your phone\'s home screen and deleted that icon, iOS erases the local copy — but reopening Rota from the same link restores everything from your account automatically. As an extra safety net, you can also download a manual backup below.',
     reminders_section:'Reminders', reminders_hint:'When you add a note, you can choose to be notified a custom number of hours before it. Only works while this app is open on your phone — it cannot wake your phone up on its own.', reminders_enable:'Enable note reminders', reminders_on:'Note reminders on', reminders_denied:'Notifications are blocked for this site — enable them in your phone/browser settings first.', reminders_unsupported:'This browser does not support notifications.',
     reminder_title:'Reminder', reminder_body:'In 1 hour ({time}): {text}', reminder_body_hours:'{hours}h before ({time}): {text}',
     weekly_digest_section:'Weekly summary', weekly_digest_hint:'Get a notification every Sunday listing the notes you have coming up that week.', weekly_digest_enable:'Enable weekly summary', weekly_digest_on:'Weekly summary on',
@@ -622,7 +623,10 @@ const I18N = {
     extra_wage_input_placeholder:'Extra hourly wage', extra_wage_save_btn:'Save', extra_wage_skip_btn:'Use the same rate',
     earnings_title:'Earnings', regular_earnings:'Regular pay', extra_earnings:'Extra pay', total_earnings:'Total estimated',
     wage_settings_section:'Wage', wage_settings_hint:'Set your hourly wage to see earnings estimates in Metrics.',
-    hourly_wage_label:'Hourly wage', extra_hourly_wage_label:'Extra hourly wage (optional)', extra_wage_uses_regular:'Extra shifts use the regular rate'
+    hourly_wage_label:'Hourly wage', extra_hourly_wage_label:'Extra hourly wage (optional)', extra_wage_uses_regular:'Extra shifts use the regular rate',
+    backup_export_btn:'Download backup', backup_import_btn:'Restore from backup',
+    toast_backup_exported:'Backup downloaded', toast_backup_imported:'Backup restored', toast_backup_import_failed:'Could not read that backup file',
+    toast_data_restored:'Welcome back — your data was restored automatically'
   },
   es: {
     nav_day:'Día', nav_week:'Semana', nav_month:'Mes', nav_list:'Lista', nav_add:'Añadir',
@@ -657,7 +661,7 @@ const I18N = {
     applies_hint:'Aplica "{n}" a todos los días del rango.', apply_to_range:'Aplicar al rango', check_date_range:'Revisa el rango de fechas',
     settings_title:'Ajustes', appearance:'Apariencia', light:'Claro', dark:'Oscuro',
     text_size:'Tamaño de texto', color_palette:'Paleta de colores', data_section:'Datos',
-    data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo. Esta versión está lista para Supabase — conectar una cuenta habilitará la sincronización multidispositivo.',
+    data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo, y también se guardan automáticamente en tu cuenta mientras usas la app. Si añadiste Rota a la pantalla de inicio de tu móvil y borraste ese icono, iOS elimina la copia local — pero al volver a abrir Rota desde el mismo enlace, todo se recupera automáticamente desde tu cuenta. Como protección extra, también puedes descargar una copia de seguridad manual abajo.',
     reminders_section:'Recordatorios', reminders_hint:'Al añadir una nota puedes elegir que te avisemos con las horas de antelación que quieras. Solo funciona mientras esta app esté abierta en tu móvil — no puede despertar el móvil por sí sola.', reminders_enable:'Activar avisos de notas', reminders_on:'Avisos de notas activados', reminders_denied:'Las notificaciones están bloqueadas para esta web — actívalas primero en los ajustes de tu móvil/navegador.', reminders_unsupported:'Este navegador no admite notificaciones.',
     reminder_title:'Recordatorio', reminder_body:'En 1 hora ({time}): {text}', reminder_body_hours:'{hours}h antes ({time}): {text}',
     weekly_digest_section:'Resumen semanal', weekly_digest_hint:'Recibe una notificación cada domingo con las notas que tienes esa semana.', weekly_digest_enable:'Activar resumen semanal', weekly_digest_on:'Resumen semanal activado',
@@ -699,7 +703,10 @@ const I18N = {
     extra_wage_input_placeholder:'Salario por hora extra', extra_wage_save_btn:'Guardar', extra_wage_skip_btn:'Usar la misma tarifa',
     earnings_title:'Ganancias', regular_earnings:'Sueldo normal', extra_earnings:'Sueldo extra', total_earnings:'Total estimado',
     wage_settings_section:'Salario', wage_settings_hint:'Configura tu salario por hora para ver estimaciones de ganancias en Estadísticas.',
-    hourly_wage_label:'Salario por hora', extra_hourly_wage_label:'Salario por hora extra (opcional)', extra_wage_uses_regular:'Las horas extra usan la tarifa normal'
+    hourly_wage_label:'Salario por hora', extra_hourly_wage_label:'Salario por hora extra (opcional)', extra_wage_uses_regular:'Las horas extra usan la tarifa normal',
+    backup_export_btn:'Descargar copia de seguridad', backup_import_btn:'Restaurar copia de seguridad',
+    toast_backup_exported:'Copia de seguridad descargada', toast_backup_imported:'Copia de seguridad restaurada', toast_backup_import_failed:'No se pudo leer ese archivo de copia de seguridad',
+    toast_data_restored:'Bienvenido de nuevo — tus datos se han recuperado automáticamente'
   }
 };
 function tr(key, vars){
@@ -871,6 +878,7 @@ async function init(){
   if(navigator.storage && navigator.storage.persist){
     navigator.storage.persist().catch(()=>{});
   }
+  const hadLocalData = ['shiftTypes','shifts','notes','settings'].some(k => DB.lsGet(k) !== null);
   const [shiftTypes, shifts, notes, settings] = await Promise.all([DB.loadShiftTypes(), DB.loadShifts(), DB.loadNotes(), DB.loadSettings()]);
   state.shiftTypes = shiftTypes;
   state.shifts = shifts;
@@ -888,6 +896,13 @@ async function init(){
   seedDefaultShiftTypesIfNeeded();
   renderApp();
   continueOnboarding();
+  // If this device's local storage started empty (e.g. the home-screen icon was deleted
+  // and reinstalled) but we still had shifts/types/notes saved in the cloud-backed store,
+  // let the person know their data came back on its own.
+  const gotSomethingBack = shiftTypes.length > 0 || Object.keys(shifts).length > 0 || Object.keys(notes).length > 0;
+  if(!hadLocalData && DB.hasArtifactStorage() && gotSomethingBack){
+    setTimeout(()=>showToast(tr('toast_data_restored')), 700);
+  }
 }
 function applyStaticLabels(){
   document.querySelectorAll('.navbtn [data-i18n]').forEach(el=>{
@@ -2708,6 +2723,10 @@ function openSettings(){
       <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
         ${tr('data_hint')}
       </div>
+      <div style="display:flex; gap:10px; margin-bottom:10px">
+        <button class="btn btn-primary" style="flex:1" onclick="exportBackupJSON()">${ICONS.download}${tr('backup_export_btn')}</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="triggerImportBackup()">${tr('backup_import_btn')}</button>
+      </div>
       <button class="btn btn-ghost" disabled style="opacity:.55">${tr('connect_supabase')}</button>
     </div>
     <button class="btn btn-danger" onclick="clearAllData()">${ICONS.trash}${tr('erase_all')}</button>
@@ -2966,6 +2985,55 @@ function clearAllData(){
   closeModal();
   renderApp();
   showToast(tr('toast_all_cleared'));
+}
+function exportBackupJSON(){
+  const backup = {
+    app: 'rota', version: 1, exportedAt: new Date().toISOString(),
+    shiftTypes: state.shiftTypes, shifts: state.shifts, notes: state.notes, settings: state.settings
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'rota-backup-' + todayStr() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 3000);
+  showToast(tr('toast_backup_exported'));
+}
+function triggerImportBackup(){
+  const input = document.getElementById('backupFileInput');
+  if(input){ input.value = ''; input.click(); }
+}
+async function importBackupFile(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if(!data || typeof data !== 'object') throw new Error('invalid backup');
+    state.shiftTypes = Array.isArray(data.shiftTypes) ? data.shiftTypes : [];
+    state.shifts = (data.shifts && typeof data.shifts === 'object') ? data.shifts : {};
+    state.notes = (data.notes && typeof data.notes === 'object') ? data.notes : {};
+    state.settings = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
+    await Promise.all([
+      DB.saveShiftTypes(state.shiftTypes),
+      DB.saveShifts(state.shifts),
+      DB.saveNotes(state.notes),
+      DB.saveSettings(state.settings)
+    ]);
+    applyTheme();
+    applyLanguageArrays();
+    applyStaticLabels();
+    closeModal();
+    renderApp();
+    showToast(tr('toast_backup_imported'));
+  }catch(e){
+    console.error('Backup import failed', e);
+    showToast(tr('toast_backup_import_failed'));
+  }
+  input.value = '';
 }
 
 /* ================= Toast ================= */
