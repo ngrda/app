@@ -372,17 +372,6 @@ html.dark .year-cell{color:#fff;}
 .paint-chip:active{transform:scale(.95);}
 .legend-dot{width:9px; height:9px; border-radius:3px;}
 
-/* ---------- List view search / filter bar ---------- */
-.list-toolbar{display:flex; flex-direction:column; gap:8px; margin-bottom:18px;}
-.list-search-row{display:flex; gap:8px; align-items:center;}
-.list-search-row .search-wrap{position:relative; flex:1; min-width:0;}
-.list-search-row .search-wrap svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--text-muted); pointer-events:none;}
-.list-search-row .search-wrap input{padding-left:34px;}
-.list-past-btn{flex-shrink:0; display:flex; align-items:center; gap:5px; border:1.5px solid var(--border); background:var(--bg-elevated); border-radius:999px; padding:0 13px; height:40px; font-weight:700; font-size:calc(13px * var(--fs-mult, 1)); color:var(--text); white-space:nowrap;}
-.list-past-btn svg{width:13px; height:13px;}
-.list-past-btn.active{background:var(--accent); color:var(--accent-text); border-color:var(--accent);}
-.list-past-btn:active{transform:scale(.95);}
-
 ::-webkit-scrollbar{width:0; height:0;}
 </style>
 </head>
@@ -589,10 +578,11 @@ const I18N = {
     default_morning:'Morning', default_afternoon:'Afternoon', default_night:'Night',
     default_morning_afternoon:'Morning & Afternoon', default_off:'Off', default_vacation:'Vacation', default_extra:'Extra',
     open_full_day:'Open full day view',
-    list_search_placeholder:'Search shifts and notes…',
-    list_show_past:'Past', list_show_upcoming:'Upcoming',
-    list_no_upcoming_matches:'No upcoming events match your filters',
-    list_no_past_matches:'No past events match your filters'
+    export_section:'Export data', export_hint:'Export your shifts and notes as a PDF you can save or print.',
+    export_range_label:'Range', export_weekly:'Weekly', export_monthly:'Monthly', export_annual:'Annual',
+    export_pdf_btn:'Export PDF', export_no_entries:'No shifts or notes in this period.',
+    export_total_hours:'Total hours worked', export_popup_blocked:'Please allow pop-ups for this site to export the PDF.',
+    export_generated_on:'Generated on'
   },
   es: {
     nav_day:'Día', nav_week:'Semana', nav_month:'Mes', nav_list:'Lista', nav_add:'Añadir',
@@ -652,10 +642,11 @@ const I18N = {
     default_morning:'Mañana', default_afternoon:'Tarde', default_night:'Noche',
     default_morning_afternoon:'Mañana y Tarde', default_off:'Libre', default_vacation:'Vacaciones', default_extra:'Extra',
     open_full_day:'Ver día completo',
-    list_search_placeholder:'Buscar turnos y notas…',
-    list_show_past:'Pasado', list_show_upcoming:'Próximos',
-    list_no_upcoming_matches:'No hay próximos eventos que cumplan los filtros',
-    list_no_past_matches:'No hay eventos pasados que cumplan los filtros'
+    export_section:'Exportar datos', export_hint:'Exporta tus turnos y notas en un PDF que puedes guardar o imprimir.',
+    export_range_label:'Rango', export_weekly:'Semanal', export_monthly:'Mensual', export_annual:'Anual',
+    export_pdf_btn:'Exportar PDF', export_no_entries:'No hay turnos ni notas en este período.',
+    export_total_hours:'Total de horas trabajadas', export_popup_blocked:'Permite las ventanas emergentes de este sitio para exportar el PDF.',
+    export_generated_on:'Generado el'
   }
 };
 function tr(key, vars){
@@ -720,7 +711,8 @@ const DEFAULT_SETTINGS = {
   remindersEnabled: false,
   weeklyDigestEnabled: false,
   weeklyDigestAsked: false,
-  fontSizeAsked: false
+  fontSizeAsked: false,
+  exportPeriod: 'monthly'
 };
 const DB = {
   hasArtifactStorage(){ return typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function'; },
@@ -786,7 +778,6 @@ const state = {
   metricsPeriod: 'week',
   addCtx: { mode: 'shift', selectedTypeId: null, noteId: null },
   paintMode: { active: false, typeIds: [] },
-  listFilter: { query: '', typeIds: [], showPast: false },
 };
 
 function typeById(id){ return state.shiftTypes.find(t=>t.id===id); }
@@ -1698,62 +1689,13 @@ function attachMonthSwipe(){
 }
 
 /* ================= YEAR VIEW ================= */
-function renderListToolbar(){
-  const filter = state.listFilter;
-  const chips = state.shiftTypes.map(t=>`
-    <button class="paint-chip ${filter.typeIds.includes(t.id)?'selected':''}" style="color:${t.color}" onclick="toggleListTypeFilter('${t.id}')">
-      <span style="color:${t.color}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</span>${escapeHtml(t.name)}
-    </button>`).join('');
-  return `
-    <div class="list-toolbar">
-      <div class="list-search-row">
-        <div class="search-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          <input id="listSearchInput" type="text" value="${escapeHtml(filter.query)}" placeholder="${tr('list_search_placeholder')}" oninput="setListSearchQuery(this.value)">
-        </div>
-        <button class="list-past-btn ${filter.showPast?'active':''}" onclick="toggleListPast()" aria-label="${filter.showPast?tr('list_show_upcoming'):tr('list_show_past')}">
-          ${filter.showPast?tr('list_show_upcoming'):tr('list_show_past')}${filter.showPast?ICONS.chevR:ICONS.chevL}
-        </button>
-      </div>
-      ${state.shiftTypes.length ? `<div class="paint-chip-row">${chips}</div>` : ''}
-    </div>
-  `;
-}
-let _listSearchDebounce = null;
-function setListSearchQuery(val){
-  state.listFilter.query = val;
-  clearTimeout(_listSearchDebounce);
-  _listSearchDebounce = setTimeout(()=>{
-    renderApp();
-    const inp = document.getElementById('listSearchInput');
-    if(inp){
-      inp.focus();
-      const pos = inp.value.length;
-      inp.setSelectionRange(pos, pos);
-    }
-  }, 200);
-}
-function toggleListTypeFilter(id){
-  const idx = state.listFilter.typeIds.indexOf(id);
-  if(idx >= 0) state.listFilter.typeIds.splice(idx,1);
-  else state.listFilter.typeIds.push(id);
-  renderApp();
-}
-function toggleListPast(){
-  state.listFilter.showPast = !state.listFilter.showPast;
-  renderApp();
-}
 function renderListView(){
   const todaystr = todayStr();
-  const filter = state.listFilter;
-  const toolbar = renderListToolbar();
-
   const dateSet = new Set([...Object.keys(state.shifts||{}), ...Object.keys(state.notes||{})]);
-  const allDates = [...dateSet].filter(dstr=>entriesFor(dstr).length || notesFor(dstr).length);
+  const dates = [...dateSet].filter(dstr=>entriesFor(dstr).length || notesFor(dstr).length).sort();
 
-  if(allDates.length === 0){
+  if(dates.length === 0){
     return `
-      ${toolbar}
       <div class="section-title" style="margin-top:0">${tr('nav_list')}</div>
       <div class="empty-state">
         ${ICONS.calBlank}
@@ -1763,28 +1705,9 @@ function renderListView(){
     `;
   }
 
-  // Normal mode: today + future (ascending). "Pasado" mode: strictly before today (most recent first).
-  let dates = allDates.filter(dstr => filter.showPast ? dstr < todaystr : dstr >= todaystr).sort();
-  if(filter.showPast) dates.reverse();
-
-  const q = filter.query.trim().toLowerCase();
-  const matchesEntry = (e)=>{
-    if(filter.typeIds.length && !filter.typeIds.includes(e.typeId)) return false;
-    if(!q) return true;
-    const t = typeById(e.typeId);
-    const name = t ? t.name.toLowerCase() : '';
-    return name.includes(q) || (e.notes||'').toLowerCase().includes(q);
-  };
-  const matchesNote = (n)=>{
-    if(filter.typeIds.length) return false; // notes have no shift type, hide when a type filter is active
-    if(!q) return true;
-    return (n.text||'').toLowerCase().includes(q);
-  };
-
   const groups = dates.map(dstr=>{
-    const entries = entriesFor(dstr).filter(matchesEntry);
-    const notes = notesFor(dstr).filter(matchesNote);
-    if(!entries.length && !notes.length) return '';
+    const entries = entriesFor(dstr);
+    const notes = notesFor(dstr);
     const isToday = dstr === todaystr;
     const itemsHtml = entries.map(e=>renderAgendaItem(e, dstr)).join('')
       + notes.map(n=>renderNoteAgendaItem(n, dstr)).join('');
@@ -1794,17 +1717,9 @@ function renderListView(){
     `;
   }).join('');
 
-  const hasMatches = groups.trim().length > 0;
-
   return `
-    ${toolbar}
     <div class="section-title" style="margin-top:0">${tr('nav_list')}</div>
-    ${hasMatches ? groups : `
-      <div class="empty-state">
-        ${ICONS.calBlank}
-        <div class="title">${filter.showPast ? tr('list_no_past_matches') : tr('list_no_upcoming_matches')}</div>
-      </div>
-    `}
+    ${groups}
   `;
 }
 
@@ -2464,6 +2379,21 @@ function openSettings(){
         ? `<button class="btn btn-ghost" onclick="disableWeeklyDigest()">${ICONS.trash}${tr('weekly_digest_on')} · ${tr('paint_done')}</button>`
         : `<button class="btn btn-primary" onclick="enableWeeklyDigest()">${tr('weekly_digest_enable')}</button>`}
     </div>
+    <div class="section-title" style="margin-top:6px">${tr('export_section')}</div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
+        ${tr('export_hint')}
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>${tr('export_range_label')}</label>
+        <div class="modeToggle">
+          <button class="${state.settings.exportPeriod==='weekly'?'active':''}" onclick="setExportPeriod('weekly')">${tr('export_weekly')}</button>
+          <button class="${state.settings.exportPeriod==='monthly'?'active':''}" onclick="setExportPeriod('monthly')">${tr('export_monthly')}</button>
+          <button class="${state.settings.exportPeriod==='annual'?'active':''}" onclick="setExportPeriod('annual')">${tr('export_annual')}</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="exportDataPDF()">${ICONS.download}${tr('export_pdf_btn')}</button>
+    </div>
     <div class="section-title" style="margin-top:6px">${tr('data_section')}</div>
     <div class="card" style="margin-bottom:14px">
       <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
@@ -2500,6 +2430,91 @@ function setPalette(k){
   applyTheme();
   DB.saveSettings(state.settings);
   openSettings();
+}
+function setExportPeriod(k){
+  state.settings.exportPeriod = k;
+  DB.saveSettings(state.settings);
+  openSettings();
+}
+function buildExportRange(period){
+  let start, end, label;
+  if(period === 'weekly'){
+    const cursor = fromDateStr(state.weekCursor || todayStr());
+    start = addDays(cursor, -mondayIndex(cursor));
+    end = addDays(start, 6);
+    label = fmtHumanShort(toDateStr(start)) + ' – ' + fmtHumanShort(toDateStr(end)) + ', ' + start.getFullYear();
+  } else if(period === 'annual'){
+    const y = state.yearCursor || new Date().getFullYear();
+    start = new Date(y, 0, 1);
+    end = new Date(y, 11, 31);
+    label = String(y);
+  } else { // monthly
+    const mc = state.monthCursor || { y:new Date().getFullYear(), m:new Date().getMonth() };
+    start = new Date(mc.y, mc.m, 1);
+    end = new Date(mc.y, mc.m + 1, 0);
+    label = MONTHS[mc.m] + ' ' + mc.y;
+  }
+  return { start, end, label };
+}
+function exportDataPDF(){
+  const period = state.settings.exportPeriod || 'monthly';
+  const { start, end, label } = buildExportRange(period);
+  let totalHours = 0;
+  const dayRows = [];
+  let d = new Date(start);
+  while(d <= end){
+    const dstr = toDateStr(d);
+    const shifts = entriesFor(dstr);
+    const notesArr = notesFor(dstr);
+    if(shifts.length || notesArr.length){
+      const shiftParts = shifts.map(e=>{
+        const t = typeById(e.typeId);
+        const name = t ? t.name : tr('unknown_type');
+        const hrs = t ? shiftDurationHours(t) : 0;
+        totalHours += hrs;
+        const timeStr = (t && t.start && t.end) ? (t.start + '–' + t.end) : '';
+        const noteStr = e.notes ? escapeHtml(e.notes) : '';
+        return '<div class="exp-shift"><span class="exp-shift-name">' + escapeHtml(name) + '</span>' +
+          (timeStr ? ' <span class="exp-time">' + timeStr + '</span>' : '') +
+          (noteStr ? '<div class="exp-shift-notes">' + noteStr + '</div>' : '') + '</div>';
+      }).join('');
+      const noteParts = notesArr.map(n => '<div class="exp-note">📝 ' + escapeHtml(n.text) + '</div>').join('');
+      dayRows.push('<tr><td class="exp-date">' + escapeHtml(fmtHuman(dstr)) + '</td><td>' + shiftParts + noteParts + '</td></tr>');
+    }
+    d = addDays(d, 1);
+  }
+  const bodyRows = dayRows.length ? dayRows.join('') :
+    '<tr><td colspan="2" class="exp-empty">' + tr('export_no_entries') + '</td></tr>';
+  const genDate = new Date();
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rota — ' + escapeHtml(label) + '</title><style>' +
+    'body{font-family:-apple-system,BlinkMacSystemFont,"Inter",Arial,sans-serif;color:#14161F;padding:32px;margin:0;}' +
+    'h1{font-size:20px;margin:0 0 2px;font-weight:700;}' +
+    '.exp-sub{color:#6B6D7A;margin-bottom:24px;font-size:13px;}' +
+    'table{width:100%;border-collapse:collapse;}' +
+    'td{border-bottom:1px solid #E4E3DC;padding:10px 8px;vertical-align:top;font-size:13px;}' +
+    '.exp-date{white-space:nowrap;font-weight:700;width:170px;padding-right:16px;}' +
+    '.exp-shift{margin-bottom:6px;}' +
+    '.exp-shift-name{font-weight:700;}' +
+    '.exp-time{color:#6B6D7A;font-family:"JetBrains Mono",monospace;font-size:12px;}' +
+    '.exp-shift-notes{color:#6B6D7A;font-size:12px;margin-top:2px;}' +
+    '.exp-note{color:#8A5A00;font-size:12px;margin-top:4px;}' +
+    '.exp-empty{text-align:center;color:#9B9DB0;padding:40px 0;}' +
+    '.exp-summary{margin-top:24px;font-size:13px;color:#14161F;font-weight:600;}' +
+    '.exp-footer{margin-top:36px;font-size:11px;color:#9B9DB0;}' +
+    '@media print{ body{padding:12mm;} }' +
+    '</style></head><body>' +
+    '<h1>Rota</h1>' +
+    '<div class="exp-sub">' + escapeHtml(label) + '</div>' +
+    '<table><tbody>' + bodyRows + '</tbody></table>' +
+    (totalHours > 0 ? '<div class="exp-summary">' + tr('export_total_hours') + ': ' + totalHours.toFixed(1) + 'h</div>' : '') +
+    '<div class="exp-footer">' + tr('export_generated_on') + ' ' + genDate.toLocaleDateString() + '</div>' +
+    '</body></html>';
+  const w = window.open('', '_blank');
+  if(!w){ showToast(tr('export_popup_blocked')); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){} }, 350);
 }
 function clearAllData(){
   state.shifts = {};
