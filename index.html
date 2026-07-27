@@ -246,6 +246,11 @@ html.dark .year-cell{color:#fff;}
 .checkbox-row{display:flex; align-items:center; gap:10px; background:var(--bg-sunken); border-radius:12px; padding:12px 14px;}
 .checkbox-row input{width:20px; height:20px; padding:0; flex-shrink:0; accent-color:var(--accent);}
 .checkbox-row label{margin:0; font-size:calc(13.5px * var(--fs-mult, 1)); font-weight:600; text-transform:none; letter-spacing:0; color:var(--text);}
+.month-pick-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+.month-pick-btn{border-radius:14px; padding:14px 6px; text-align:center; border:2px solid var(--border); background:var(--bg-elevated); font-weight:700; font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text); transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;}
+.month-pick-btn:active{transform:scale(.96);}
+.month-pick-btn.is-today{color:var(--accent);}
+.month-pick-btn.selected{border-color:var(--accent); box-shadow:var(--shadow); background:color-mix(in srgb, var(--accent) 12%, var(--bg-elevated));}
 .palette-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:10px;}
 .palette-swatch{aspect-ratio:1/1; width:100%; border-radius:50%; border:none; padding:0; position:relative; box-shadow:var(--shadow);}
 .palette-swatch.selected::after{content:''; position:absolute; inset:-4px; border:2px solid var(--text); border-radius:50%;}
@@ -1303,7 +1308,7 @@ function renderMonthView(){
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftMonth(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
-        <h2 class="date-heading" style="font-size:calc(17px * var(--fs-mult, 1))">${MONTHS[m]} ${y}</h2>
+        <h2 class="date-heading" style="font-size:calc(17px * var(--fs-mult, 1)); cursor:pointer" onclick="openMonthPicker()">${MONTHS[m]} ${y}</h2>
       </div>
       <button class="icon-btn" onclick="shiftMonth(1)">${ICONS.chevR}</button>
     </div>
@@ -1483,6 +1488,40 @@ function shiftMonth(n){
   m += n;
   if(m<0){ m=11; y--; } if(m>11){ m=0; y++; }
   state.monthCursor = {y,m};
+  renderApp();
+}
+/* ================= MONTH PICKER SHEET ================= */
+let _monthPickerYear = null;
+function openMonthPicker(){
+  _monthPickerYear = state.monthCursor.y;
+  renderMonthPickerSheet();
+}
+function shiftMonthPickerYear(n){
+  _monthPickerYear += n;
+  renderMonthPickerSheet();
+}
+function renderMonthPickerSheet(){
+  const y = _monthPickerYear;
+  const now = new Date();
+  const monthsHtml = MONTHS.map((name, idx)=>{
+    const isSelected = (y === state.monthCursor.y && idx === state.monthCursor.m);
+    const isCurrent = (y === now.getFullYear() && idx === now.getMonth());
+    return `<button class="month-pick-btn ${isSelected?'selected':''} ${isCurrent?'is-today':''}" onclick="pickMonth(${y},${idx})">${name}</button>`;
+  }).join('');
+  const html = `
+    <div class="sheet-handle"></div>
+    <div class="dateflip" style="margin-bottom:14px">
+      <button class="icon-btn" onclick="shiftMonthPickerYear(-1)">${ICONS.chevL}</button>
+      <h2 class="date-heading">${y}</h2>
+      <button class="icon-btn" onclick="shiftMonthPickerYear(1)">${ICONS.chevR}</button>
+    </div>
+    <div class="month-pick-grid">${monthsHtml}</div>
+  `;
+  showSheet(html);
+}
+function pickMonth(y, m){
+  state.monthCursor = {y, m};
+  closeModal();
   renderApp();
 }
 let _monthSwipeLock = false;
