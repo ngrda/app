@@ -2078,6 +2078,18 @@ function renderMetrics(){
     <div class="card">
       ${breakdownRows || `<div class="text-muted" style="font-size:calc(13.5px * var(--fs-mult, 1))">${tr('no_hours_logged')}</div>`}
     </div>
+    <div class="section-title">${tr('wage_settings_section')}</div>
+    <div class="card">
+      <div class="text-muted" style="font-size:calc(12.5px * var(--fs-mult, 1)); margin-bottom:12px; line-height:1.4">${tr('wage_settings_hint')}</div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); display:block; margin-bottom:4px">${tr('hourly_wage_label')}</label>
+        <input type="number" inputmode="decimal" step="0.01" min="0" value="${state.settings.hourlyWage != null ? state.settings.hourlyWage : ''}" onchange="setHourlyWageFromMetrics(this.value)">
+      </div>
+      <div>
+        <label style="font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); display:block; margin-bottom:4px">${tr('extra_hourly_wage_label')}</label>
+        <input type="number" inputmode="decimal" step="0.01" min="0" value="${state.settings.extraHourlyWage != null ? state.settings.extraHourlyWage : ''}" onchange="setExtraHourlyWageFromMetrics(this.value)">
+      </div>
+    </div>
   `;
 }
 function setMetricsPeriod(p){ state.metricsPeriod = p; renderApp(); }
@@ -2658,18 +2670,6 @@ function openSettings(){
         <button class="${state.settings.calendarStyle==='bars'?'active':''}" onclick="setCalendarStyle('bars')">${tr('calendar_style_bars')}</button>
       </div>
     </div>
-    <div class="field">
-      <label>${tr('wage_settings_section')}</label>
-      <div class="text-muted" style="font-size:calc(12.5px * var(--fs-mult, 1)); margin-bottom:8px; line-height:1.4">${tr('wage_settings_hint')}</div>
-      <div style="margin-bottom:10px">
-        <label style="font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); display:block; margin-bottom:4px">${tr('hourly_wage_label')}</label>
-        <input type="number" inputmode="decimal" step="0.01" min="0" value="${state.settings.hourlyWage != null ? state.settings.hourlyWage : ''}" onchange="setHourlyWageExplicit(this.value)">
-      </div>
-      <div>
-        <label style="font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); display:block; margin-bottom:4px">${tr('extra_hourly_wage_label')}</label>
-        <input type="number" inputmode="decimal" step="0.01" min="0" value="${state.settings.extraHourlyWage != null ? state.settings.extraHourlyWage : ''}" onchange="setExtraHourlyWageExplicit(this.value)">
-      </div>
-    </div>
     <div class="section-title" style="margin-top:6px">${tr('reminders_section')}</div>
     <div class="card" style="margin-bottom:14px">
       <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
@@ -2714,21 +2714,19 @@ function openSettings(){
   `;
   showSheet(html);
 }
-function setHourlyWageExplicit(val){
+function setHourlyWageFromMetrics(val){
   const num = parseFloat(val);
   state.settings.hourlyWage = (!isNaN(num) && num > 0) ? num : null;
   state.settings.wageAsked = true;
   DB.saveSettings(state.settings);
   renderApp();
-  openSettings();
 }
-function setExtraHourlyWageExplicit(val){
+function setExtraHourlyWageFromMetrics(val){
   const num = parseFloat(val);
   state.settings.extraHourlyWage = (!isNaN(num) && num > 0) ? num : null;
   state.settings.extraWageAsked = true;
   DB.saveSettings(state.settings);
   renderApp();
-  openSettings();
 }
 function setLanguageExplicit(lang){
   state.settings.language = lang;
