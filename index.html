@@ -615,7 +615,14 @@ const I18N = {
     calendar_style_classic:'Classic', calendar_style_bars:'Event bars',
     calendar_style_onboarding_title:'Pick your calendar style', calendar_style_onboarding_sub:"Choose the month view that suits you best. You can always change this later in Settings.",
     calendar_style_classic_desc:'Colored day tiles with a short label.', calendar_style_bars_desc:'White grid with a colored bar per shift, like a classic calendar app.',
-    calendar_style_choose:'Use this style'
+    calendar_style_choose:'Use this style',
+    wage_onboarding_title:'Want to track your earnings?', wage_onboarding_sub:'Add your hourly wage and Rota can calculate how much you earn each week and month. You can change this anytime in Settings.',
+    wage_input_placeholder:'Hourly wage', wage_save_btn:'Save and calculate', wage_skip_btn:'Not now',
+    extra_wage_onboarding_title:'Different rate for extra shifts?', extra_wage_onboarding_sub:'If your "Extra" shifts pay a different hourly rate, add it here so Rota can calculate it separately. Otherwise your regular wage will be used.',
+    extra_wage_input_placeholder:'Extra hourly wage', extra_wage_save_btn:'Save', extra_wage_skip_btn:'Use the same rate',
+    earnings_title:'Earnings', regular_earnings:'Regular pay', extra_earnings:'Extra pay', total_earnings:'Total estimated',
+    wage_settings_section:'Wage', wage_settings_hint:'Set your hourly wage to see earnings estimates in Metrics.',
+    hourly_wage_label:'Hourly wage', extra_hourly_wage_label:'Extra hourly wage (optional)', extra_wage_uses_regular:'Extra shifts use the regular rate'
   },
   es: {
     nav_day:'Día', nav_week:'Semana', nav_month:'Mes', nav_list:'Lista', nav_add:'Añadir',
@@ -685,7 +692,14 @@ const I18N = {
     calendar_style_classic:'Clásico', calendar_style_bars:'Barras de eventos',
     calendar_style_onboarding_title:'Elige tu estilo de calendario', calendar_style_onboarding_sub:'Elige la vista de mes que más te guste. Siempre puedes cambiarlo más tarde en Ajustes.',
     calendar_style_classic_desc:'Casillas de color con una etiqueta corta.', calendar_style_bars_desc:'Cuadrícula en blanco con una barra de color por turno, como un calendario clásico.',
-    calendar_style_choose:'Usar este estilo'
+    calendar_style_choose:'Usar este estilo',
+    wage_onboarding_title:'¿Quieres calcular cuánto ganas?', wage_onboarding_sub:'Añade tu salario por hora y Rota calculará cuánto ganas cada semana y cada mes. Puedes cambiarlo cuando quieras en Ajustes.',
+    wage_input_placeholder:'Salario por hora', wage_save_btn:'Guardar y calcular', wage_skip_btn:'Ahora no',
+    extra_wage_onboarding_title:'¿Cobras distinto en las horas extra?', extra_wage_onboarding_sub:'Si tus turnos "Extra" tienen una tarifa por hora distinta, añádela aquí para calcularla aparte. Si no, se usará tu salario normal.',
+    extra_wage_input_placeholder:'Salario por hora extra', extra_wage_save_btn:'Guardar', extra_wage_skip_btn:'Usar la misma tarifa',
+    earnings_title:'Ganancias', regular_earnings:'Sueldo normal', extra_earnings:'Sueldo extra', total_earnings:'Total estimado',
+    wage_settings_section:'Salario', wage_settings_hint:'Configura tu salario por hora para ver estimaciones de ganancias en Estadísticas.',
+    hourly_wage_label:'Salario por hora', extra_hourly_wage_label:'Salario por hora extra (opcional)', extra_wage_uses_regular:'Las horas extra usan la tarifa normal'
   }
 };
 function tr(key, vars){
@@ -753,7 +767,11 @@ const DEFAULT_SETTINGS = {
   fontSizeAsked: true,
   exportPeriod: 'monthly',
   calendarStyle: 'classic',
-  calendarStyleAsked: false
+  calendarStyleAsked: false,
+  wageAsked: false,
+  hourlyWage: null,
+  extraWageAsked: false,
+  extraHourlyWage: null
 };
 function detectDeviceLanguage(){
   const candidates = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
@@ -1028,6 +1046,89 @@ function chooseCalendarStyleOnboarding(style){
   DB.saveSettings(state.settings);
   continueOnboarding();
 }
+function showWageOnboarding(){
+  window.__wageInput = state.settings.hourlyWage != null ? String(state.settings.hourlyWage) : '';
+  renderWageOnboarding();
+}
+function renderWageOnboarding(){
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="overlay" style="align-items:center">
+      <div class="sheet" style="border-radius:24px; max-width:400px; text-align:center; padding:32px 24px calc(28px + var(--safe-bottom))">
+        <div class="brand-mark" style="margin:0 auto 16px; width:44px; height:44px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14161F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.1-2 2.5-2s2.5.9 2.5 2c0 2.5-5 1.5-5 4 0 1.1 1.1 2 2.5 2s2.5-.8 2.5-2"/></svg>
+        </div>
+        <h2 style="justify-content:center; margin-bottom:6px">${tr('wage_onboarding_title')}</h2>
+        <div class="text-muted" style="font-size:calc(13.5px * var(--fs-mult, 1)); margin-bottom:20px; line-height:1.5">${tr('wage_onboarding_sub')}</div>
+        <input type="number" inputmode="decimal" step="0.01" min="0" id="wageOnboardingInput" placeholder="${tr('wage_input_placeholder')}" value="${escapeHtml(window.__wageInput||'')}" style="margin-bottom:18px; text-align:center; font-size:calc(17px * var(--fs-mult, 1)); font-weight:700" oninput="window.__wageInput=this.value">
+        <div class="btn-row" style="flex-direction:column; gap:10px">
+          <button class="btn btn-primary" onclick="saveWageOnboarding()">${tr('wage_save_btn')}</button>
+          <button class="btn btn-ghost" onclick="skipWageOnboarding()">${tr('wage_skip_btn')}</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>{ const el=document.getElementById('wageOnboardingInput'); if(el) el.focus(); }, 60);
+}
+function saveWageOnboarding(){
+  const val = parseFloat(window.__wageInput);
+  state.settings.hourlyWage = (!isNaN(val) && val > 0) ? val : null;
+  state.settings.wageAsked = true;
+  DB.saveSettings(state.settings);
+  delete window.__wageInput;
+  continueWageOnboarding();
+}
+function skipWageOnboarding(){
+  state.settings.hourlyWage = null;
+  state.settings.wageAsked = true;
+  DB.saveSettings(state.settings);
+  delete window.__wageInput;
+  continueWageOnboarding();
+}
+function continueWageOnboarding(){
+  if(!state.settings.extraWageAsked){ showExtraWageOnboarding(); return; }
+  document.getElementById('modal-root').innerHTML = '';
+  renderApp();
+}
+function showExtraWageOnboarding(){
+  window.__extraWageInput = state.settings.extraHourlyWage != null ? String(state.settings.extraHourlyWage) : '';
+  renderExtraWageOnboarding();
+}
+function renderExtraWageOnboarding(){
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="overlay" style="align-items:center">
+      <div class="sheet" style="border-radius:24px; max-width:400px; text-align:center; padding:32px 24px calc(28px + var(--safe-bottom))">
+        <div class="brand-mark" style="margin:0 auto 16px; width:44px; height:44px">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#14161F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>
+        </div>
+        <h2 style="justify-content:center; margin-bottom:6px">${tr('extra_wage_onboarding_title')}</h2>
+        <div class="text-muted" style="font-size:calc(13.5px * var(--fs-mult, 1)); margin-bottom:20px; line-height:1.5">${tr('extra_wage_onboarding_sub')}</div>
+        <input type="number" inputmode="decimal" step="0.01" min="0" id="extraWageOnboardingInput" placeholder="${tr('extra_wage_input_placeholder')}" value="${escapeHtml(window.__extraWageInput||'')}" style="margin-bottom:18px; text-align:center; font-size:calc(17px * var(--fs-mult, 1)); font-weight:700" oninput="window.__extraWageInput=this.value">
+        <div class="btn-row" style="flex-direction:column; gap:10px">
+          <button class="btn btn-primary" onclick="saveExtraWageOnboarding()">${tr('extra_wage_save_btn')}</button>
+          <button class="btn btn-ghost" onclick="skipExtraWageOnboarding()">${tr('extra_wage_skip_btn')}</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>{ const el=document.getElementById('extraWageOnboardingInput'); if(el) el.focus(); }, 60);
+}
+function saveExtraWageOnboarding(){
+  const val = parseFloat(window.__extraWageInput);
+  state.settings.extraHourlyWage = (!isNaN(val) && val > 0) ? val : null;
+  state.settings.extraWageAsked = true;
+  DB.saveSettings(state.settings);
+  delete window.__extraWageInput;
+  document.getElementById('modal-root').innerHTML = '';
+  renderApp();
+}
+function skipExtraWageOnboarding(){
+  state.settings.extraHourlyWage = null;
+  state.settings.extraWageAsked = true;
+  DB.saveSettings(state.settings);
+  delete window.__extraWageInput;
+  document.getElementById('modal-root').innerHTML = '';
+  renderApp();
+}
 function setCalendarStyle(style){
   state.settings.calendarStyle = style;
   state.settings.calendarStyleAsked = true;
@@ -1091,8 +1192,12 @@ function toggleTheme(){
 function setTab(tab, opts){
   if(tab === 'add' && state.activeTab !== 'add') state.returnTab = state.activeTab;
   if(tab === 'day' && opts && opts.resetToToday) state.selectedDate = todayStr();
+  const enteringMetrics = tab === 'metrics' && state.activeTab !== 'metrics';
   state.activeTab = tab;
   renderApp();
+  if(enteringMetrics && !state.settings.wageAsked){
+    showWageOnboarding();
+  }
 }
 
 /* ---------------- App shell render ---------------- */
@@ -1478,7 +1583,9 @@ function renderMonthViewBars(){
     const dayTypes = [...new Map(entries.map(e=>{ const t=typeById(e.typeId); return t ? [t.id,t] : null; }).filter(Boolean)).values()];
     const barsList = dayTypes.map(t=>{
       const txtColor = textColorFor(t.color);
-      return `<div class="event-bar" style="background:${t.color};color:${txtColor}">${escapeHtml(t.name)}</div>`;
+      const isCombo = /\s*(?:&|\by\b|\band\b)\s*/i.test(t.name);
+      const barLabel = isCombo ? shiftAbbr(t.name) : t.name;
+      return `<div class="event-bar" style="background:${t.color};color:${txtColor}">${escapeHtml(barLabel)}</div>`;
     });
     dayNotes.forEach(n=>{
       barsList.push(`<div class="event-bar note-bar">📝 ${escapeHtml((n.text||'').trim())}</div>`);
@@ -1898,6 +2005,7 @@ function renderMetrics(){
   }
 
   let totalHours = 0, daysWorked = 0, offDays = 0, vacationDays = 0;
+  let regularHours = 0, extraHours = 0;
   const byType = {};
   state.shiftTypes.forEach(t => byType[t.id] = 0);
 
@@ -1912,6 +2020,7 @@ function renderMetrics(){
         const h = shiftDurationHours(t);
         totalHours += h;
         byType[t.id] = (byType[t.id]||0) + h;
+        if(/extra/i.test(t.name)) extraHours += h; else regularHours += h;
         workedToday = true;
       } else {
         offToday = true;
@@ -1922,6 +2031,25 @@ function renderMetrics(){
     if(offToday && !workedToday) offDays++;
     if(vacToday) vacationDays++;
   });
+
+  const hourlyWage = state.settings.hourlyWage;
+  const extraHourlyWage = state.settings.extraHourlyWage;
+  let earningsHtml = '';
+  if(hourlyWage != null){
+    const extraRate = extraHourlyWage != null ? extraHourlyWage : hourlyWage;
+    const regularPay = regularHours * hourlyWage;
+    const extraPay = extraHours * extraRate;
+    const totalPay = regularPay + extraPay;
+    earningsHtml = `
+      <div class="section-title">${tr('earnings_title')}</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="lab">${tr('regular_earnings')}</div><div class="big-num">${regularPay.toFixed(2)}</div></div>
+        ${extraHours > 0 ? `<div class="stat-card"><div class="lab">${tr('extra_earnings')}</div><div class="big-num">${extraPay.toFixed(2)}</div></div>` : ''}
+        <div class="stat-card"><div class="lab">${tr('total_earnings')}</div><div class="big-num">${totalPay.toFixed(2)}</div></div>
+      </div>
+      ${extraHourlyWage == null && extraHours > 0 ? `<div class="text-muted" style="font-size:calc(12px * var(--fs-mult, 1)); margin:-6px 2px 6px">${tr('extra_wage_uses_regular')}</div>` : ''}
+    `;
+  }
 
   const maxTypeHours = Math.max(1, ...Object.values(byType));
   const breakdownRows = state.shiftTypes.filter(t=>t.isWork).map(t=>{
@@ -1945,6 +2073,7 @@ function renderMetrics(){
       <div class="stat-card"><div class="lab">${tr('off_days')}</div><div class="big-num">${offDays}</div></div>
       <div class="stat-card"><div class="lab">${tr('vacation_days')}</div><div class="big-num">${vacationDays}</div></div>
     </div>
+    ${earningsHtml}
     <div class="section-title">${tr('hours_by_type')}</div>
     <div class="card">
       ${breakdownRows || `<div class="text-muted" style="font-size:calc(13.5px * var(--fs-mult, 1))">${tr('no_hours_logged')}</div>`}
@@ -2529,6 +2658,18 @@ function openSettings(){
         <button class="${state.settings.calendarStyle==='bars'?'active':''}" onclick="setCalendarStyle('bars')">${tr('calendar_style_bars')}</button>
       </div>
     </div>
+    <div class="field">
+      <label>${tr('wage_settings_section')}</label>
+      <div class="text-muted" style="font-size:calc(12.5px * var(--fs-mult, 1)); margin-bottom:8px; line-height:1.4">${tr('wage_settings_hint')}</div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); display:block; margin-bottom:4px">${tr('hourly_wage_label')}</label>
+        <input type="number" inputmode="decimal" step="0.01" min="0" value="${state.settings.hourlyWage != null ? state.settings.hourlyWage : ''}" onchange="setHourlyWageExplicit(this.value)">
+      </div>
+      <div>
+        <label style="font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); display:block; margin-bottom:4px">${tr('extra_hourly_wage_label')}</label>
+        <input type="number" inputmode="decimal" step="0.01" min="0" value="${state.settings.extraHourlyWage != null ? state.settings.extraHourlyWage : ''}" onchange="setExtraHourlyWageExplicit(this.value)">
+      </div>
+    </div>
     <div class="section-title" style="margin-top:6px">${tr('reminders_section')}</div>
     <div class="card" style="margin-bottom:14px">
       <div style="font-size:calc(13.5px * var(--fs-mult, 1)); color:var(--text-muted); line-height:1.5; margin-bottom:12px">
@@ -2572,6 +2713,22 @@ function openSettings(){
     <button class="btn btn-danger" onclick="clearAllData()">${ICONS.trash}${tr('erase_all')}</button>
   `;
   showSheet(html);
+}
+function setHourlyWageExplicit(val){
+  const num = parseFloat(val);
+  state.settings.hourlyWage = (!isNaN(num) && num > 0) ? num : null;
+  state.settings.wageAsked = true;
+  DB.saveSettings(state.settings);
+  renderApp();
+  openSettings();
+}
+function setExtraHourlyWageExplicit(val){
+  const num = parseFloat(val);
+  state.settings.extraHourlyWage = (!isNaN(num) && num > 0) ? num : null;
+  state.settings.extraWageAsked = true;
+  DB.saveSettings(state.settings);
+  renderApp();
+  openSettings();
 }
 function setLanguageExplicit(lang){
   state.settings.language = lang;
