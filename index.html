@@ -582,7 +582,8 @@ const I18N = {
     export_range_label:'Range', export_weekly:'Weekly', export_monthly:'Monthly', export_annual:'Annual',
     export_pdf_btn:'Export PDF', export_no_entries:'No shifts or notes in this period.',
     export_total_hours:'Total hours worked', export_popup_blocked:'Please allow pop-ups for this site to export the PDF.',
-    export_generated_on:'Generated on'
+    export_generated_on:'Generated on', export_list_title:'List view', export_calendar_title:'Calendar view',
+    export_close:'Close', export_print_btn:'Print / Save as PDF'
   },
   es: {
     nav_day:'Día', nav_week:'Semana', nav_month:'Mes', nav_list:'Lista', nav_add:'Añadir',
@@ -646,7 +647,8 @@ const I18N = {
     export_range_label:'Rango', export_weekly:'Semanal', export_monthly:'Mensual', export_annual:'Anual',
     export_pdf_btn:'Exportar PDF', export_no_entries:'No hay turnos ni notas en este período.',
     export_total_hours:'Total de horas trabajadas', export_popup_blocked:'Permite las ventanas emergentes de este sitio para exportar el PDF.',
-    export_generated_on:'Generado el'
+    export_generated_on:'Generado el', export_list_title:'Vista lista', export_calendar_title:'Vista calendario',
+    export_close:'Cerrar', export_print_btn:'Imprimir / Guardar como PDF'
   }
 };
 function tr(key, vars){
@@ -2456,9 +2458,7 @@ function buildExportRange(period){
   }
   return { start, end, label };
 }
-function exportDataPDF(){
-  const period = state.settings.exportPeriod || 'monthly';
-  const { start, end, label } = buildExportRange(period);
+function exportListRowsHTML(start, end){
   let totalHours = 0;
   const dayRows = [];
   let d = new Date(start);
@@ -2485,11 +2485,95 @@ function exportDataPDF(){
   }
   const bodyRows = dayRows.length ? dayRows.join('') :
     '<tr><td colspan="2" class="exp-empty">' + tr('export_no_entries') + '</td></tr>';
+  return { bodyRows, totalHours };
+}
+function exportDayCellHTML(date, compact){
+  const dstr = toDateStr(date);
+  const entries = entriesFor(dstr);
+  const dayNotesArr = notesFor(dstr);
+  const dayTypes = [...new Map(entries.map(e=>{ const t=typeById(e.typeId); return t ? [t.id,t] : null; }).filter(Boolean)).values()];
+  const chips = dayTypes.map(t=>{
+    const label = compact ? shiftAbbr(t.name) : (escapeHtml(t.name) + (t.start && t.end ? ' ' + t.start + '–' + t.end : ''));
+    const txtColor = textColorFor(t.color);
+    return '<span class="exp-chip" style="background:' + t.color + ';color:' + txtColor + '">' + (compact ? escapeHtml(label) : label) + '</span>';
+  }).join('');
+  const noteLimit = compact ? 1 : 4;
+  const notesHtml = dayNotesArr.slice(0, noteLimit).map(n=>{
+    const txt = (n.text || '').trim();
+    const shown = compact && txt.length > 14 ? txt.slice(0,14) + '…' : txt;
+    return '<div class="exp-cell-note">📝 ' + escapeHtml(shown) + '</div>';
+  }).join('');
+  return '<div class="exp-cell-num">' + date.getDate() + '</div>' +
+    (chips ? '<div class="exp-chip-row">' + chips + '</div>' : '') + notesHtml;
+}
+function monthCellsMatrix(y, m){
+  const first = new Date(y, m, 1);
+  const startOffset = mondayIndex(first);
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const cells = [];
+  for(let i = 0; i < startOffset; i++){ cells.push({ date: addDays(first, -(startOffset - i)), outside: true }); }
+  for(let dd = 1; dd <= daysInMonth; dd++) cells.push({ date: new Date(y, m, dd), outside: false });
+  while(cells.length % 7 !== 0) cells.push({ date: addDays(cells[cells.length - 1].date, 1), outside: true });
+  return cells;
+}
+function buildMonthCalendarBlock(y, m, compact){
+  const cells = monthCellsMatrix(y, m);
+  const todaystr = todayStr();
+  const head = WEEKDAYS.map(w => '<div class="exp-cal-head">' + w + '</div>').join('');
+  const body = cells.map(c=>{
+    const dstr = toDateStr(c.date);
+    const cls = 'exp-cal-cell' + (c.outside ? ' outside' : '') + (dstr === todaystr ? ' today' : '') + (compact ? ' compact' : '');
+    return '<div class="' + cls + '">' + exportDayCellHTML(c.date, compact) + '</div>';
+  }).join('');
+  return '<div class="exp-cal-month-wrap' + (compact ? ' compact-wrap' : '') + '">' +
+    '<div class="exp-cal-title">' + MONTHS[m] + ' ' + y + '</div>' +
+    '<div class="exp-cal-grid-head">' + head + '</div>' +
+    '<div class="exp-cal-grid' + (compact ? ' compact' : '') + '">' + body + '</div>' +
+    '</div>';
+}
+function buildWeekCalendarBlock(start){
+  const head = WEEKDAYS.map(w => '<div class="exp-cal-head">' + w + '</div>').join('');
+  const cells = [];
+  for(let i = 0; i < 7; i++) cells.push(addDays(start, i));
+  const todaystr = todayStr();
+  const body = cells.map(date=>{
+    const dstr = toDateStr(date);
+    const cls = 'exp-cal-cell week-mode' + (dstr === todaystr ? ' today' : '');
+    return '<div class="' + cls + '">' + exportDayCellHTML(date, false) + '</div>';
+  }).join('');
+  return '<div class="exp-cal-grid-head">' + head + '</div>' +
+    '<div class="exp-cal-grid week-mode">' + body + '</div>';
+}
+function buildCalendarSectionHTML(period, start, end){
+  if(period === 'weekly') return buildWeekCalendarBlock(start);
+  if(period === 'annual'){
+    const y = start.getFullYear();
+    let out = '<div class="exp-cal-year-grid">';
+    for(let m = 0; m < 12; m++) out += buildMonthCalendarBlock(y, m, true);
+    out += '</div>';
+    return out;
+  }
+  return buildMonthCalendarBlock(start.getFullYear(), start.getMonth(), false);
+}
+function exportDataPDF(){
+  const period = state.settings.exportPeriod || 'monthly';
+  const { start, end, label } = buildExportRange(period);
+  const { bodyRows, totalHours } = exportListRowsHTML(start, end);
+  const calendarHtml = buildCalendarSectionHTML(period, start, end);
   const genDate = new Date();
-  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rota — ' + escapeHtml(label) + '</title><style>' +
-    'body{font-family:-apple-system,BlinkMacSystemFont,"Inter",Arial,sans-serif;color:#14161F;padding:32px;margin:0;}' +
+  const css =
+    'body{font-family:-apple-system,BlinkMacSystemFont,"Inter",Arial,sans-serif;color:#14161F;margin:0;background:#EFEEE7;}' +
+    '.toolbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#14161F;color:#fff;padding:12px 18px;}' +
+    '.toolbar-title{font-weight:700;font-size:14px;}' +
+    '.toolbar-actions{display:flex;align-items:center;gap:8px;}' +
+    '.toolbar button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;padding:8px 14px;font-weight:600;font-size:13px;}' +
+    '.toolbar button:hover{background:rgba(255,255,255,.18);}' +
+    '.toolbar .exp-close{width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;border-radius:50%;}' +
+    '.exp-sheet{max-width:900px;margin:0 auto;background:#fff;padding:28px 32px;}' +
+    '.exp-sheet + .exp-sheet{page-break-before:always;}' +
     'h1{font-size:20px;margin:0 0 2px;font-weight:700;}' +
-    '.exp-sub{color:#6B6D7A;margin-bottom:24px;font-size:13px;}' +
+    '.exp-sub{color:#6B6D7A;margin-bottom:20px;font-size:13px;}' +
+    '.exp-page-label{text-transform:uppercase;letter-spacing:.06em;font-size:11px;font-weight:700;color:#9B9DB0;margin-bottom:4px;}' +
     'table{width:100%;border-collapse:collapse;}' +
     'td{border-bottom:1px solid #E4E3DC;padding:10px 8px;vertical-align:top;font-size:13px;}' +
     '.exp-date{white-space:nowrap;font-weight:700;width:170px;padding-right:16px;}' +
@@ -2501,13 +2585,46 @@ function exportDataPDF(){
     '.exp-empty{text-align:center;color:#9B9DB0;padding:40px 0;}' +
     '.exp-summary{margin-top:24px;font-size:13px;color:#14161F;font-weight:600;}' +
     '.exp-footer{margin-top:36px;font-size:11px;color:#9B9DB0;}' +
-    '@media print{ body{padding:12mm;} }' +
-    '</style></head><body>' +
-    '<h1>Rota</h1>' +
-    '<div class="exp-sub">' + escapeHtml(label) + '</div>' +
-    '<table><tbody>' + bodyRows + '</tbody></table>' +
-    (totalHours > 0 ? '<div class="exp-summary">' + tr('export_total_hours') + ': ' + totalHours.toFixed(1) + 'h</div>' : '') +
-    '<div class="exp-footer">' + tr('export_generated_on') + ' ' + genDate.toLocaleDateString() + '</div>' +
+    '.exp-cal-title{font-weight:700;font-size:15px;margin:0 0 8px;}' +
+    '.exp-cal-grid-head{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;}' +
+    '.exp-cal-head{text-align:center;font-size:10px;font-weight:700;color:#6B6D7A;}' +
+    '.exp-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}' +
+    '.exp-cal-cell{border:1px solid #E4E3DC;border-radius:7px;padding:4px;min-height:78px;font-size:10px;overflow:hidden;}' +
+    '.exp-cal-cell.week-mode{min-height:110px;font-size:11px;}' +
+    '.exp-cal-cell.outside{opacity:.32;}' +
+    '.exp-cal-cell.today{border:2px solid #6C5CE7;}' +
+    '.exp-cal-cell.compact{min-height:30px;padding:2px;font-size:7.5px;}' +
+    '.exp-cell-num{font-weight:700;margin-bottom:2px;}' +
+    '.exp-chip-row{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:2px;}' +
+    '.exp-chip{display:inline-block;border-radius:4px;padding:1px 4px;font-weight:700;font-size:9px;line-height:1.4;}' +
+    '.exp-cal-cell.compact .exp-chip{font-size:6.5px;padding:0 2px;}' +
+    '.exp-cell-note{color:#8A5A00;font-size:9px;line-height:1.3;}' +
+    '.exp-cal-year-grid{display:flex;flex-wrap:wrap;gap:16px;}' +
+    '.exp-cal-month-wrap{width:calc(33.333% - 11px);}' +
+    '.exp-cal-month-wrap.compact-wrap{page-break-inside:avoid;break-inside:avoid;}' +
+    '@media print{ .toolbar{display:none;} body{background:#fff;} .exp-sheet{padding:0;max-width:none;} }';
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rota — ' + escapeHtml(label) + '</title><style>' + css + '</style></head><body>' +
+    '<div class="toolbar no-print">' +
+      '<span class="toolbar-title">Rota — ' + escapeHtml(label) + '</span>' +
+      '<div class="toolbar-actions">' +
+        '<button onclick="window.print()">' + tr('export_print_btn') + '</button>' +
+        '<button class="exp-close" onclick="window.close()" aria-label="' + tr('export_close') + '" title="' + tr('export_close') + '">✕</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="exp-sheet">' +
+      '<div class="exp-page-label">' + tr('export_list_title') + '</div>' +
+      '<h1>Rota</h1>' +
+      '<div class="exp-sub">' + escapeHtml(label) + '</div>' +
+      '<table><tbody>' + bodyRows + '</tbody></table>' +
+      (totalHours > 0 ? '<div class="exp-summary">' + tr('export_total_hours') + ': ' + totalHours.toFixed(1) + 'h</div>' : '') +
+      '<div class="exp-footer">' + tr('export_generated_on') + ' ' + genDate.toLocaleDateString() + '</div>' +
+    '</div>' +
+    '<div class="exp-sheet">' +
+      '<div class="exp-page-label">' + tr('export_calendar_title') + '</div>' +
+      '<h1>Rota</h1>' +
+      '<div class="exp-sub">' + escapeHtml(label) + '</div>' +
+      calendarHtml +
+    '</div>' +
     '</body></html>';
   const w = window.open('', '_blank');
   if(!w){ showToast(tr('export_popup_blocked')); return; }
