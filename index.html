@@ -372,6 +372,17 @@ html.dark .year-cell{color:#fff;}
 .paint-chip:active{transform:scale(.95);}
 .legend-dot{width:9px; height:9px; border-radius:3px;}
 
+/* ---------- List view search / filter bar ---------- */
+.list-toolbar{display:flex; flex-direction:column; gap:8px; margin-bottom:18px;}
+.list-search-row{display:flex; gap:8px; align-items:center;}
+.list-search-row .search-wrap{position:relative; flex:1; min-width:0;}
+.list-search-row .search-wrap svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--text-muted); pointer-events:none;}
+.list-search-row .search-wrap input{padding-left:34px;}
+.list-past-btn{flex-shrink:0; display:flex; align-items:center; gap:5px; border:1.5px solid var(--border); background:var(--bg-elevated); border-radius:999px; padding:0 13px; height:40px; font-weight:700; font-size:calc(13px * var(--fs-mult, 1)); color:var(--text); white-space:nowrap;}
+.list-past-btn svg{width:13px; height:13px;}
+.list-past-btn.active{background:var(--accent); color:var(--accent-text); border-color:var(--accent);}
+.list-past-btn:active{transform:scale(.95);}
+
 ::-webkit-scrollbar{width:0; height:0;}
 </style>
 </head>
@@ -577,7 +588,11 @@ const I18N = {
     language_picker_title:'Choose your language', language_picker_sub:'You can change this later in Settings.',
     default_morning:'Morning', default_afternoon:'Afternoon', default_night:'Night',
     default_morning_afternoon:'Morning & Afternoon', default_off:'Off', default_vacation:'Vacation', default_extra:'Extra',
-    open_full_day:'Open full day view'
+    open_full_day:'Open full day view',
+    list_search_placeholder:'Search shifts and notes…',
+    list_show_past:'Past', list_show_upcoming:'Upcoming',
+    list_no_upcoming_matches:'No upcoming events match your filters',
+    list_no_past_matches:'No past events match your filters'
   },
   es: {
     nav_day:'Día', nav_week:'Semana', nav_month:'Mes', nav_list:'Lista', nav_add:'Añadir',
@@ -636,7 +651,11 @@ const I18N = {
     language_picker_title:'Elige tu idioma', language_picker_sub:'Puedes cambiarlo más tarde en Ajustes.',
     default_morning:'Mañana', default_afternoon:'Tarde', default_night:'Noche',
     default_morning_afternoon:'Mañana y Tarde', default_off:'Libre', default_vacation:'Vacaciones', default_extra:'Extra',
-    open_full_day:'Ver día completo'
+    open_full_day:'Ver día completo',
+    list_search_placeholder:'Buscar turnos y notas…',
+    list_show_past:'Pasado', list_show_upcoming:'Próximos',
+    list_no_upcoming_matches:'No hay próximos eventos que cumplan los filtros',
+    list_no_past_matches:'No hay eventos pasados que cumplan los filtros'
   }
 };
 function tr(key, vars){
@@ -767,6 +786,7 @@ const state = {
   metricsPeriod: 'week',
   addCtx: { mode: 'shift', selectedTypeId: null, noteId: null },
   paintMode: { active: false, typeIds: [] },
+  listFilter: { query: '', typeIds: [], showPast: false },
 };
 
 function typeById(id){ return state.shiftTypes.find(t=>t.id===id); }
@@ -1678,13 +1698,62 @@ function attachMonthSwipe(){
 }
 
 /* ================= YEAR VIEW ================= */
+function renderListToolbar(){
+  const filter = state.listFilter;
+  const chips = state.shiftTypes.map(t=>`
+    <button class="paint-chip ${filter.typeIds.includes(t.id)?'selected':''}" style="color:${t.color}" onclick="toggleListTypeFilter('${t.id}')">
+      <span style="color:${t.color}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</span>${escapeHtml(t.name)}
+    </button>`).join('');
+  return `
+    <div class="list-toolbar">
+      <div class="list-search-row">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="listSearchInput" type="text" value="${escapeHtml(filter.query)}" placeholder="${tr('list_search_placeholder')}" oninput="setListSearchQuery(this.value)">
+        </div>
+        <button class="list-past-btn ${filter.showPast?'active':''}" onclick="toggleListPast()" aria-label="${filter.showPast?tr('list_show_upcoming'):tr('list_show_past')}">
+          ${filter.showPast?tr('list_show_upcoming'):tr('list_show_past')}${filter.showPast?ICONS.chevR:ICONS.chevL}
+        </button>
+      </div>
+      ${state.shiftTypes.length ? `<div class="paint-chip-row">${chips}</div>` : ''}
+    </div>
+  `;
+}
+let _listSearchDebounce = null;
+function setListSearchQuery(val){
+  state.listFilter.query = val;
+  clearTimeout(_listSearchDebounce);
+  _listSearchDebounce = setTimeout(()=>{
+    renderApp();
+    const inp = document.getElementById('listSearchInput');
+    if(inp){
+      inp.focus();
+      const pos = inp.value.length;
+      inp.setSelectionRange(pos, pos);
+    }
+  }, 200);
+}
+function toggleListTypeFilter(id){
+  const idx = state.listFilter.typeIds.indexOf(id);
+  if(idx >= 0) state.listFilter.typeIds.splice(idx,1);
+  else state.listFilter.typeIds.push(id);
+  renderApp();
+}
+function toggleListPast(){
+  state.listFilter.showPast = !state.listFilter.showPast;
+  renderApp();
+}
 function renderListView(){
   const todaystr = todayStr();
-  const dateSet = new Set([...Object.keys(state.shifts||{}), ...Object.keys(state.notes||{})]);
-  const dates = [...dateSet].filter(dstr=>entriesFor(dstr).length || notesFor(dstr).length).sort();
+  const filter = state.listFilter;
+  const toolbar = renderListToolbar();
 
-  if(dates.length === 0){
+  const dateSet = new Set([...Object.keys(state.shifts||{}), ...Object.keys(state.notes||{})]);
+  const allDates = [...dateSet].filter(dstr=>entriesFor(dstr).length || notesFor(dstr).length);
+
+  if(allDates.length === 0){
     return `
+      ${toolbar}
       <div class="section-title" style="margin-top:0">${tr('nav_list')}</div>
       <div class="empty-state">
         ${ICONS.calBlank}
@@ -1694,9 +1763,28 @@ function renderListView(){
     `;
   }
 
+  // Normal mode: today + future (ascending). "Pasado" mode: strictly before today (most recent first).
+  let dates = allDates.filter(dstr => filter.showPast ? dstr < todaystr : dstr >= todaystr).sort();
+  if(filter.showPast) dates.reverse();
+
+  const q = filter.query.trim().toLowerCase();
+  const matchesEntry = (e)=>{
+    if(filter.typeIds.length && !filter.typeIds.includes(e.typeId)) return false;
+    if(!q) return true;
+    const t = typeById(e.typeId);
+    const name = t ? t.name.toLowerCase() : '';
+    return name.includes(q) || (e.notes||'').toLowerCase().includes(q);
+  };
+  const matchesNote = (n)=>{
+    if(filter.typeIds.length) return false; // notes have no shift type, hide when a type filter is active
+    if(!q) return true;
+    return (n.text||'').toLowerCase().includes(q);
+  };
+
   const groups = dates.map(dstr=>{
-    const entries = entriesFor(dstr);
-    const notes = notesFor(dstr);
+    const entries = entriesFor(dstr).filter(matchesEntry);
+    const notes = notesFor(dstr).filter(matchesNote);
+    if(!entries.length && !notes.length) return '';
     const isToday = dstr === todaystr;
     const itemsHtml = entries.map(e=>renderAgendaItem(e, dstr)).join('')
       + notes.map(n=>renderNoteAgendaItem(n, dstr)).join('');
@@ -1706,9 +1794,17 @@ function renderListView(){
     `;
   }).join('');
 
+  const hasMatches = groups.trim().length > 0;
+
   return `
+    ${toolbar}
     <div class="section-title" style="margin-top:0">${tr('nav_list')}</div>
-    ${groups}
+    ${hasMatches ? groups : `
+      <div class="empty-state">
+        ${ICONS.calBlank}
+        <div class="title">${filter.showPast ? tr('list_no_past_matches') : tr('list_no_upcoming_matches')}</div>
+      </div>
+    `}
   `;
 }
 
