@@ -538,6 +538,9 @@ const I18N = {
     weekly_digest_onboarding_title:'Stay on top of your notes?', weekly_digest_onboarding_sub:'Rota can send you a notification every Sunday with the notes you have for that week. You can also get reminded before any single note, with however many hours of notice you choose. Turn this on now?',
     weekly_digest_onboarding_yes:'Yes, notify me', weekly_digest_onboarding_no:'Not now',
     toast_weekly_digest_on:'Weekly summary enabled',
+    font_size_onboarding_title:'Choose your text size', font_size_onboarding_sub:'Pick whatever is easiest to read. You can always change this later in Settings.',
+    font_size_preview_shift:'Morning shift', font_size_preview_note:'This is how notes and shift details will look.',
+    font_size_confirm:'Confirm',
     weekly_digest_title:'This week\'s notes', weekly_digest_body_none:'You have no notes scheduled this week.', weekly_digest_body:'You have {n} note{s} this week:', weekly_digest_more:'…and {n} more',
     note_notify_label:'Notify me before this', note_notify_hours_label:'Hours before', toast_need_time_for_notify:'Add a time above first so Rota knows when to remind you',
     connect_supabase:'Connect Supabase account (coming soon)', erase_all:'Erase all shifts', language_label:'Language',
@@ -594,6 +597,9 @@ const I18N = {
     weekly_digest_onboarding_title:'¿Quieres recibir avisos de tus notas?', weekly_digest_onboarding_sub:'Rota puede enviarte una notificación cada domingo con las notas que tienes para esa semana. También puedes pedir que te avise antes de cada nota concreta, con las horas de antelación que elijas. ¿Lo activamos ahora?',
     weekly_digest_onboarding_yes:'Sí, avísame', weekly_digest_onboarding_no:'Ahora no',
     toast_weekly_digest_on:'Resumen semanal activado',
+    font_size_onboarding_title:'Elige el tamaño del texto', font_size_onboarding_sub:'Elige el que te resulte más fácil de leer. Siempre puedes cambiarlo más tarde en Ajustes.',
+    font_size_preview_shift:'Turno de mañana', font_size_preview_note:'Así se verán las notas y los detalles de los turnos.',
+    font_size_confirm:'Confirmar',
     weekly_digest_title:'Notas de esta semana', weekly_digest_body_none:'No tienes notas programadas esta semana.', weekly_digest_body:'Tienes {n} nota{s} esta semana:', weekly_digest_more:'…y {n} más',
     note_notify_label:'Avisarme antes de esto', note_notify_hours_label:'Horas de antelación', toast_need_time_for_notify:'Añade antes una hora para que Rota sepa cuándo avisarte',
     connect_supabase:'Conectar cuenta de Supabase (próximamente)', erase_all:'Borrar todos los turnos', language_label:'Idioma',
@@ -672,7 +678,8 @@ const DEFAULT_SETTINGS = {
   language: null,
   remindersEnabled: false,
   weeklyDigestEnabled: false,
-  weeklyDigestAsked: false
+  weeklyDigestAsked: false,
+  fontSizeAsked: false
 };
 const DB = {
   hasArtifactStorage(){ return typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function'; },
@@ -779,7 +786,7 @@ async function init(){
     applyLanguageArrays();
     applyStaticLabels();
     renderApp();
-    if(!state.settings.weeklyDigestAsked) showNotifOnboarding();
+    continueOnboarding();
   }
 }
 function applyStaticLabels(){
@@ -812,7 +819,7 @@ function chooseLanguage(lang){
   seedDefaultShiftTypesIfNeeded();
   document.getElementById('modal-root').innerHTML = '';
   renderApp();
-  if(!state.settings.weeklyDigestAsked) showNotifOnboarding();
+  continueOnboarding();
 }
 function seedDefaultShiftTypesIfNeeded(){
   if(state.shiftTypes.length > 0) return;
@@ -845,9 +852,51 @@ function showNotifOnboarding(){
       </div>
     </div>`;
 }
-function finishNotifOnboarding(){
+function continueOnboarding(){
+  if(!state.settings.weeklyDigestAsked){ showNotifOnboarding(); return; }
+  if(!state.settings.fontSizeAsked){ showFontSizePicker(); return; }
   document.getElementById('modal-root').innerHTML = '';
   renderApp();
+}
+function showFontSizePicker(){
+  window.__fontSizePreview = state.settings.fontSize || 'md';
+  renderFontSizePicker();
+}
+function renderFontSizePicker(){
+  const root = document.getElementById('modal-root');
+  const sel = window.__fontSizePreview || state.settings.fontSize || 'md';
+  const zoom = (FONT_SIZES[sel] || FONT_SIZES.md).zoom / 100;
+  root.innerHTML = `
+    <div class="overlay" style="align-items:center">
+      <div class="sheet" style="border-radius:24px; max-width:400px; text-align:center; padding:32px 24px calc(28px + var(--safe-bottom))">
+        <div class="brand-mark" style="margin:0 auto 16px; width:44px; height:44px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14161F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+        </div>
+        <h2 style="justify-content:center; margin-bottom:6px">${tr('font_size_onboarding_title')}</h2>
+        <div class="text-muted" style="font-size:calc(13.5px * var(--fs-mult, 1)); margin-bottom:20px; line-height:1.5">${tr('font_size_onboarding_sub')}</div>
+        <div class="modeToggle" style="margin-bottom:20px">
+          ${Object.entries(FONT_SIZES).map(([k,f])=>`<button class="${sel===k?'active':''}" onclick="previewFontSize('${k}')">${f.label}</button>`).join('')}
+        </div>
+        <div class="card" style="text-align:left; margin-bottom:24px">
+          <div style="font-weight:700; font-size:${14.5*zoom}px">${tr('font_size_preview_shift')}</div>
+          <div style="font-family:var(--font-mono); font-size:${12*zoom}px; color:var(--text-muted); margin-top:2px">09:00 – 17:00</div>
+          <div style="font-size:${13*zoom}px; color:var(--text-muted); margin-top:6px; line-height:1.4">${tr('font_size_preview_note')}</div>
+        </div>
+        <button class="btn btn-primary" onclick="confirmFontSize()">${tr('font_size_confirm')}</button>
+      </div>
+    </div>`;
+}
+function previewFontSize(k){
+  window.__fontSizePreview = k;
+  renderFontSizePicker();
+}
+function confirmFontSize(){
+  state.settings.fontSize = window.__fontSizePreview || state.settings.fontSize || 'md';
+  state.settings.fontSizeAsked = true;
+  applyFontSize();
+  DB.saveSettings(state.settings);
+  delete window.__fontSizePreview;
+  continueOnboarding();
 }
 function acceptWeeklyDigestOnboarding(){
   state.settings.weeklyDigestAsked = true;
@@ -855,7 +904,7 @@ function acceptWeeklyDigestOnboarding(){
     state.settings.weeklyDigestEnabled = false;
     DB.saveSettings(state.settings);
     showToast(tr('reminders_unsupported'));
-    finishNotifOnboarding();
+    continueOnboarding();
     return;
   }
   const grantHandler = (perm)=>{
@@ -869,7 +918,7 @@ function acceptWeeklyDigestOnboarding(){
       showToast(tr('reminders_denied'));
     }
     DB.saveSettings(state.settings);
-    finishNotifOnboarding();
+    continueOnboarding();
   };
   if(Notification.permission === 'granted'){
     grantHandler('granted');
@@ -881,7 +930,7 @@ function declineWeeklyDigestOnboarding(){
   state.settings.weeklyDigestAsked = true;
   state.settings.weeklyDigestEnabled = false;
   DB.saveSettings(state.settings);
-  finishNotifOnboarding();
+  continueOnboarding();
 }
 function applyTheme(){
   document.documentElement.classList.toggle('dark', state.settings.theme === 'dark');
