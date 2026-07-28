@@ -118,6 +118,8 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:5px; max-height:64px; overflo
 
 /* ---------- Day view (agenda, compact) ---------- */
 .dateflip{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px;}
+.day-pullback-hint{display:flex; align-items:center; justify-content:center; width:36px; height:20px; margin:0 auto 4px; color:var(--text-muted); opacity:.55; cursor:pointer;}
+.day-pullback-hint svg{width:18px; height:18px;}
 .dateflip .today-label{font-size:calc(13px * var(--fs-mult, 1)); color:var(--text-muted); font-weight:600;}
 .dateflip .date-heading{font-size:calc(22px * var(--fs-mult, 1)); font-weight:700; margin:1px 0 0;}
 .agenda-list{display:flex; flex-direction:column; gap:10px;}
@@ -490,6 +492,7 @@ const ICONS = {
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   chevL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
   chevR: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+  chevDown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9"/></svg>',
   download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0-4.5-4.5M12 16l4.5-4.5"/><path d="M4 19h16"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m2 0-.9 12.1a2 2 0 0 1-2 1.9H7.9a2 2 0 0 1-2-1.9L5 7"/></svg>',
@@ -559,7 +562,7 @@ const I18N = {
     nav_day:'Day', nav_week:'Week', nav_month:'Month', nav_list:'List', nav_add:'Add',
     today:'Today', week_label:'Week',
     nothing_scheduled:'Nothing scheduled', nothing_scheduled_sub:'Use the Add tab below to log a shift or note',
-    search_list:'Search…', no_search_results:'No matching results',
+    search_list:'Search…', no_search_results:'No matching results', back:'Back',
     all_day:'All day', timeline:'Timeline', no_timed_shifts:'No timed shifts today.',
     add_shift:'Add shift', add_note:'Add note',
     create_first_type_title:"Create your first shift type",
@@ -640,7 +643,7 @@ const I18N = {
     nav_day:'Día', nav_week:'Semana', nav_month:'Mes', nav_list:'Lista', nav_add:'Añadir',
     today:'Hoy', week_label:'Semana',
     nothing_scheduled:'Nada programado', nothing_scheduled_sub:'Usa la pestaña Añadir de abajo para registrar un turno o nota',
-    search_list:'Buscar…', no_search_results:'No se encontraron resultados',
+    search_list:'Buscar…', no_search_results:'No se encontraron resultados', back:'Atrás',
     all_day:'Todo el día', timeline:'Cronología', no_timed_shifts:'No hay turnos con horario hoy.',
     add_shift:'Añadir turno', add_note:'Añadir nota',
     create_first_type_title:'Crea tu primer tipo de turno',
@@ -858,6 +861,7 @@ const state = {
   addCtx: { mode: 'shift', selectedTypeId: null, noteId: null },
   paintMode: { active: false, typeIds: [] },
   searchQuery: '',
+  dayReturnTab: null,
 };
 
 function typeById(id){ return state.shiftTypes.find(t=>t.id===id); }
@@ -1210,7 +1214,8 @@ function toggleTheme(){
 }
 function setTab(tab, opts){
   if(tab === 'add' && state.activeTab !== 'add') state.returnTab = state.activeTab;
-  if(tab === 'day' && opts && opts.resetToToday) state.selectedDate = todayStr();
+  if(tab === 'day' && opts && opts.resetToToday){ state.selectedDate = todayStr(); state.dayReturnTab = null; }
+  if(tab !== 'day') state.dayReturnTab = null;
   const enteringMetrics = tab === 'metrics' && state.activeTab !== 'metrics';
   state.activeTab = tab;
   
@@ -1230,7 +1235,7 @@ function renderApp(){
   const root = document.getElementById('view-root');
   root.classList.toggle('fullbleed', state.activeTab==='month');
   try{
-    if(state.activeTab==='day'){ root.innerHTML = renderDayView(); scrollTimelineIntoView(); }
+    if(state.activeTab==='day'){ root.innerHTML = renderDayView(); scrollTimelineIntoView(); attachDayPullBack(); }
     else if(state.activeTab==='week') root.innerHTML = renderWeekView();
     else if(state.activeTab==='month'){ root.innerHTML = renderMonthView(); attachMonthSwipe(); }
     else if(state.activeTab==='list') root.innerHTML = renderListView();
@@ -1293,6 +1298,7 @@ function renderDayView(){
   }
 
   return `
+    ${state.dayReturnTab ? `<div class="day-pullback-hint" onclick="goBackFromDay()" aria-label="${tr('back')}">${ICONS.chevDown}</div>` : ''}
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftDay(-1)">${ICONS.chevL}</button>
       <div style="text-align:center; cursor:pointer" onclick="openDayPicker()">
@@ -1349,6 +1355,62 @@ function scrollTimelineIntoView(){
     const el = document.querySelector('.now-line') || document.querySelector('.timeline-event');
     if(el && el.scrollIntoView) el.scrollIntoView({block:'center'});
   });
+}
+let _dayPullLock = false;
+function attachDayPullBack(){
+  const root = document.getElementById('view-root');
+  if(!root || root.dataset.pullbackAttached === '1') return;
+  root.dataset.pullbackAttached = '1';
+  const scroller = document.scrollingElement || document.documentElement;
+  let startY = 0, dragging = false, dy = 0;
+  const THRESHOLD = 80;
+  const MAX_PULL = 140;
+  const active = ()=> state.activeTab === 'day' && !!state.dayReturnTab;
+
+  const reset = (animate)=>{
+    root.style.transition = animate ? 'transform .2s ease' : '';
+    root.style.transform = '';
+    if(animate) setTimeout(()=>{ root.style.transition = ''; }, 220);
+  };
+
+  root.addEventListener('touchstart', e=>{
+    if(!active() || e.touches.length !== 1 || scroller.scrollTop > 0){ dragging = false; return; }
+    startY = e.touches[0].clientY;
+    dragging = true; dy = 0;
+  }, {passive:true});
+
+  root.addEventListener('touchmove', e=>{
+    if(!dragging || !active()) return;
+    if(scroller.scrollTop > 0){ dragging = false; reset(false); return; }
+    const currentY = e.touches[0].clientY;
+    const rawDy = currentY - startY;
+    if(rawDy <= 0){ dy = 0; reset(false); return; }
+    dy = Math.min(MAX_PULL, rawDy * 0.55);
+    root.style.transition = '';
+    root.style.transform = `translateY(${dy}px)`;
+  }, {passive:true});
+
+  root.addEventListener('touchend', ()=>{
+    if(!dragging) return;
+    dragging = false;
+    if(dy >= THRESHOLD && active()){
+      reset(false);
+      goBackFromDay();
+    } else {
+      reset(true);
+    }
+    dy = 0;
+  }, {passive:true});
+
+  root.addEventListener('wheel', e=>{
+    if(!active() || scroller.scrollTop > 0) return;
+    if(e.deltaY < -28){
+      if(_dayPullLock) return;
+      _dayPullLock = true;
+      goBackFromDay();
+      setTimeout(()=>{ _dayPullLock = false; }, 420);
+    }
+  }, {passive:true});
 }
 function renderAgendaItem(entry, dateStr){
   const t = typeById(entry.typeId);
@@ -1789,8 +1851,15 @@ function quickDeleteNote(dstr, noteId){
 }
 
 function goToDay(dstr){
+  if(state.activeTab !== 'day') state.dayReturnTab = state.activeTab;
   state.selectedDate = dstr;
   setTab('day');
+}
+function goBackFromDay(){
+  const target = state.dayReturnTab;
+  if(!target) return;
+  state.dayReturnTab = null;
+  setTab(target);
 }
 function shiftMonth(n){
   let {y,m} = state.monthCursor;
