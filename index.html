@@ -1235,7 +1235,7 @@ function renderApp(){
   const root = document.getElementById('view-root');
   root.classList.toggle('fullbleed', state.activeTab==='month');
   try{
-    if(state.activeTab==='day'){ root.innerHTML = renderDayView(); scrollTimelineIntoView(); attachDayPullBack(); }
+    if(state.activeTab==='day'){ root.innerHTML = renderDayView(); if(!state.dayReturnTab) scrollTimelineIntoView(); attachDayPullBack(); }
     else if(state.activeTab==='week') root.innerHTML = renderWeekView();
     else if(state.activeTab==='month'){ root.innerHTML = renderMonthView(); attachMonthSwipe(); }
     else if(state.activeTab==='list') root.innerHTML = renderListView();
@@ -1362,8 +1362,8 @@ function attachDayPullBack(){
   if(!root || root.dataset.pullbackAttached === '1') return;
   root.dataset.pullbackAttached = '1';
   const scroller = document.scrollingElement || document.documentElement;
-  let startY = 0, dragging = false, dy = 0;
-  const THRESHOLD = 80;
+  let startY = 0, dragging = false, dy = 0, pointerId = null;
+  const THRESHOLD = 70;
   const MAX_PULL = 140;
   const active = ()=> state.activeTab === 'day' && !!state.dayReturnTab;
 
@@ -1373,25 +1373,28 @@ function attachDayPullBack(){
     if(animate) setTimeout(()=>{ root.style.transition = ''; }, 220);
   };
 
-  root.addEventListener('touchstart', e=>{
-    if(!active() || e.touches.length !== 1 || scroller.scrollTop > 0){ dragging = false; return; }
-    startY = e.touches[0].clientY;
-    dragging = true; dy = 0;
-  }, {passive:true});
+  root.addEventListener('pointerdown', e=>{
+    if(!active()) return;
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    if(e.target.closest('button,a,input,textarea,select')) return;
+    if(scroller.scrollTop > 4) return;
+    startY = e.clientY;
+    dragging = true; dy = 0; pointerId = e.pointerId;
+    try{ root.setPointerCapture(pointerId); }catch(err){}
+  });
 
-  root.addEventListener('touchmove', e=>{
-    if(!dragging || !active()) return;
-    if(scroller.scrollTop > 0){ dragging = false; reset(false); return; }
-    const currentY = e.touches[0].clientY;
-    const rawDy = currentY - startY;
+  root.addEventListener('pointermove', e=>{
+    if(!dragging || !active() || e.pointerId !== pointerId) return;
+    if(scroller.scrollTop > 4){ dragging = false; reset(false); return; }
+    const rawDy = e.clientY - startY;
     if(rawDy <= 0){ dy = 0; reset(false); return; }
     dy = Math.min(MAX_PULL, rawDy * 0.55);
     root.style.transition = '';
     root.style.transform = `translateY(${dy}px)`;
-  }, {passive:true});
+  });
 
-  root.addEventListener('touchend', ()=>{
-    if(!dragging) return;
+  const endDrag = e=>{
+    if(!dragging || (pointerId !== null && e.pointerId !== undefined && e.pointerId !== pointerId)) return;
     dragging = false;
     if(dy >= THRESHOLD && active()){
       reset(false);
@@ -1400,10 +1403,12 @@ function attachDayPullBack(){
       reset(true);
     }
     dy = 0;
-  }, {passive:true});
+  };
+  root.addEventListener('pointerup', endDrag);
+  root.addEventListener('pointercancel', endDrag);
 
   root.addEventListener('wheel', e=>{
-    if(!active() || scroller.scrollTop > 0) return;
+    if(!active() || scroller.scrollTop > 4) return;
     if(e.deltaY < -28){
       if(_dayPullLock) return;
       _dayPullLock = true;
