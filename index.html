@@ -403,11 +403,31 @@ html.dark .year-cell{color:#fff;}
 
 ::-webkit-scrollbar{width:0; height:0;}
 </style>
-     <!-- GoatCounter Analytics -->
-<script data-goatcounter="https://nuriagarcia.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
-</head>
-<body>
-<div id="app">
+ <!-- Script de GoatCounter -->
+<script data-goatcounter="https://nuriagarcia.goatcounter.com/count"
+        data-goatcounter-settings='{"allow_local": true}'
+        async src="https://gc.zgo.at/count.js"></script>
+
+<!-- Detector de apertura desde Pantalla de Inicio -->
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    // Comprueba si la web se está ejecutando instalada en la pantalla de inicio (PWA / Standalone)
+    const isHomeScreen = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
+    if (isHomeScreen) {
+      var checkGoat = setInterval(() => {
+        if (window.goatcounter && window.goatcounter.count) {
+          window.goatcounter.count({
+            path: 'apertura-app-pantalla-inicio',
+            title: 'Apertura desde Pantalla de Inicio (Icono)',
+            event: true // Se registra como un evento individual cada vez que entra
+          });
+          clearInterval(checkGoat);
+        }
+      }, 200);
+    }
+  });
+</script>
 
   <header class="topbar">
     <div class="brand">
