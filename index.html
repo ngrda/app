@@ -1715,7 +1715,7 @@ function renderMonthViewBars(){
   const todaystr = todayStr();
   const nRows = cells.length / 7;
   const paintActive = state.paintMode.active;
-  const maxBars = 3;
+  const maxBars = 5;
   const gridHtml = cells.map(c=>{
     const dstr = toDateStr(c.date);
     const entries = entriesFor(dstr);
