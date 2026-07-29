@@ -83,6 +83,8 @@ textarea{resize:vertical; min-height:64px;}
 main{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:16px 16px 20px; animation:fadein .28s ease;}
 main.fullbleed{display:flex; flex-direction:column; min-height:0; overflow:hidden; padding:3px 5px 5px;}
 main.fullbleed > .dateflip{flex:0 0 auto; margin-bottom:5px;}
+main.fullbleed > .dateflip .icon-btn{width:26px; height:26px;}
+main.fullbleed > .dateflip .icon-btn svg{width:13px; height:13px;}
 main.fullbleed > .paint-bar{flex:0 0 auto;}
 main.fullbleed > .legend{flex:0 0 auto; margin-top:5px; max-height:64px; overflow-y:auto;}
 @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
@@ -120,7 +122,7 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:5px; max-height:64px; overflo
 .empty-state .title{font-weight:700; font-size:calc(15px * var(--fs-mult, 1)); color:var(--text); margin-bottom:4px;}
 
 /* ---------- Day view (agenda, compact) ---------- */
-.dateflip{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;}
+.dateflip{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:5px;}
 .day-pullback-hint{display:flex; align-items:center; justify-content:center; width:36px; height:20px; margin:0 auto 4px; color:var(--text-muted); opacity:.55; cursor:pointer;}
 .day-pullback-hint svg{width:18px; height:18px;}
 .dateflip .today-label{font-size:calc(13px * var(--fs-mult, 1)); color:var(--text-muted); font-weight:600;}
@@ -178,17 +180,17 @@ main.fullbleed > .legend{flex:0 0 auto; margin-top:5px; max-height:64px; overflo
 
 /* ---------- Month grid ---------- */
 .month-grid-head{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px; margin-bottom:2px; flex:0 0 auto;}
-.month-grid-head div{text-align:center; font-size:calc(9.5px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted);}
+.month-grid-head div{text-align:center; font-size:calc(8.5px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted);}
 .month-grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px; flex:1 1 auto; min-height:0;}
-.day-cell{width:100%; height:100%; min-width:0; min-height:0; border-radius:12px; background:var(--bg-elevated); border:1.5px solid color-mix(in srgb, var(--accent) 28%, var(--border)); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3px 2px; gap:2px; position:relative; font-weight:700; font-size:calc(12px * var(--fs-mult, 1)); overflow:hidden;}
+.day-cell{width:100%; height:100%; min-width:0; min-height:0; border-radius:10px; background:var(--bg-elevated); border:1.25px solid color-mix(in srgb, var(--accent) 28%, var(--border)); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px 2px; gap:1px; position:relative; font-weight:700; font-size:calc(10.5px * var(--fs-mult, 1)); overflow:hidden;}
 .day-cell{transition:transform .1s ease, box-shadow .15s ease;}
 .day-cell:active{transform:scale(.93);}
 .day-cell.outside{opacity:.25;}
 .day-cell.today{outline:2px solid var(--accent); outline-offset:-2px; background:color-mix(in srgb, var(--accent) 10%, var(--bg-elevated));}
-.day-cell .dnum{position:absolute; top:3px; left:5px; line-height:1; font-size:calc(10.5px * var(--fs-mult, 1)); font-weight:700; transition:font-size .1s ease; color:#000; z-index:1;}
+.day-cell .dnum{position:absolute; top:2px; left:4px; line-height:1; font-size:calc(9.5px * var(--fs-mult, 1)); font-weight:700; transition:font-size .1s ease; color:#000; z-index:1;}
 html.dark .day-cell .dnum{color:#fff;}
 .day-cell.painted .dnum{background:rgba(255,255,255,.55); color:#14161F; padding:1px 6px; border-radius:7px; box-shadow:0 1px 3px rgba(0,0,0,.15);}
-.day-cell .dtype{position:absolute; bottom:3px; left:50%; transform:translateX(-50%); line-height:1; font-size:calc(8.5px * var(--fs-mult, 1)); font-weight:800; letter-spacing:.3px; z-index:1; background:rgba(255,255,255,.55); color:#14161F; padding:1px 6px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.15); max-width:calc(100% - 6px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.day-cell .dtype{position:absolute; bottom:2px; left:50%; transform:translateX(-50%); line-height:1; font-size:calc(7.5px * var(--fs-mult, 1)); font-weight:800; letter-spacing:.3px; z-index:1; background:rgba(255,255,255,.55); color:#14161F; padding:1px 5px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.15); max-width:calc(100% - 6px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .day-dots{display:flex; gap:4px; margin-top:5px; flex-wrap:wrap; justify-content:center; max-width:100%;}
 .day-dots span{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
 .day-dots span.note-dot{border-radius:2px; background:var(--text-muted);}
@@ -406,10 +408,10 @@ html.modal-open{overflow:hidden;}
 .legend-item{display:flex; align-items:center; gap:6px; font-size:calc(12px * var(--fs-mult, 1)); font-weight:600; color:var(--text-muted);}
 
 /* ---------- Paint bar (Month view) ---------- */
-.paint-bar{flex:0 0 auto; margin-top:4px;}
+.paint-bar{flex:0 0 auto; margin-top:2px;}
 .paint-bar-row{display:flex; justify-content:flex-end; align-items:center;}
 .paint-bar-row.is-active{justify-content:space-between;}
-.paint-toggle{display:flex; align-items:center; gap:4px; padding:4px 8px; border:none; background:transparent; color:var(--text-muted); font-weight:600; font-size:calc(10.5px * var(--fs-mult, 1)); border-radius:99px; opacity:.7;}
+.paint-toggle{display:flex; align-items:center; gap:3px; padding:3px 7px; border:none; background:transparent; color:var(--text-muted); font-weight:600; font-size:calc(9.5px * var(--fs-mult, 1)); border-radius:99px; opacity:.7;}
 .paint-toggle svg{width:13px; height:13px;}
 .paint-status{display:flex; align-items:center; gap:5px; padding:5px 10px; color:var(--accent); font-weight:600; font-size:calc(11.5px * var(--fs-mult, 1)); border-radius:99px; background:color-mix(in srgb, var(--accent) 10%, transparent);}
 .paint-status svg{width:13px; height:13px;}
@@ -1680,7 +1682,7 @@ function renderMonthViewClassic(){
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftMonth(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
-        <h2 class="date-heading" style="font-size:calc(15px * var(--fs-mult, 1)); cursor:pointer" onclick="openMonthPicker()">${MONTHS[m]} ${y}</h2>
+        <h2 class="date-heading" style="font-size:calc(13px * var(--fs-mult, 1)); cursor:pointer" onclick="openMonthPicker()">${MONTHS[m]} ${y}</h2>
       </div>
       <button class="icon-btn" onclick="shiftMonth(1)">${ICONS.chevR}</button>
     </div>
@@ -1735,7 +1737,7 @@ function renderMonthViewBars(){
     <div class="dateflip">
       <button class="icon-btn" onclick="shiftMonth(-1)">${ICONS.chevL}</button>
       <div style="text-align:center">
-        <h2 class="date-heading" style="font-size:calc(15px * var(--fs-mult, 1)); cursor:pointer" onclick="openMonthPicker()">${MONTHS[m]} ${y}</h2>
+        <h2 class="date-heading" style="font-size:calc(13px * var(--fs-mult, 1)); cursor:pointer" onclick="openMonthPicker()">${MONTHS[m]} ${y}</h2>
       </div>
       <button class="icon-btn" onclick="shiftMonth(1)">${ICONS.chevR}</button>
     </div>
