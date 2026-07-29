@@ -252,7 +252,9 @@ html.dark .year-cell{color:#fff;}
 body.modal-open{overflow:hidden;}
 html.modal-open{overflow:hidden;}
 @keyframes sheetup{from{transform:translateY(24px); opacity:0;} to{transform:translateY(0); opacity:1;}}
-.sheet-handle{width:38px; height:5px; background:var(--border); border-radius:99px; margin:6px auto 14px; cursor:pointer;}
+.sheet-handle{width:38px; height:5px; background:var(--border); border-radius:99px; margin:6px auto 14px; cursor:grab; touch-action:none; position:relative;}
+.sheet-handle::before{content:''; position:absolute; inset:-16px -24px;}
+.sheet-handle:active{cursor:grabbing;}
 .sheet-close{position:absolute; top:-50px; right:14px; z-index:10; width:36px; height:36px; border-radius:50%; background:var(--bg-elevated); box-shadow:var(--shadow); border:1px solid var(--border); color:var(--text); display:flex; align-items:center; justify-content:center;}
 .sheet-close svg{width:16px; height:16px;}
 .sheet-close:active{transform:scale(.9);}
@@ -2282,7 +2284,44 @@ function showSheet(html){
   const root = document.getElementById('modal-root');
   root.innerHTML = `<div class="overlay" onclick="if(event.target===this) closeModal()"><div class="sheet-wrap"><button class="sheet-close" onclick="closeModal()" aria-label="Close">${ICONS.close}</button><div class="sheet">${html}</div></div></div>`;
   const handle = root.querySelector('.sheet-handle');
-  if(handle) handle.addEventListener('click', closeModal);
+  const sheet = root.querySelector('.sheet');
+  if(handle && sheet) enableSheetDragToClose(handle, sheet);
+}
+function enableSheetDragToClose(handle, sheet){
+  const DISMISS_PX = 80;
+  let dragging = false, startY = 0, dy = 0;
+  function pointY(e){ return e.touches ? e.touches[0].clientY : e.clientY; }
+  function onDown(e){
+    dragging = true; dy = 0;
+    startY = pointY(e);
+    sheet.style.transition = 'none';
+    if(e.pointerId != null && handle.setPointerCapture){ try{ handle.setPointerCapture(e.pointerId); }catch(err){} }
+  }
+  function onMove(e){
+    if(!dragging) return;
+    dy = Math.max(0, pointY(e) - startY);
+    sheet.style.transform = 'translateY(' + dy + 'px)';
+    if(dy > 4 && e.cancelable) e.preventDefault();
+  }
+  function onUp(){
+    if(!dragging) return;
+    dragging = false;
+    sheet.style.transition = '';
+    if(dy > DISMISS_PX){
+      sheet.style.transform = 'translateY(100%)';
+      setTimeout(closeModal, 160);
+    } else {
+      sheet.style.transform = '';
+    }
+  }
+  handle.addEventListener('pointerdown', onDown);
+  handle.addEventListener('pointermove', onMove);
+  handle.addEventListener('pointerup', onUp);
+  handle.addEventListener('pointercancel', onUp);
+  handle.addEventListener('touchstart', onDown, {passive:true});
+  handle.addEventListener('touchmove', onMove, {passive:false});
+  handle.addEventListener('touchend', onUp);
+  handle.addEventListener('click', ()=>{ if(dy < 4) closeModal(); });
 }
 function closeModal(){ document.getElementById('modal-root').innerHTML = ''; }
 
