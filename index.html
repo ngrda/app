@@ -36,6 +36,7 @@
   --radius:18px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
+  --navh: 64px;
 }
 html.dark{
   --bg:#14161F; --bg-elevated:#1D2030; --bg-sunken:#191B27;
@@ -80,8 +81,8 @@ textarea{resize:vertical; min-height:64px;}
 .header-actions::-webkit-scrollbar{display:none;}
 
 /* ---------- Nav / view swap ---------- */
-main{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:16px 16px calc(96px + var(--safe-bottom)); animation:fadein .28s ease;}
-main.fullbleed{display:flex; flex-direction:column; min-height:0; overflow:hidden; padding:4px 6px calc(52px + var(--safe-bottom));}
+main{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:16px 16px calc(var(--navh) + 20px); animation:fadein .28s ease;}
+main.fullbleed{display:flex; flex-direction:column; min-height:0; overflow:hidden; padding:4px 6px calc(var(--navh) + 8px);}
 main.fullbleed > .dateflip{flex:0 0 auto; margin-bottom:5px;}
 main.fullbleed > .paint-bar{flex:0 0 auto;}
 main.fullbleed > .legend{flex:0 0 auto; margin-top:5px; max-height:64px; overflow-y:auto;}
@@ -414,9 +415,9 @@ html.modal-open{overflow:hidden;}
 .paint-status{display:flex; align-items:center; gap:5px; padding:5px 10px; color:var(--accent); font-weight:600; font-size:calc(11.5px * var(--fs-mult, 1)); border-radius:99px; background:color-mix(in srgb, var(--accent) 10%, transparent);}
 .paint-status svg{width:13px; height:13px;}
 .paint-bar.active .paint-toggle{color:var(--accent); opacity:1; background:color-mix(in srgb, var(--accent) 10%, transparent);}
-.paint-strip{display:flex; flex-direction:column; gap:6px; padding:8px 2px 2px; margin-top:2px; border-top:1px solid var(--border);}
-.paint-hint{font-size:calc(11px * var(--fs-mult, 1)); color:var(--text-muted); text-align:center; padding:0 6px;}
-.paint-chip-row{display:flex; flex-wrap:wrap; gap:5px; padding:2px; justify-content:center;}
+.paint-strip{display:flex; flex-direction:column; gap:6px; padding:8px 2px 2px; margin-top:2px; border-top:1px solid var(--border); max-height:30vh; overflow-y:auto;}
+.paint-hint{font-size:calc(11px * var(--fs-mult, 1)); color:var(--text-muted); text-align:center; padding:0 6px; flex:0 0 auto;}
+.paint-chip-row{display:flex; flex-wrap:wrap; gap:5px; padding:2px; justify-content:center; flex:0 0 auto;}
 .paint-chip{flex:0 0 auto; display:flex; align-items:center; gap:4px; border-radius:99px; padding:5px 8px; font-size:calc(10.5px * var(--fs-mult, 1)); font-weight:600; border:1.5px solid transparent; background:var(--bg-sunken); color:var(--text); white-space:nowrap;}
 .paint-chip svg{width:12px; height:12px;}
 .paint-chip.selected{border-color:currentColor; box-shadow:var(--shadow);}
@@ -959,6 +960,17 @@ async function init(){
     setTimeout(()=>showToast(tr('toast_data_restored')), 700);
   }
   trackView('/day', 'Day View');
+  updateNavHeight();
+  window.addEventListener('resize', updateNavHeight);
+  window.addEventListener('orientationchange', ()=>setTimeout(updateNavHeight, 150));
+}
+
+/* Mide la altura REAL de la barra inferior (varía con el tamaño de fuente
+   y con el safe-area del dispositivo) y la expone como --navh, para que
+   ningún contenido (como la barra de "pintar") quede oculto tras ella. */
+function updateNavHeight(){
+  const nav = document.querySelector('.bottomnav');
+  if(nav) document.documentElement.style.setProperty('--navh', nav.offsetHeight + 'px');
 }
 
 function applyStaticLabels(){
@@ -1256,6 +1268,7 @@ function applyTheme(){
 function applyFontSize(){
   const fs = FONT_SIZES[state.settings.fontSize] || FONT_SIZES.md;
   document.documentElement.style.setProperty('--fs-mult', fs.zoom/100);
+  setTimeout(updateNavHeight, 50);
 }
 function toggleTheme(){
   state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark';
