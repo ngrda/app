@@ -650,7 +650,7 @@ const I18N = {
     text_size:'Text size', color_palette:'Color palette', data_section:'Data',
     data_hint:'Shifts and shift types are saved locally on this device (in this browser). The home-screen icon now opens as a normal saved link rather than a separate standalone app, so deleting that icon does not erase your data — Safari keeps it. Data is tied to this specific browser though, so if you switch phones or browsers, download a backup below and restore it there.',
     reminders_section:'Reminders', reminders_hint:'When you add a note, you can choose to be notified a custom number of hours before it. Only works while this app is open on your phone — it cannot wake your phone up on its own.', reminders_enable:'Enable note reminders', reminders_on:'Note reminders on', reminders_denied:'Notifications are blocked for this site — enable them in your phone/browser settings first.', reminders_unsupported:'This browser does not support notifications.',
-    reminder_title:'Reminder', reminder_body:'In 1 hour ({time}): {text}', reminder_body_hours:'{hours}h before ({time}): {text}',
+    reminder_title:'Reminder', reminder_body:'In 1 hour ({time}): {text}', reminder_body_hours:'{hours} before ({time}): {text}',
     weekly_digest_section:'Weekly summary', weekly_digest_hint:'Get a notification every Sunday listing the notes you have coming up that week.', weekly_digest_enable:'Enable weekly summary', weekly_digest_on:'Weekly summary on',
     weekly_digest_onboarding_title:'Stay on top of your notes?', weekly_digest_onboarding_sub:'Shift Planner can send you a notification every Sunday with the notes you have for that week. You can also get reminded before any single note, with however many hours of notice you choose. Turn this on now?',
     weekly_digest_onboarding_yes:'Yes, notify me', weekly_digest_onboarding_no:'Not now',
@@ -659,7 +659,7 @@ const I18N = {
     font_size_preview_shift:'Morning shift', font_size_preview_note:'This is how notes and shift details will look.',
     font_size_confirm:'Confirm',
     weekly_digest_title:'This week\'s notes', weekly_digest_body_none:'You have no notes scheduled this week.', weekly_digest_body:'You have {n} note{s} this week:', weekly_digest_more:'…and {n} more',
-    note_notify_label:'Notify me before this', note_notify_hours_label:'Hours before', toast_need_time_for_notify:'Add a time above first so Shift Planner knows when to remind you',
+    note_notify_label:'Notify me before this', note_notify_hours_label:'Lead time', hours_label:'Hours', minutes_label:'Minutes', toast_need_time_for_notify:'Add a time above first so Shift Planner knows when to remind you',
     connect_supabase:'Connect Supabase account (coming soon)', erase_all:'Erase all shifts', language_label:'Language',
     toast_all_cleared:'All shifts cleared',
     toast_create_type_first:'Create a shift type first', toast_pick_type:'Pick a shift type',
@@ -732,7 +732,7 @@ const I18N = {
     text_size:'Tamaño de texto', color_palette:'Paleta de colores', data_section:'Datos',
     data_hint:'Los turnos y tipos de turno se guardan localmente en este dispositivo (en este navegador). El icono de la pantalla de inicio ahora se abre como un enlace guardado normal, no como una app aislada, así que borrar ese icono ya no elimina tus datos — Safari los conserva. Aun así los datos están ligados a este navegador concreto, así que si cambias de móvil o navegador, descarga una copia de seguridad abajo y restáurala allí.',
     reminders_section:'Recordatorios', reminders_hint:'Al añadir una nota puedes elegir que te avisemos con las horas de antelación que quieras. Solo funciona mientras esta app esté abierta en tu móvil — no puede despertar el móvil por sí sola.', reminders_enable:'Activar avisos de notas', reminders_on:'Avisos de notas activados', reminders_denied:'Las notificaciones están bloqueadas para esta web — actívalas primero en los ajustes de tu móvil/navegador.', reminders_unsupported:'Este navegador no admite notificaciones.',
-    reminder_title:'Recordatorio', reminder_body:'En 1 hora ({time}): {text}', reminder_body_hours:'{hours}h antes ({time}): {text}',
+    reminder_title:'Recordatorio', reminder_body:'En 1 hora ({time}): {text}', reminder_body_hours:'{hours} antes ({time}): {text}',
     weekly_digest_section:'Resumen semanal', weekly_digest_hint:'Recibe una notificación cada domingo con las notas que tienes esa semana.', weekly_digest_enable:'Activar resumen semanal', weekly_digest_on:'Resumen semanal activado',
     weekly_digest_onboarding_title:'¿Quieres recibir avisos de tus notas?', weekly_digest_onboarding_sub:'Turno Plan puede enviarte una notificación cada domingo con las notas que tienes para esa semana. También puedes pedir que te avise antes de cada nota concreta, con las horas de antelación que elijas. ¿Lo activamos ahora?',
     weekly_digest_onboarding_yes:'Sí, avísame', weekly_digest_onboarding_no:'Ahora no',
@@ -741,7 +741,7 @@ const I18N = {
     font_size_preview_shift:'Turno de mañana', font_size_preview_note:'Así se verán las notas y los detalles de los turnos.',
     font_size_confirm:'Confirmar',
     weekly_digest_title:'Notas de esta semana', weekly_digest_body_none:'No tienes notas programadas esta semana.', weekly_digest_body:'Tienes {n} nota{s} esta semana:', weekly_digest_more:'…y {n} más',
-    note_notify_label:'Avisarme antes de esto', note_notify_hours_label:'Horas de antelación', toast_need_time_for_notify:'Añade antes una hora para que Turno Plan sepa cuándo avisarte',
+    note_notify_label:'Avisarme antes de esto', note_notify_hours_label:'Antelación', hours_label:'Horas', minutes_label:'Minutos', toast_need_time_for_notify:'Añade antes una hora para que Turno Plan sepa cuándo avisarte',
     connect_supabase:'Conectar cuenta de Supabase (próximamente)', erase_all:'Borrar todos los turnos', language_label:'Idioma',
     toast_all_cleared:'Todos los turnos borrados',
     toast_create_type_first:'Crea primero un tipo de turno', toast_pick_type:'Elige un tipo de turno',
@@ -909,7 +909,7 @@ const state = {
   shifts: {},
   notes: {},
   settings: {...DEFAULT_SETTINGS},
-  activeTab: 'day',
+  activeTab: 'month',
   selectedDate: todayStr(),
   monthCursor: { y: new Date().getFullYear(), m: new Date().getMonth() },
   weekCursor: todayStr(),
@@ -924,6 +924,14 @@ const state = {
 function typeById(id){ return state.shiftTypes.find(t=>t.id===id); }
 function entriesFor(dateStr){ return state.shifts[dateStr] || []; }
 function notesFor(dateStr){ return state.notes[dateStr] || []; }
+function formatLeadTime(hoursFloat){
+  const total = Math.max(0, Math.round((Number(hoursFloat)||0) * 60));
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if(h > 0 && m > 0) return `${h}h${String(m).padStart(2,'0')}`;
+  if(h > 0) return `${h}h`;
+  return `${m}m`;
+}
 function slashify(str){
   if(!str) return str;
   return str.replace(/\s*&\s*/g, '/').replace(/\s+y\s+/gi, '/').replace(/\s+and\s+/gi, '/');
@@ -966,7 +974,7 @@ async function init(){
   if(!hadLocalData && DB.hasArtifactStorage() && gotSomethingBack){
     setTimeout(()=>showToast(tr('toast_data_restored')), 700);
   }
-  trackView('/day', 'Day View');
+  trackView('/month', 'Month View');
 }
 
 function applyStaticLabels(){
@@ -1496,7 +1504,7 @@ function renderAgendaItem(entry, dateStr){
   </div>`;
 }
 function renderNoteAgendaItem(note, dateStr){
-  const notifyBadge = note.notify ? `<span class="mono" style="display:inline-flex; align-items:center; gap:3px; color:var(--accent); font-size:calc(11px * var(--fs-mult, 1)); margin-left:8px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>${Number(note.notifyHours)||1}h</span>` : '';
+  const notifyBadge = note.notify ? `<span class="mono" style="display:inline-flex; align-items:center; gap:3px; color:var(--accent); font-size:calc(11px * var(--fs-mult, 1)); margin-left:8px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>${formatLeadTime(note.notifyHours)}</span>` : '';
   return `<div class="agenda-item note-item">
     <div class="agenda-icon">${ICONS.note}</div>
     <div class="agenda-body">
@@ -1728,7 +1736,7 @@ function renderMonthViewBars(){
       return `<div class="event-bar" style="background:${t.color};color:${txtColor}">${escapeHtml(barLabel)}</div>`;
     });
     dayNotes.forEach(n=>{
-      barsList.push(`<div class="event-bar note-bar">📝 ${escapeHtml((n.text||'').trim())}</div>`);
+      barsList.push(`<div class="event-bar note-bar">${escapeHtml((n.text||'').trim())}</div>`);
     });
     const shown = barsList.slice(0, maxBars);
     const overflowCount = barsList.length - shown.length;
@@ -1856,7 +1864,12 @@ function renderDayQuickSheet(){
     </div>
     <div class="field" id="quickNoteNotifyHoursField" style="display:none">
       <label>${tr('note_notify_hours_label')}</label>
-      <input type="number" id="quickNoteNotifyHours" min="1" max="72" step="0.5" value="1">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="number" id="quickNoteNotifyH" min="0" max="72" step="1" value="1" style="flex:1" aria-label="${tr('hours_label')}">
+        <span class="text-muted mono">h</span>
+        <input type="number" id="quickNoteNotifyM" min="0" max="59" step="1" value="0" style="flex:1" aria-label="${tr('minutes_label')}">
+        <span class="text-muted mono">min</span>
+      </div>
     </div>
     <button class="btn btn-primary" onclick="quickSaveNote('${dstr}')">${ICONS.plus}${tr('add_note')}</button>
     ${noteItems ? `<div class="section-title">${tr('other_notes_day')}</div><div class="notelist">${noteItems}</div>` : ''}
@@ -1890,8 +1903,12 @@ function quickSaveNote(dstr){
   const text = (document.getElementById('quickNoteText')?.value || '').trim();
   const time = (document.getElementById('quickNoteTime')?.value || '').trim();
   const notifyChecked = !!document.getElementById('quickNoteNotify')?.checked;
-  let notifyHoursVal = parseFloat(document.getElementById('quickNoteNotifyHours')?.value);
-  if(isNaN(notifyHoursVal) || notifyHoursVal <= 0) notifyHoursVal = 1;
+  let notifyH = parseInt(document.getElementById('quickNoteNotifyH')?.value, 10);
+  let notifyM = parseInt(document.getElementById('quickNoteNotifyM')?.value, 10);
+  if(isNaN(notifyH) || notifyH < 0) notifyH = 0;
+  if(isNaN(notifyM) || notifyM < 0) notifyM = 0;
+  let notifyHoursVal = notifyH + (notifyM/60);
+  if(notifyHoursVal <= 0) notifyHoursVal = 1;
   if(!text){ showToast(tr('toast_write_something')); return; }
   if(notifyChecked && !time){ showToast(tr('toast_need_time_for_notify')); return; }
   const notify = notifyChecked && !!time;
@@ -2428,14 +2445,17 @@ function renderAddView(){
       return `<div class="addview">` + datebar + `<div class="card" style="margin-top:2px">
         <div style="font-weight:700;font-size:calc(14.5px * var(--fs-mult, 1));margin-bottom:6px">${tr('create_first_type_title')}</div>
         <div class="text-muted" style="font-size:calc(13px * var(--fs-mult, 1));line-height:1.5;margin-bottom:12px">${tr('create_first_type_sub')}</div>
-        <button class="btn btn-primary" onclick="openShiftTypesManager()">${ICONS.layers} ${tr('manage_types')}</button>
+        <button class="btn btn-primary" onclick="openShiftTypeEditor(null,'add')">${ICONS.layers} ${tr('manage_types')}</button>
       </div></div>`;
     }
     if(!state.addCtx.selectedTypeId) state.addCtx.selectedTypeId = state.shiftTypes[0].id;
     const chips = state.shiftTypes.map(t=>`
       <button class="type-chip ${t.id===state.addCtx.selectedTypeId?'selected':''}" style="color:${t.color}" onclick="pickAddType('${t.id}')">
         <span style="color:${t.color}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</span>${escapeHtml(t.name)}
-      </button>`).join('');
+      </button>`).join('') + `
+      <button class="type-chip" onclick="openShiftTypeEditor(null,'add')">
+        <span>${ICONS.plus}</span>${tr('new_shift_type')}
+      </button>`;
     return `<div class="addview">` + datebar + `
       <div class="field">
         <label>${tr('shift_type_label')}</label>
@@ -2476,7 +2496,12 @@ function renderAddView(){
     </div>
     <div class="field" id="addNoteNotifyHoursField" style="${draftNotify?'':'display:none'}">
       <label>${tr('note_notify_hours_label')}</label>
-      <input type="number" id="addNoteNotifyHours" min="1" max="72" step="0.5" value="${draftNotifyHours}">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="number" id="addNoteNotifyH" min="0" max="72" step="1" value="${Math.floor(draftNotifyHours)}" style="flex:1" aria-label="${tr('hours_label')}">
+        <span class="text-muted mono">h</span>
+        <input type="number" id="addNoteNotifyM" min="0" max="59" step="1" value="${Math.round((draftNotifyHours - Math.floor(draftNotifyHours))*60)}" style="flex:1" aria-label="${tr('minutes_label')}">
+        <span class="text-muted mono">min</span>
+      </div>
     </div>
     <button class="btn btn-primary" onclick="saveAddNote()">${editing?ICONS.edit:ICONS.plus}${editing?tr('save_changes'):tr('add_note')}</button>
     ${list.length?`<div class="section-title">${tr('other_notes_day')}</div><div class="notelist">${list.map(n=>`
@@ -2548,8 +2573,12 @@ function saveAddNote(){
   const text = (document.getElementById('addNoteText')?.value || '').trim();
   const time = (document.getElementById('addNoteTime')?.value || '').trim();
   const notifyChecked = !!document.getElementById('addNoteNotify')?.checked;
-  let notifyHoursVal = parseFloat(document.getElementById('addNoteNotifyHours')?.value);
-  if(isNaN(notifyHoursVal) || notifyHoursVal <= 0) notifyHoursVal = 1;
+  let notifyH = parseInt(document.getElementById('addNoteNotifyH')?.value, 10);
+  let notifyM = parseInt(document.getElementById('addNoteNotifyM')?.value, 10);
+  if(isNaN(notifyH) || notifyH < 0) notifyH = 0;
+  if(isNaN(notifyM) || notifyM < 0) notifyM = 0;
+  let notifyHoursVal = notifyH + (notifyM/60);
+  if(notifyHoursVal <= 0) notifyHoursVal = 1;
   if(!text){ showToast(tr('toast_write_something')); return; }
   if(notifyChecked && !time){ showToast(tr('toast_need_time_for_notify')); return; }
   const notify = notifyChecked && !!time;
@@ -2616,7 +2645,9 @@ function deleteShiftType(id){
 
 /* ---- Shift type editor (create/edit) ---- */
 let _typeEditorCtx = null;
-function openShiftTypeEditor(id){
+let _typeEditorReturnTo = 'manager';
+function openShiftTypeEditor(id, returnTo){
+  _typeEditorReturnTo = returnTo || 'manager';
   const existing = id ? typeById(id) : null;
   _typeEditorCtx = existing ? {...existing} : {
     id: uid(), name:'', start:'09:00', end:'17:00', breakMins:0, color:SWATCHES[0], icon:TYPE_ICON_KEYS[0], isWork:true, _new:true
@@ -2658,9 +2689,13 @@ function renderShiftTypeEditor(){
       <div class="icon-grid">${icons}</div>
     </div>
     <button class="btn btn-primary" onclick="saveShiftType()">${tr('save_shift_type')}</button>
-    <button class="btn btn-ghost" style="margin-top:10px" onclick="openShiftTypesManager()">${tr('cancel')}</button>
+    <button class="btn btn-ghost" style="margin-top:10px" onclick="cancelTypeEditor()">${tr('cancel')}</button>
   `;
   showSheet(html);
+}
+function cancelTypeEditor(){
+  if(_typeEditorReturnTo === 'add'){ closeModal(); renderApp(); }
+  else { openShiftTypesManager(); }
 }
 function updateTypeField(field, value){
   _typeEditorCtx[field] = value;
@@ -2673,8 +2708,15 @@ function saveShiftType(){
   const idx = state.shiftTypes.findIndex(x=>x.id===t.id);
   if(idx>=0) state.shiftTypes[idx] = clean; else state.shiftTypes.push(clean);
   DB.saveShiftTypes(state.shiftTypes);
-  renderApp();
-  openShiftTypesManager();
+  if(_typeEditorReturnTo === 'add'){
+    state.addCtx.mode = 'shift';
+    state.addCtx.selectedTypeId = clean.id;
+    closeModal();
+    renderApp();
+  } else {
+    renderApp();
+    openShiftTypesManager();
+  }
   showToast(t._new?tr('toast_type_created'):tr('toast_type_updated'));
 }
 
@@ -2750,7 +2792,7 @@ function checkReminders(){
     const eventTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, mi, 0);
     const reminderTime = new Date(eventTime.getTime() - leadMinutes*60000);
     if(now >= reminderTime && now < eventTime){
-      try{ new Notification(tr('reminder_title'), { body: tr('reminder_body_hours', {hours:leadHours, time:n.time, text:n.text||''}) }); }
+      try{ new Notification(tr('reminder_title'), { body: tr('reminder_body_hours', {hours:formatLeadTime(leadHours), time:n.time, text:n.text||''}) }); }
       catch(e){ console.error('Notification failed', e); }
       firedRemindersMark(id);
     }
@@ -2875,14 +2917,6 @@ function openSettings(){
       <label>${tr('text_size')}</label>
       <div class="modeToggle">
         ${Object.entries(FONT_SIZES).map(([k,f])=>`<button class="${state.settings.fontSize===k?'active':''}" onclick="setFontSize('${k}')">${f.label}</button>`).join('')}
-      </div>
-    </div>
-    <div class="field">
-      <label>${tr('color_palette')}</label>
-      <div class="palette-grid">
-        ${Object.entries(PALETTES).map(([k,p])=>`
-          <button class="palette-swatch ${state.settings.palette===k?'selected':''}" style="background:${state.settings.theme==='dark'?p.dark:p.light}" onclick="setPalette('${k}')" aria-label="${p.name}" title="${p.name}"></button>
-        `).join('')}
       </div>
     </div>
     <div class="field">
@@ -3026,7 +3060,7 @@ function exportListRowsHTML(start, end){
           (timeStr ? ' <span class="exp-time">' + timeStr + '</span>' : '') +
           (noteStr ? '<div class="exp-shift-notes">' + noteStr + '</div>' : '') + '</div>';
       }).join('');
-      const noteParts = notesArr.map(n => '<div class="exp-note">📝 ' + escapeHtml(n.text) + '</div>').join('');
+      const noteParts = notesArr.map(n => '<div class="exp-note">' + escapeHtml(n.text) + '</div>').join('');
       dayRows.push('<tr><td class="exp-date">' + escapeHtml(fmtHuman(dstr)) + '</td><td>' + shiftParts + noteParts + '</td></tr>');
     }
     d = addDays(d, 1);
@@ -3049,7 +3083,7 @@ function exportDayCellHTML(date, compact){
   const notesHtml = dayNotesArr.slice(0, noteLimit).map(n=>{
     const txt = (n.text || '').trim();
     const shown = compact && txt.length > 14 ? txt.slice(0,14) + '…' : txt;
-    return '<div class="exp-cell-note">📝 ' + escapeHtml(shown) + '</div>';
+    return '<div class="exp-cell-note">' + escapeHtml(shown) + '</div>';
   }).join('');
   return '<div class="exp-cell-num">' + date.getDate() + '</div>' +
     (chips ? '<div class="exp-chip-row">' + chips + '</div>' : '') + notesHtml;
