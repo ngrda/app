@@ -619,6 +619,7 @@ const I18N = {
     today:'Today', week_label:'Week',
     nothing_scheduled:'Nothing scheduled', nothing_scheduled_sub:'Use the Add tab below to log a shift or note',
     search_list:'Search…', no_search_results:'No matching results', back:'Back',
+    list_past:'Past', list_past_count:'{n} past',
     all_day:'All day', timeline:'Timeline', no_timed_shifts:'No timed shifts today.',
     add_shift:'Add shift', add_note:'Add note',
     create_first_type_title:"Create your first shift type",
@@ -701,6 +702,7 @@ const I18N = {
     today:'Hoy', week_label:'Semana',
     nothing_scheduled:'Nada programado', nothing_scheduled_sub:'Usa la pestaña Añadir de abajo para registrar un turno o nota',
     search_list:'Buscar…', no_search_results:'No se encontraron resultados', back:'Atrás',
+    list_past:'Pasados', list_past_count:'{n} pasados',
     all_day:'Todo el día', timeline:'Cronología', no_timed_shifts:'No hay turnos con horario hoy.',
     add_shift:'Añadir turno', add_note:'Añadir nota',
     create_first_type_title:'Crea tu primer tipo de turno',
@@ -919,6 +921,7 @@ const state = {
   paintMode: { active: false, typeIds: [] },
   searchQuery: '',
   dayReturnTab: null,
+  listPastExpanded: false,
 };
 
 function typeById(id){ return state.shiftTypes.find(t=>t.id===id); }
@@ -2133,6 +2136,12 @@ function onSearchList(val){
   }
 }
 
+function togglePastList(){
+  state.listPastExpanded = !state.listPastExpanded;
+  const root = document.getElementById('view-root');
+  if(root) root.innerHTML = renderListView();
+}
+
 function renderListView(){
   const todaystr = todayStr();
   const query = (state.searchQuery || '').trim().toLowerCase();
@@ -2158,11 +2167,15 @@ function renderListView(){
     `;
   }
 
-  const groups = [];
+  // Build a matched-entries map per date first (respecting the search query),
+  // then split into past (before today) and current/upcoming (today onward).
+  // Past dates are collapsed into one small "Past" row instead of showing as
+  // full sections mixed in with today/upcoming — tapping it reveals a compact
+  // list where each date still jumps into that day (goToDay) on tap.
+  const matched = [];
   allDates.forEach(dstr=>{
     let entries = entriesFor(dstr);
     let notes = notesFor(dstr);
-
     if(query){
       notes = notes.filter(n => (n.text || '').toLowerCase().includes(query));
       entries = entries.filter(e => {
@@ -2171,19 +2184,10 @@ function renderListView(){
         return (e.notes || '').toLowerCase().includes(query) || shiftName.toLowerCase().includes(query);
       });
     }
-
-    if(entries.length || notes.length){
-      const isToday = dstr === todaystr;
-      const itemsHtml = entries.map(e=>renderAgendaItem(e, dstr)).join('')
-        + notes.map(n=>renderNoteAgendaItem(n, dstr)).join('');
-      groups.push(`
-        <div class="section-title" style="margin-top:22px; cursor:pointer" onclick="goToDay('${dstr}')">${isToday?tr('today')+' · ':''}${fmtHuman(dstr)}</div>
-        <div class="agenda-list">${itemsHtml}</div>
-      `);
-    }
+    if(entries.length || notes.length) matched.push({dstr, entries, notes});
   });
 
-  if(groups.length === 0 && query){
+  if(matched.length === 0 && query){
     return `
       <div class="section-title" style="margin-top:0">${tr('nav_list')}</div>
       ${searchInputHtml}
@@ -2194,10 +2198,47 @@ function renderListView(){
     `;
   }
 
+  const pastItems = matched.filter(m => m.dstr < todaystr);
+  const currentItems = matched.filter(m => m.dstr >= todaystr);
+
+  const renderGroup = (m) => {
+    const isToday = m.dstr === todaystr;
+    const itemsHtml = m.entries.map(e=>renderAgendaItem(e, m.dstr)).join('')
+      + m.notes.map(n=>renderNoteAgendaItem(n, m.dstr)).join('');
+    return `
+      <div class="section-title" style="margin-top:22px; cursor:pointer" onclick="goToDay('${m.dstr}')">${isToday?tr('today')+' · ':''}${fmtHuman(m.dstr)}</div>
+      <div class="agenda-list">${itemsHtml}</div>
+    `;
+  };
+
+  let pastHtml = '';
+  if(pastItems.length){
+    if(state.listPastExpanded){
+      const pastGroupsHtml = pastItems.slice().reverse().map(renderGroup).join('');
+      pastHtml = `
+        <div class="row-between" style="margin-top:0; cursor:pointer; opacity:.65;" onclick="togglePastList()">
+          <div class="section-title" style="margin:0;">${tr('list_past')} · ${pastItems.length}</div>
+          <span style="color:var(--text-muted); font-size:12px;">▲</span>
+        </div>
+        ${pastGroupsHtml}
+      `;
+    } else {
+      pastHtml = `
+        <div class="row-between" style="padding:9px 12px; margin-bottom:2px; cursor:pointer; opacity:.65; border:1px dashed var(--border); border-radius:12px;" onclick="togglePastList()">
+          <span style="font-size:calc(12px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.06em;">${tr('list_past_count', {n: pastItems.length})}</span>
+          <span style="color:var(--text-muted); font-size:12px;">▾</span>
+        </div>
+      `;
+    }
+  }
+
+  const currentGroups = currentItems.map(renderGroup).join('');
+
   return `
     <div class="section-title" style="margin-top:0">${tr('nav_list')}</div>
     ${searchInputHtml}
-    ${groups.join('')}
+    ${pastHtml}
+    ${currentGroups}
   `;
 }
 
