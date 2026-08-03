@@ -270,7 +270,9 @@ html.modal-open{overflow:hidden;}
 .type-chip svg{width:18px; height:18px;}
 .type-chip.selected{border-color:currentColor; box-shadow:var(--shadow); background:color-mix(in srgb, currentColor 10%, var(--bg-elevated));}
 .type-chip:active{transform:scale(.96);}
-.two-col{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.two-col{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px;}
+.two-col > div{min-width:0;}
+.two-col input[type="time"]{min-width:0; width:100%;}
 .checkbox-row{display:flex; align-items:center; gap:10px; background:var(--bg-sunken); border-radius:12px; padding:12px 14px;}
 .checkbox-row input{width:20px; height:20px; padding:0; flex-shrink:0; accent-color:var(--accent);}
 .checkbox-row label{margin:0; font-size:calc(13.5px * var(--fs-mult, 1)); font-weight:600; text-transform:none; letter-spacing:0; color:var(--text);}
