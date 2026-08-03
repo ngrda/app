@@ -290,23 +290,31 @@ html.modal-open{overflow:hidden;}
   justify-content: center;
 }
 
-/* 2. Solución a los campos de Entrada y Salida (two-col) */
+/* ---------- Ajustes de hora de entrada/salida ---------- */
 .two-col {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 8px; /* Reducimos el espacio entre columnas */
+  gap: 12px;           /* Espacio seguro entre inicio y fin */
+  margin-right: 16px;  /* Margen extra a la derecha */
 }
 
 .two-col > div {
   min-width: 0;
 }
 
-/* Reducimos el padding y ajustamos la fuente en los inputs de hora para evitar desbordamientos */
+/* Fuerza a que el último campo respete el margen derecho */
+.two-col > div:last-child {
+  margin-right: 4px;
+}
+
+/* Campos de tiempo más compactos y sin solapamientos */
 .two-col input[type="time"] {
   min-width: 0;
   width: 100%;
-  padding: 8px 6px; /* Padding reducido para evitar desbordes horizontales */
-  font-size: calc(13px * var(--fs-mult, 1)); /* Tamaño adaptado */
+  padding: 4px 6px;                           /* Padding interno reducido */
+  font-size: calc(11.5px * var(--fs-mult, 1));/* Letra más pequeña */
+  font-family: var(--font-mono);
+  height: 34px;                               /* Altura más compacta */
   box-sizing: border-box;
   margin-top: 2px;
 }
