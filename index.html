@@ -52,7 +52,7 @@ body{
   margin:0; background:var(--bg); color:var(--text);
   font-family:var(--font-body); -webkit-font-smoothing:antialiased;
   overscroll-behavior-y:none; transition:background .25s ease, color .25s ease;
-  position:fixed; inset:0; width:100%;
+  position:fixed; inset:0; width:100%; overflow-x:hidden;
 }
 h1,h2,h3,.display{font-family:var(--font-display); letter-spacing:-0.01em;}
 .mono{font-family:var(--font-mono);}
@@ -60,7 +60,7 @@ button{font-family:inherit; cursor:pointer;}
 input,select,textarea{font-family:inherit; background:var(--bg-sunken); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:calc(15px * var(--fs-mult, 1)); outline:none; width:100%;}
 input:focus,select:focus,textarea:focus{border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);}
 textarea{resize:vertical; min-height:64px;}
-#app{max-width:560px; margin:0 auto; height:100%; height:calc(var(--vh, 1vh) * 100); display:flex; flex-direction:column; position:relative; overflow:hidden;}
+#app{max-width:560px; margin:0 auto; height:100%; height:calc(var(--vh, 1vh) * 100); display:flex; flex-direction:column; position:relative; overflow:hidden; overflow-x:hidden;}
 
 /* ---------- Header ---------- */
 .topbar{
@@ -80,7 +80,7 @@ textarea{resize:vertical; min-height:64px;}
 .header-actions::-webkit-scrollbar{display:none;}
 
 /* ---------- Nav / view swap ---------- */
-main{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:16px 16px 20px; animation:fadein .28s ease;}
+main{flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:16px 16px 20px; animation:fadein .28s ease;}
 main.fullbleed{display:flex; flex-direction:column; min-height:0; overflow:hidden; padding:3px 5px 5px;}
 main.fullbleed > .dateflip{flex:0 0 auto; margin-bottom:5px;}
 main.fullbleed > .dateflip .icon-btn{width:26px; height:26px;}
@@ -240,8 +240,8 @@ html.dark .year-cell{color:#fff;}
 
 /* ---------- Modals / sheets ---------- */
 .overlay{position:fixed; inset:0; background:rgba(10,10,16,.5); backdrop-filter:blur(2px); z-index:60; display:flex; align-items:flex-end; justify-content:center; animation:fadein .2s ease;}
-.sheet-wrap{position:relative; width:100%; max-width:560px; display:flex; justify-content:center;}
-.sheet{width:100%; background:var(--bg); border-radius:24px 24px 0 0; padding:10px 18px calc(22px + var(--safe-bottom)); max-height:90vh; max-height:90svh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; animation:sheetup .25s cubic-bezier(.2,.9,.3,1); touch-action:pan-y;
+.sheet-wrap{position:relative; width:100%; max-width:560px; display:flex; justify-content:center; overflow-x:hidden;}
+.sheet{width:100%; background:var(--bg); border-radius:24px 24px 0 0; padding:10px 18px calc(22px + var(--safe-bottom)); max-height:90vh; max-height:90svh; overflow-y:auto; overflow-x:hidden; overscroll-behavior-x:none; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; animation:sheetup .25s cubic-bezier(.2,.9,.3,1); touch-action:pan-y;
   background-image:
     linear-gradient(var(--bg), var(--bg)),
     linear-gradient(var(--bg), var(--bg)),
