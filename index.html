@@ -2702,7 +2702,19 @@ function openShiftTypeEditor(id, returnTo){
 
 function toggleTypeIconsExpand(){
   _showAllTypeIcons = !_showAllTypeIcons;
-  renderShiftTypeEditor();
+  updateTypeIconsGrid();
+}
+function updateTypeIconsGrid(){
+  // Actualiza solo la rejilla de iconos y el texto del botón "Ver más/menos"
+  // en lugar de re-renderizar toda la hoja (showSheet), para no resetear
+  // el scroll ni relanzar la animación de entrada de la hoja.
+  const t = _typeEditorCtx;
+  const grid = document.getElementById('typeIconsGrid');
+  const btn = document.getElementById('typeIconsToggleBtn');
+  if(!grid || !btn || !t) return;
+  const visibleKeys = _showAllTypeIcons ? TYPE_ICON_KEYS : TYPE_ICON_KEYS.slice(0, 12);
+  grid.innerHTML = visibleKeys.map(k=>`<button class="icon-opt ${t.icon===k?'selected':''}" onclick="updateTypeField('icon','${k}')">${TYPE_ICONS[k]}</button>`).join('');
+  btn.textContent = _showAllTypeIcons ? tr('show_less_icons') : tr('show_more_icons');
 }
 
 function renderShiftTypeEditor(){
@@ -2743,9 +2755,9 @@ function renderShiftTypeEditor(){
     <div class="field">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
         <label style="margin:0">${tr('icon_label')}</label>
-        <button type="button" onclick="toggleTypeIconsExpand()" style="background:none; border:none; color:var(--accent); font-weight:700; font-size:calc(12px * var(--fs-mult, 1)); padding:0; cursor:pointer;">${toggleBtnText}</button>
+        <button type="button" id="typeIconsToggleBtn" onclick="toggleTypeIconsExpand()" style="background:none; border:none; color:var(--accent); font-weight:700; font-size:calc(12px * var(--fs-mult, 1)); padding:0; cursor:pointer;">${toggleBtnText}</button>
       </div>
-      <div class="icon-grid">${icons}</div>
+      <div class="icon-grid" id="typeIconsGrid">${icons}</div>
     </div>
     <button class="btn btn-primary" onclick="saveShiftType()">${tr('save_shift_type')}</button>
     <button class="btn btn-ghost" style="margin-top:10px" onclick="cancelTypeEditor()">${tr('cancel')}</button>
