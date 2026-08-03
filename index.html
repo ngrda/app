@@ -266,13 +266,65 @@ html.modal-open{overflow:hidden;}
 .field label{display:block; font-size:calc(12px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;}
 .field-hint{font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); margin-top:6px; line-height:1.4;}
 .type-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
-.type-chip{border-radius:14px; padding:12px 6px; text-align:center; border:2px solid var(--border); background:var(--bg-elevated); font-weight:700; font-size:calc(12.5px * var(--fs-mult, 1)); display:flex; flex-direction:column; align-items:center; gap:5px; color:var(--text); transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;}
 .type-chip svg{width:18px; height:18px;}
 .type-chip.selected{border-color:currentColor; box-shadow:var(--shadow); background:color-mix(in srgb, currentColor 10%, var(--bg-elevated));}
 .type-chip:active{transform:scale(.96);}
-.two-col{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px;}
-.two-col > div{min-width:0;}
-.two-col input[type="time"]{min-width:0; width:100%; padding:10px 8px;}
+/* ---------- Modals / sheets ---------- */
+
+/* 1. Ajuste de chips de tipo de turno (para que no se amontonen) */
+.type-chip {
+  border-radius: 12px;
+  padding: 8px 4px; /* Un poco menos de padding vertical */
+  text-align: center;
+  border: 2px solid var(--border);
+  background: var(--bg-elevated);
+  font-weight: 700;
+  font-size: calc(11.5px * var(--fs-mult, 1)); /* Letra ligeramente más pequeña para que encaje mejor */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--text);
+  transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+  min-height: 54px; /* Asegura una altura consistente */
+  justify-content: center;
+}
+
+/* 2. Solución a los campos de Entrada y Salida (two-col) */
+.two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px; /* Reducimos el espacio entre columnas */
+}
+
+.two-col > div {
+  min-width: 0;
+}
+
+/* Reducimos el padding y ajustamos la fuente en los inputs de hora para evitar desbordamientos */
+.two-col input[type="time"] {
+  min-width: 0;
+  width: 100%;
+  padding: 8px 6px; /* Padding reducido para evitar desbordes horizontales */
+  font-size: calc(13px * var(--fs-mult, 1)); /* Tamaño adaptado */
+  box-sizing: border-box;
+  margin-top: 2px;
+}
+
+/* 3. Margen de separación general para que no se peguen unos elementos con otros */
+.sheet .field {
+  margin-bottom: 16px; /* Da respiro entre sección y sección dentro del modal */
+}
+
+.sheet .field label {
+  display: block;
+  font-size: calc(11.5px * var(--fs-mult, 1));
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 4px; /* Separa la etiqueta del input */
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
 .checkbox-row{display:flex; align-items:center; gap:10px; background:var(--bg-sunken); border-radius:12px; padding:12px 14px;}
 .checkbox-row input{width:20px; height:20px; padding:0; flex-shrink:0; accent-color:var(--accent);}
 .checkbox-row label{margin:0; font-size:calc(13.5px * var(--fs-mult, 1)); font-weight:600; text-transform:none; letter-spacing:0; color:var(--text);}
