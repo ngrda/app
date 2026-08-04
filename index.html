@@ -266,72 +266,15 @@ html.modal-open{overflow:hidden;}
 .field label{display:block; font-size:calc(12px * var(--fs-mult, 1)); font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;}
 .field-hint{font-size:calc(12px * var(--fs-mult, 1)); color:var(--text-muted); margin-top:6px; line-height:1.4;}
 .type-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+.type-chip{border-radius:14px; padding:12px 6px; text-align:center; border:2px solid var(--border); background:var(--bg-elevated); font-weight:700; font-size:calc(12.5px * var(--fs-mult, 1)); display:flex; flex-direction:column; align-items:center; gap:5px; color:var(--text); transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;}
 .type-chip svg{width:18px; height:18px;}
 .type-chip.selected{border-color:currentColor; box-shadow:var(--shadow); background:color-mix(in srgb, currentColor 10%, var(--bg-elevated));}
 .type-chip:active{transform:scale(.96);}
-/* ---------- Modals / sheets ---------- */
-
-/* 1. Ajuste de chips de tipo de turno (para que no se amontonen) */
-.type-chip {
-  border-radius: 12px;
-  padding: 8px 4px; /* Un poco menos de padding vertical */
-  text-align: center;
-  border: 2px solid var(--border);
-  background: var(--bg-elevated);
-  font-weight: 700;
-  font-size: calc(11.5px * var(--fs-mult, 1)); /* Letra ligeramente más pequeña para que encaje mejor */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  color: var(--text);
-  transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
-  min-height: 54px; /* Asegura una altura consistente */
-  justify-content: center;
-}
-
-/* ---------- Ajustes de hora de entrada/salida ---------- */
-.two-col {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;           /* Espacio seguro entre inicio y fin */
-  margin-right: 16px;  /* Margen extra a la derecha */
-}
-
-.two-col > div {
-  min-width: 0;
-}
-
-/* Fuerza a que el último campo respete el margen derecho */
-.two-col > div:last-child {
-  margin-right: 4px;
-}
-
-/* Campos de tiempo más compactos y sin solapamientos */
-.two-col input[type="time"] {
-  min-width: 0;
-  width: 100%;
-  padding: 4px 6px;                           /* Padding interno reducido */
-  font-size: calc(11.5px * var(--fs-mult, 1));/* Letra más pequeña */
-  font-family: var(--font-mono);
-  height: 34px;                               /* Altura más compacta */
-  box-sizing: border-box;
-  margin-top: 2px;
-}
-
-/* 3. Margen de separación general para que no se peguen unos elementos con otros */
-.sheet .field {
-  margin-bottom: 16px; /* Da respiro entre sección y sección dentro del modal */
-}
-
-.sheet .field label {
-  display: block;
-  font-size: calc(11.5px * var(--fs-mult, 1));
-  font-weight: 700;
-  color: var(--text-muted);
-  margin-bottom: 4px; /* Separa la etiqueta del input */
-  text-transform: uppercase;
-  letter-spacing: .04em;
+.two-col{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px;}
+.two-col > div{min-width:0;}
+.two-col input[type="time"]{min-width:0; width:100%;}
+@media (max-width:480px){
+  .two-col{grid-template-columns:1fr;}
 }
 .checkbox-row{display:flex; align-items:center; gap:10px; background:var(--bg-sunken); border-radius:12px; padding:12px 14px;}
 .checkbox-row input{width:20px; height:20px; padding:0; flex-shrink:0; accent-color:var(--accent);}
@@ -1387,8 +1330,8 @@ function renderDayView(){
   const entries = entriesFor(dateStr);
   const dayNotes = notesFor(dateStr);
 
-  const timedEntries = entries.filter(e=>{ const t=typeById(e.typeId); return t && t.isWork && t.start && t.end; });
-  const allDayEntries = entries.filter(e=>{ const t=typeById(e.typeId); return !t || !(t.isWork && t.start && t.end); });
+  const timedEntries = entries.filter(e=>{ const t=typeById(e.typeId); return t && t.start && t.end; });
+  const allDayEntries = entries.filter(e=>{ const t=typeById(e.typeId); return !t || !(t.start && t.end); });
   const timedNotes = dayNotes.filter(n=>n.time);
   const allDayNotes = dayNotes.filter(n=>!n.time);
 
@@ -1651,7 +1594,7 @@ function renderWeekView(){
       if(!t) return '';
       if(t.isWork && t.start && t.end) totalHours += shiftDurationHours(t);
       return `<span class="week-chip" style="background:${t.color};color:${textColorFor(t.color)}">
-        ${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}<span>${escapeHtml(t.name)}</span>${t.isWork && t.start && t.end ? `<span class="wc-time">${t.start}–${t.end}</span>` : ''}
+        ${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}<span>${escapeHtml(t.name)}</span>${t.start && t.end ? `<span class="wc-time">${t.start}–${t.end}</span>` : ''}
       </span>`;
     }).join('');
     const noteChips = dayNotes.map(n=>`<span class="week-note-chip">${ICONS.note}${n.time?`<span class="mono" style="font-size:calc(10.5px * var(--fs-mult, 1)); opacity:.85">${escapeHtml(n.time)}</span>`:''}<span>${escapeHtml(n.text)}</span></span>`).join('');
@@ -2719,7 +2662,7 @@ function renderShiftTypesManager(){
       <div class="shifttype-swatch" style="background:${t.color};color:${textColorFor(t.color)}">${TYPE_ICONS[t.icon]||TYPE_ICONS.sun}</div>
       <div class="shifttype-info">
         <div class="shifttype-name">${escapeHtml(t.name)}</div>
-        <div class="shifttype-meta">${t.isWork ? `${t.start}–${t.end}${t.breakMins?` · ${t.breakMins}m ${tr('brk_abbrev')}`:''}` : tr('not_counted_work')}</div>
+        <div class="shifttype-meta">${t.start && t.end ? `${t.start}–${t.end}${t.isWork && t.breakMins ? ` · ${t.breakMins}m ${tr('brk_abbrev')}` : ''}${!t.isWork ? ` · ${tr('not_counted_work')}` : ''}` : tr('not_counted_work')}</div>
       </div>
       <div class="shifttype-actions">
         <button onclick="openRangeAssign('${t.id}')" aria-label="Assign to range">${ICONS.range}</button>
@@ -2801,11 +2744,11 @@ function renderShiftTypeEditor(){
         <label for="typeIsWork">${tr('counts_as_work')}</label>
       </div>
     </div>
-    ${t.isWork ? `
     <div class="field two-col">
       <div><label>${tr('start_time')}</label><input type="time" value="${t.start}" onchange="updateTypeField('start', this.value)"></div>
       <div><label>${tr('end_time')}</label><input type="time" value="${t.end}" onchange="updateTypeField('end', this.value)"></div>
     </div>
+    ${t.isWork ? `
     <div class="field">
       <label>${tr('break_duration')}</label>
       <input type="number" min="0" step="5" value="${t.breakMins||0}" onchange="updateTypeField('breakMins', this.value)">
