@@ -62,6 +62,7 @@ input[type="time"]{font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 input[type="time"]::-webkit-datetime-edit{max-width:100%; line-height:1; padding:0; display:flex; align-items:center;}
 input[type="time"]::-webkit-datetime-edit-fields-wrapper{max-width:100%; overflow:visible;}
 input[type="time"]::-webkit-date-and-time-value{margin:0; text-align:center;}
+.time-input{font-family:var(--font-mono); letter-spacing:.06em; text-align:center;}
 input:focus,select:focus,textarea:focus{border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);}
 textarea{resize:vertical; min-height:64px;}
 #app{max-width:560px; margin:0 auto; height:100%; height:calc(var(--vh, 1vh) * 100); display:flex; flex-direction:column; position:relative; overflow:hidden; overflow-x:hidden;}
@@ -813,6 +814,22 @@ function fmtHumanShort(dateStr){
   return MONTHS[d.getMonth()].slice(0,3)+' '+d.getDate();
 }
 function uid(){ return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4); }
+function maskTimeInput(el){
+  const caretAtEnd = el.selectionStart === el.value.length;
+  let digits = el.value.replace(/[^0-9]/g,'').slice(0,4);
+  let v = digits;
+  if(digits.length >= 3) v = digits.slice(0,2) + ':' + digits.slice(2);
+  el.value = v;
+  if(caretAtEnd){ el.selectionStart = el.selectionEnd = el.value.length; }
+}
+function normalizeTimeInput(el){
+  const digits = el.value.replace(/[^0-9]/g,'');
+  if(!digits){ el.value=''; return; }
+  const padded = digits.padEnd(4,'0').slice(0,4);
+  const h = Math.min(23, parseInt(padded.slice(0,2),10) || 0);
+  const m = Math.min(59, parseInt(padded.slice(2,4),10) || 0);
+  el.value = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
 function escapeHtml(s){
   return String(s==null?'':s)
     .replace(/&/g,'&amp;')
@@ -1865,7 +1882,7 @@ function renderDayQuickSheet(){
     </div>
     <div class="field">
       <label>${tr('note_time_label')}</label>
-      <input type="time" id="quickNoteTime">
+      <input type="text" class="time-input" id="quickNoteTime" inputmode="numeric" maxlength="5" placeholder="--:--" oninput="maskTimeInput(this)" onblur="normalizeTimeInput(this)">
     </div>
     <div class="field">
       <div class="checkbox-row">
@@ -2536,7 +2553,7 @@ function renderAddView(){
     <div class="field">
       <label>${tr('note_time_label')}</label>
       <div class="note-time-row">
-        <input type="time" id="addNoteTime" value="${escapeHtml(draftTime)}">
+        <input type="text" class="time-input" id="addNoteTime" inputmode="numeric" maxlength="5" placeholder="--:--" value="${escapeHtml(draftTime)}" oninput="maskTimeInput(this)" onblur="normalizeTimeInput(this)">
         <button class="clear-time-btn" type="button" onclick="clearAddNoteTime()" aria-label="${tr('clear_time')}">${ICONS.close}</button>
       </div>
     </div>
